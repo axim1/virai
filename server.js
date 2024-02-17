@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const { Sequelize, DataTypes } = require("sequelize");
 const axios = require("axios");
+const path = require('path'); // Add this line
 
 const app = express();
 app.use(express.json());
@@ -16,8 +17,13 @@ const sequelize = new Sequelize({
   database: "vir_ai_db",
 });
 
-// ... (existing code)
+// ... (existing code)D:\virai\my-app\build\index.html
+app.use(express.static(path.join(__dirname, 'my-app/build')));
 
+// Handle all other routes and serve the index.html file
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'my-app/build', 'index.html'));
+});
 
 const User = sequelize.define("User", {
   fname: {
