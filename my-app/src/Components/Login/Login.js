@@ -3,6 +3,8 @@ import basestyle from "../Base.module.css";
 import loginstyle from "./Login.module.css";
 import axios from "axios";
 import { useNavigate, NavLink } from "react-router-dom";
+import "bootstrap/dist/css/bootstrap.min.css"; // Import Bootstrap CSS
+
 const Login = ({ setUserState }) => {
   const navigate = useNavigate();
   const [formErrors, setFormErrors] = useState({});
@@ -45,7 +47,7 @@ const Login = ({ setUserState }) => {
   useEffect(() => {
     if (Object.keys(formErrors).length === 0 && isSubmit) {
       console.log(user);
-      axios.post("http://localhost:9002/login", user).then((res) => {
+      axios.post("http://localhost:8000/login", user).then((res) => {
         alert(res.data.message);
         setUserState(res.data.user);
         navigate("/", { replace: true });
@@ -55,31 +57,40 @@ const Login = ({ setUserState }) => {
   return (
     <div className={loginstyle.login}>
       <form>
-        <h1>Login</h1>
-        <input
-          type="email"
-          name="email"
-          id="email"
-          placeholder="Email"
-          onChange={changeHandler}
-          value={user.email}
-        />
-        <p className={basestyle.error}>{formErrors.email}</p>
-        <input
-          type="password"
-          name="password"
-          id="password"
-          placeholder="Password"
-          onChange={changeHandler}
-          value={user.password}
-        />
-        <p className={basestyle.error}>{formErrors.password}</p>
-        <button className={basestyle.button_common} onClick={loginHandler}>
+        <h1 className="mb-4">Login</h1>
+        <div className="mb-3">
+          <input
+            type="email"
+            name="email"
+            id="email"
+            placeholder="Email"
+            onChange={changeHandler}
+            value={user.email}
+            className="form-control"
+          />
+          <p className={basestyle.error}>{formErrors.email}</p>
+        </div>
+        <div className="mb-3">
+          <input
+            type="password"
+            name="password"
+            id="password"
+            placeholder="Password"
+            onChange={changeHandler}
+            value={user.password}
+            className="form-control"
+          />
+          <p className={basestyle.error}>{formErrors.password}</p>
+        </div>
+        <button className="btn btn-primary btn-block" onClick={loginHandler}>
           Login
         </button>
       </form>
-      <NavLink to="/signup">Not yet registered? Register Now</NavLink>
+      <div className="mt-3 text-center">
+        <NavLink to="/signup">Not yet registered? Register Now</NavLink>
+      </div>
     </div>
   );
 };
+
 export default Login;

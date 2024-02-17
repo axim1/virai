@@ -1,15 +1,30 @@
+/* Login.module.css */
+
 .login {
     width: 400px;
-    background: #fff;
-    border: 1px solid #dddfe2;
+    background: #0f0f0f;
+    /* border: 1px solid #dddfe2; */
     box-shadow: 0 2px 4px rgb(0 0 10 / 64%), 0 8px 16px rgb(0 10 0 / 34%);
     border-radius: 8px;
     padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    display: flex;
+    justify-content: center;
     align-items: center;
     text-align: center;
-}
-
-.login > form input {
+    color: white; /* Set text color to white */
+    width: 100vw;
+  height: 100vh;
+  background-size: cover;
+  background-repeat: no-repeat;
+  }
+  
+  .inputContainer {
+    width: 100%;
+  }
+  
+  .input {
     border-radius: 20px;
     border: 2px solid lightgrey;
     outline: none;
@@ -18,4 +33,13 @@
     width: 90%;
     padding: 12px;
     font-size: 16px;
-}
+  }
+  
+  .loginBtn {
+    margin-top: 15px;
+  }
+  
+  .registerLink {
+    color: lightblue; /* Set link color */
+  }
+  

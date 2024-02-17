@@ -1,0 +1,94 @@
+body {
+    margin: 0;
+    font-family: "Arial", sans-serif;
+  }
+  
+  .form-container {
+    /* background-color: #000; Black */
+    color: #00ffcc; /* Neon Green */
+    padding: 20px;
+    border-radius: 8px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    width: 100vw;
+    height: 100vh;
+    background-size: cover;
+    background-repeat: no-repeat;
+  }
+  
+  h1 {
+    color: #00ffcc; /* Neon Green */
+  }
+  
+  label {
+    color: #00ccff; /* Neon Blue */
+  }
+  
+  .input-field {
+    background-color: #333333;
+    border: 1px solid #555555;
+    color: #ffffff;
+    border-radius: 4px;
+    padding: 8px;
+    margin-bottom: 10px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  
+  .button-container {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  
+  .button {
+    background-color: #ffcc00; /* Neon Yellow */
+    color: #1c1c1c; /* Dark Background */
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .generated-images-container {
+    margin-top: 20px;
+  }
+  
+  .generated-image {
+    max-width: 100%;
+    height: auto;
+    margin-bottom: 10px;
+    border-radius: 4px;
+  }
+  
+  /* Styling for 2D and 3D buttons */
+  .button-2d,
+  .button-3d {
+    background-color: #00ccff; /* Neon Blue */
+    color: #1c1c1c; /* Dark Background */
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .button-2d:hover,
+  .button-3d:hover {
+    background-color: #005cbf; /* Darker Blue on hover */
+  }
+  .generated-images-container {
+    margin-top: 20px;
+  }
+  
+  .generated-image {
+    max-width: 70%;
+    height: auto;
+    margin:5px;
+    margin-bottom: 10px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3); /* Adding a subtle box shadow */
+  }

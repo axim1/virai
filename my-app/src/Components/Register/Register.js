@@ -1,12 +1,15 @@
+// Register.jsx
+import "bootstrap/dist/css/bootstrap.min.css"; // Import Bootstrap CSS
+
 import React, { useEffect, useState } from "react";
 import basestyle from "../Base.module.css";
 import registerstyle from "./Register.module.css";
 import axios from "axios";
-
 import { useNavigate, NavLink } from "react-router-dom";
+
 const Register = () => {
   const navigate = useNavigate();
-
+  const [subscriptions, setSubscriptions] = useState([]);
   const [formErrors, setFormErrors] = useState({});
   const [isSubmit, setIsSubmit] = useState(false);
   const [user, setUserDetails] = useState({
@@ -15,7 +18,11 @@ const Register = () => {
     email: "",
     password: "",
     cpassword: "",
+    subscription: "", // Updated state to track selected subscription
   });
+
+  // Add the following line to define setSelectedSubscription
+  const [selectedSubscription, setSelectedSubscription] = useState("");
 
   const changeHandler = (e) => {
     const { name, value } = e.target;
@@ -23,6 +30,11 @@ const Register = () => {
       ...user,
       [name]: value,
     });
+
+    // Handle the selected subscription separately
+    if (name === "subscription") {
+      setSelectedSubscription(value);
+    }
   };
 
   const validateForm = (values) => {
@@ -53,29 +65,45 @@ const Register = () => {
     }
     return error;
   };
+
   const signupHandler = (e) => {
     e.preventDefault();
     setFormErrors(validateForm(user));
     setIsSubmit(true);
-    // if (!formErrors) {
-    //   setIsSubmit(true);
-    // }
   };
 
   useEffect(() => {
     if (Object.keys(formErrors).length === 0 && isSubmit) {
-      console.log(user);
-      axios.post("http://localhost:9002/signup/", user).then((res) => {
-        alert(res.data.message);
-        navigate("/login", { replace: true });
-      });
+      axios
+        .post("http://localhost:8000/signup", {
+          ...user,
+          subscriptionName: selectedSubscription, // Include selected subscription name in the request payload
+        })
+        .then((res) => {
+          alert(res.data.message);
+          navigate("/login", { replace: true });
+        })
+        .catch((error) => {
+          console.error("Error during signup:", error);
+          alert("Internal server error");
+        });
     }
   }, [formErrors]);
+  useEffect(() => {
+    // Fetch all subscription packages when the component mounts
+    axios.get("http://localhost:8000/subscriptions").then((res) => {
+      setSubscriptions(res.data.subscriptions);
+    }).catch((error) => {
+      console.error("Error fetching subscriptions:", error);
+    });
+  }, []);
+  
+
   return (
     <>
       <div className={registerstyle.register}>
         <form>
-          <h1>Create your account</h1>
+          <h1 className="mb-4">Create your account</h1>
           <input
             type="text"
             name="fname"
@@ -83,6 +111,7 @@ const Register = () => {
             placeholder="First Name"
             onChange={changeHandler}
             value={user.fname}
+            className="form-control mb-3"
           />
           <p className={basestyle.error}>{formErrors.fname}</p>
           <input
@@ -92,6 +121,7 @@ const Register = () => {
             placeholder="Last Name"
             onChange={changeHandler}
             value={user.lname}
+            className="form-control mb-3"
           />
           <p className={basestyle.error}>{formErrors.lname}</p>
           <input
@@ -101,6 +131,7 @@ const Register = () => {
             placeholder="Email"
             onChange={changeHandler}
             value={user.email}
+            className="form-control mb-3"
           />
           <p className={basestyle.error}>{formErrors.email}</p>
           <input
@@ -110,6 +141,7 @@ const Register = () => {
             placeholder="Password"
             onChange={changeHandler}
             value={user.password}
+            className="form-control mb-3"
           />
           <p className={basestyle.error}>{formErrors.password}</p>
           <input
@@ -119,15 +151,27 @@ const Register = () => {
             placeholder="Confirm Password"
             onChange={changeHandler}
             value={user.cpassword}
+            className="form-control mb-3"
           />
+          <select name="subscription" onChange={changeHandler} value={user.subscription} className="form-control mb-3">
+            <option value="">Select Subscription</option>
+            {subscriptions.map((subscription) => (
+              <option key={subscription.id} value={subscription.name}>
+                {subscription.name}
+              </option>
+            ))}
+          </select>
           <p className={basestyle.error}>{formErrors.cpassword}</p>
-          <button className={basestyle.button_common} onClick={signupHandler}>
+          <button className="btn btn-primary btn-block" onClick={signupHandler}>
             Register
           </button>
         </form>
-        <NavLink to="/login">Already registered? Login</NavLink>
+        <NavLink to="/login" className="mt-3 d-block text-center">
+          Already registered? Login
+        </NavLink>
       </div>
     </>
   );
 };
+
 export default Register;

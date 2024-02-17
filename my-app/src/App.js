@@ -3,10 +3,14 @@ import Profile from "./Components/Profile/Profile";
 import Login from "./Components/Login/Login";
 import Register from "./Components/Register/Register";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 function App() {
   const [userstate, setUserState] = useState({});
+  useEffect(() => {
+    console.log('User State:', userstate, userstate._id );
+  }, [userstate]);
+  
   return (
     <div className="App">
       <Router>
@@ -14,10 +18,10 @@ function App() {
           <Route
             path="/"
             element={
-              userstate && userstate._id ? (
+              userstate && userstate.id ? (
                 <Profile
                   setUserState={setUserState}
-                  username={userstate.fname}
+                  username={userstate}
                 />
               ) : (
                 <Login setUserState={setUserState} />
