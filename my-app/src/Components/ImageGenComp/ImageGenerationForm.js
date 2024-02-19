@@ -11,7 +11,7 @@ const ImageGenerationForm = ({ username, onGenerateImage }) => {
   const [aspectRatio, setAspectRatio] = useState("");
   const [scale, setScale] = useState("");
   const [generatedImages, setGeneratedImages] = useState([]); // State to store generated images
-  console.log(username.id);
+  console.log("inside generator",username._id);
 
   const handleGeneratorSelect = (generatorType) => {
     setGeneratorType(generatorType);
@@ -41,7 +41,7 @@ const ImageGenerationForm = ({ username, onGenerateImage }) => {
         styleType,
         aspectRatio,
         scale,
-        userId: username.id,
+        userId: username._id,
       });
 
       // Log the generated image URLs

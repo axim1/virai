@@ -3,12 +3,11 @@ import basestyle from "../Base.module.css";
 import loginstyle from "./Login.module.css";
 import axios from "axios";
 import { useNavigate, NavLink } from "react-router-dom";
-import "bootstrap/dist/css/bootstrap.min.css"; // Import Bootstrap CSS
+import "bootstrap/dist/css/bootstrap.min.css";
 
-const Login = ({ setUserState }) => {
+const Login = ({ setLoggedIn, setUserState }) => {
   const navigate = useNavigate();
   const [formErrors, setFormErrors] = useState({});
-  const [isSubmit, setIsSubmit] = useState(false);
   const [user, setUserDetails] = useState({
     email: "",
     password: "",
@@ -21,6 +20,7 @@ const Login = ({ setUserState }) => {
       [name]: value,
     });
   };
+
   const validateForm = (values) => {
     const error = {};
     const regex = /^[^\s+@]+@[^\s@]+\.[^\s@]{2,}$/i;
@@ -35,25 +35,32 @@ const Login = ({ setUserState }) => {
     return error;
   };
 
-  const loginHandler = (e) => {
-    e.preventDefault();
-    setFormErrors(validateForm(user));
-    setIsSubmit(true);
-    // if (!formErrors) {
+  const loginHandler = async () => {
+    try {
+      const response = await axios.post("http://localhost:8000/login", user);
+      setUserState(response.data.user);
+      setLoggedIn((prevState) => !prevState);
+      navigate("/", { replace: true });
+    } catch (error) {
+      console.error("Login failed:", error);
 
-    // }
+      if (error.response && error.response.status === 401) {
+        setFormErrors({
+          email: "Invalid email or password",
+          password: "Invalid email or password",
+        });
+      } else {
+        alert("An error occurred during login. Please try again.");
+      }
+    }
   };
 
-  useEffect(() => {
-    if (Object.keys(formErrors).length === 0 && isSubmit) {
-      console.log(user);
-      axios.post("http://localhost:8000/login", user).then((res) => {
-        alert(res.data.message);
-        setUserState(res.data.user);
-        navigate("/", { replace: true });
-      });
-    }
-  }, [formErrors]);
+  // useEffect(() => {
+  //   if (Object.keys(formErrors).length === 0) {
+  //     loginHandler();
+  //   }
+  // }, [formErrors]);
+
   return (
     <div className={loginstyle.login}>
       <form>
@@ -82,7 +89,7 @@ const Login = ({ setUserState }) => {
           />
           <p className={basestyle.error}>{formErrors.password}</p>
         </div>
-        <button className="btn btn-primary btn-block" onClick={loginHandler}>
+        <button type="button" className="btn btn-primary btn-block" onClick={loginHandler}>
           Login
         </button>
       </form>

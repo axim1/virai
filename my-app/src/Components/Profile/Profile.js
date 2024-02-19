@@ -9,14 +9,14 @@ import ImageLibrary from "../ImageGenComp/ImageLibrary.js";
 
 import ProfileTab from "../ImageGenComp/ProfileTab";
 
-const Profile = ({ setUserState, username }) => {
+const Profile = ({setLoggedIn, setUserState, username }) => {
   const [generatedImages, setGeneratedImages] = useState([]); // State to store generated images
   const [activeTab, setActiveTab] = useState("Generate");
 
   const switchTab = (tab) => {
     setActiveTab(tab);
   };
-
+console.log("inside profile:",username)
   // Callback function for generating images
   const generateImages = (images) => {
     setGeneratedImages(images);
@@ -45,9 +45,9 @@ const Profile = ({ setUserState, username }) => {
         </button>
       </div>
 
-      {activeTab === "Library" && <ImageLibrary className="imageLibrary" userId={username.id} generatedImages={generatedImages} />}
+      {activeTab === "Library" && <ImageLibrary className="imageLibrary" userId={username._id} generatedImages={generatedImages} />}
       {activeTab === "Generate" && <ImageGenerationForm className="imageGenerationForm" username={username} onGenerateImage={generateImages} />}
-      {activeTab === "Profile" && <ProfileTab className="profileTab" username={username} setUserState={setUserState} />}
+      {activeTab === "Profile" && <ProfileTab className="profileTab" username={username} setLoggedIn={setLoggedIn} />}
     </div>
   );
 };

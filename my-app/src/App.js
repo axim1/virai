@@ -7,9 +7,14 @@ import { useEffect, useState } from "react";
 
 function App() {
   const [userstate, setUserState] = useState({});
+  const [loggedIn, setLoggedIn] = useState(false);
+
   useEffect(() => {
-    console.log('User State:', userstate, userstate._id );
+    if (userstate && userstate._id) {
+      console.log('User State:', userstate, userstate._id);
+    }
   }, [userstate]);
+  
   
   return (
     <div className="App">
@@ -18,19 +23,20 @@ function App() {
           <Route
             path="/"
             element={
-              userstate && userstate.id ? (
+              loggedIn ? (
                 <Profile
+                setLoggedIn={setLoggedIn}  
                   setUserState={setUserState}
                   username={userstate}
                 />
               ) : (
-                <Login setUserState={setUserState} />
+                <Login setLoggedIn={setLoggedIn}  setUserState={setUserState} />
               )
             }
           ></Route>
           <Route
             path="/login"
-            element={<Login setUserState={setUserState} />}
+            element={<Login setLoggedIn={setLoggedIn} setUserState={setUserState} />}
           ></Route>
           <Route path="/signup" element={<Register />}></Route>
         </Routes>

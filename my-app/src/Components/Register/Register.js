@@ -1,11 +1,12 @@
 // Register.jsx
-import "bootstrap/dist/css/bootstrap.min.css"; // Import Bootstrap CSS
+// import "bootstrap/dist/css/bootstrap.min.css"; // Import Bootstrap CSS
 
 import React, { useEffect, useState } from "react";
 import basestyle from "../Base.module.css";
-import registerstyle from "./Register.module.css";
+// import registerstyle from "./Register.module.css";
 import axios from "axios";
 import { useNavigate, NavLink } from "react-router-dom";
+import "./Register.css"
 
 const Register = () => {
   const navigate = useNavigate();
@@ -18,8 +19,9 @@ const Register = () => {
     email: "",
     password: "",
     cpassword: "",
-    subscription: "", // Updated state to track selected subscription
+    subscription: "",
   });
+  
 
   // Add the following line to define setSelectedSubscription
   const [selectedSubscription, setSelectedSubscription] = useState("");
@@ -66,42 +68,49 @@ const Register = () => {
     return error;
   };
 
-  const signupHandler = (e) => {
-    e.preventDefault();
-    setFormErrors(validateForm(user));
-    setIsSubmit(true);
+const signupHandler = (e) => {
+  e.preventDefault(); // Prevent the default form submission behavior
+  setFormErrors(validateForm(user));
+  setIsSubmit(true);
+};
+
+useEffect(() => {
+  const submitForm = async () => {
+    if (Object.keys(formErrors).length === 0 && isSubmit) {
+      try {
+        const response = await axios.post("http://localhost:8000/api/signup", {
+          ...user,
+          subscriptionName: selectedSubscription,
+        });
+
+        alert(response.data.message);
+        navigate("/login", { replace: true });
+      } catch (error) {
+        console.error("Error during signup:", error);
+        alert("Internal server error");
+      }
+    }
   };
 
-  useEffect(() => {
-    if (Object.keys(formErrors).length === 0 && isSubmit) {
-      axios
-        .post("http://localhost:8000/signup", {
-          ...user,
-          subscriptionName: selectedSubscription, // Include selected subscription name in the request payload
-        })
-        .then((res) => {
-          alert(res.data.message);
-          navigate("/login", { replace: true });
-        })
-        .catch((error) => {
-          console.error("Error during signup:", error);
-          alert("Internal server error");
-        });
-    }
-  }, [formErrors]);
-  useEffect(() => {
-    // Fetch all subscription packages when the component mounts
-    axios.get("http://localhost:8000/subscriptions").then((res) => {
-      setSubscriptions(res.data.subscriptions);
-    }).catch((error) => {
+  submitForm(); // Call the asynchronous function directly
+
+}, [formErrors, isSubmit, user, selectedSubscription, navigate]);
+
+useEffect(() => {
+  axios.get("http://localhost:8000/subscriptions")
+    .then((res) => {
+      setSubscriptions(res.data.subscriptions || []); // Provide a default empty array
+    })
+    .catch((error) => {
       console.error("Error fetching subscriptions:", error);
     });
-  }, []);
-  
+}, []);
+
 
   return (
     <>
-      <div className={registerstyle.register}>
+    <div>this is div</div>
+      <div className="register">
         <form>
           <h1 className="mb-4">Create your account</h1>
           <input

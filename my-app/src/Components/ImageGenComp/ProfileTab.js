@@ -3,13 +3,13 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "./ProfileTab.css"; // Import the stylesheet
 
-const ProfileTab = ({ username, setUserState }) => {
+const ProfileTab = ({ username, setLoggedIn }) => {
   const [userData, setUserData] = useState({});
-const userId= username.id
+const userId= username._id
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        console.log("user ir : ", username.id)
+        console.log("user ir : ", username._id)
         const response = await axios.get(`http://localhost:8000/user/${userId}`);
         setUserData(response.data.user);
         console.log(response)
@@ -25,9 +25,9 @@ const userId= username.id
   return (
     <div className="profile">
       <h1 className="welcome-text">Welcome {userData.fname} !!</h1>
-      <button className="btn btn-danger" onClick={() => setUserState({})}>
+      {/* <button className="btn btn-danger" onClick={() => setLoggedIn(false)}>
         Logout
-      </button>
+      </button> */}
       <div className="user-info">
         <p>Email: {userData.email}</p>
         <p>Subscribed Package: {userData.subscription?.name || "Not subscribed"}</p>

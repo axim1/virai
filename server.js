@@ -1,199 +1,213 @@
 const express = require("express");
 const cors = require("cors");
-const { Sequelize, DataTypes } = require("sequelize");
+const mongoose = require("mongoose");
 const axios = require("axios");
-const path = require('path'); // Add this line
+const path = require('path');
+const { User, Subscription, GeneratedImage } = require('./models');
 
 const app = express();
 app.use(express.json());
-app.use(express.urlencoded());
+app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 
-const sequelize = new Sequelize({
-  dialect: "mysql",
-  host: "localhost",
-  username: "root", // assuming your MySQL server is running on localhost with the default username
-  password: "1234", // add your MySQL password here
-  database: "vir_ai_db",
-});
+const uri = "mongodb+srv://asim6832475:1234@cluster0.ukza83p.mongodb.net/?retryWrites=true&w=majority";
 
-// ... (existing code)D:\virai\my-app\build\index.html
-app.use(express.static(path.join(__dirname, 'my-app/build')));
-
-// Handle all other routes and serve the index.html file
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'my-app/build', 'index.html'));
-});
-
-const User = sequelize.define("User", {
-  fname: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  lname: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  email: {
-    type: DataTypes.STRING,
-    allowNull: false,
-    unique: true,
-  },
-  password: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  no_of_images_left: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    defaultValue: 0,
-  },
-  subscribed_monthly: {
-    type: DataTypes.BOOLEAN,
-    allowNull: false,
-    defaultValue: false,
-  },
-  subscribed_yearly: {
-    type: DataTypes.BOOLEAN,
-    allowNull: false,
-    defaultValue: false,
-  },
-  subscription_date: {
-    type: DataTypes.DATE,
-    allowNull: true,
-  },
-});
-
-const Subscription = sequelize.define("Subscription", {
-  name: {
-    type: DataTypes.STRING,
-    allowNull: false,
-    unique: true,
-  },
-  priceMonthly: {
-    type: DataTypes.FLOAT,
-    allowNull: false,
-  },
-  priceYearly: {
-    type: DataTypes.FLOAT,
-    allowNull: false,
-  },
-  generatedImages: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-  },
-  generationSpeed: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  videoGenerations: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-  },
-  licenseType: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  privacy: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-});
-
-User.belongsTo(Subscription); // Establish a relationship between User and Subscription
-
-const seedDatabase = async () => {
-  try {
-    await sequelize.sync({ force: true }); // Drop existing tables and recreate them
-
-    const subscriptionsData = [
-      {
-        name: "FREE",
-        priceMonthly: 0,
-        priceYearly: 0,
-        generatedImages: 200,
-        generationSpeed: "Slow",
-        videoGenerations: 10,
-        licenseType: "Personal use only",
-        privacy: "Images are open to public",
-      },
-      {
-        name: "STARTER",
-        priceMonthly: 8,
-        priceYearly: 80,
-        generatedImages: 1200,
-        generationSpeed: "Slow",
-        videoGenerations: 40,
-        licenseType: "Personal use only",
-        privacy: "Images are open to public",
-      },
-      {
-        name: "BUSINESS",
-        priceMonthly: 24,
-        priceYearly: 240,
-        generatedImages: 4800,
-        generationSpeed: "Fast",
-        videoGenerations: 160,
-        licenseType: "Commercial license",
-        privacy: "Images are kept private",
-      },
-      {
-        name: "PREMIUM",
-        priceMonthly: 48,
-        priceYearly: 480,
-        generatedImages: 9600,
-        generationSpeed: "Fast",
-        videoGenerations: 320,
-        licenseType: "Commercial license",
-        privacy: "Images are kept private",
-      },
-    ];
-
-    await Subscription.bulkCreate(subscriptionsData);
-    console.log("Subscription data seeded successfully");
-  } catch (error) {
-    console.error("Error seeding database:", error);
-  }
-};
+const clientOptions = { serverApi: { version: '1', strict: true, deprecationErrors: true } };
 
 
-const GeneratedImage = sequelize.define("GeneratedImage", {
-  image: {
-    type: DataTypes.BLOB,
-    allowNull: false,
-  },
-  // Add any other properties you need for the generated images
-});
+mongoose.connect(uri, clientOptions)
+  .then(() => console.log("Connected to MongoDB"))
+  .catch(error => console.error("Error connecting to MongoDB:", error));
 
-User.hasMany(GeneratedImage);
-GeneratedImage.belongsTo(User);
+//   const { Schema } = require('mongoose');
 
-// ... (existing code)
+//   const userSchema = new Schema({
+//     fname: {
+//       type: String,
+//       required: true,
+//     },
+//     lname: {
+//       type: String,
+//       required: true,
+//     },
+//     email: {
+//       type: String,
+//       required: true,
+//       unique: true,
+//     },
+//     password: {
+//       type: String,
+//       required: true,
+//     },
+//     no_of_images_left: {
+//       type: Number,
+//       required: true,
+//       default: 0,
+//     },
+//     subscribed_monthly: {
+//       type: Boolean,
+//       required: true,
+//       default: false,
+//     },
+//     subscribed_yearly: {
+//       type: Boolean,
+//       required: true,
+//       default: false,
+//     },
+//     subscription_date: {
+//       type: Date,
+//       default: null,
+//     },
+//   });
+  
+//   const subscriptionSchema = new Schema({
+//     name: {
+//       type: String,
+//       required: true,
+//       unique: true,
+//     },
+//     priceMonthly: {
+//       type: Number,
+//       required: true,
+//     },
+//     priceYearly: {
+//       type: Number,
+//       required: true,
+//     },
+//     generatedImages: {
+//       type: Number,
+//       required: true,
+//     },
+//     generationSpeed: {
+//       type: String,
+//       required: true,
+//     },
+//     videoGenerations: {
+//       type: Number,
+//       required: true,
+//     },
+//     licenseType: {
+//       type: String,
+//       required: true,
+//     },
+//     privacy: {
+//       type: String,
+//       required: true,
+//     },
+//   });
+  
+//   const generatedImageSchema = new Schema({
+//     image: {
+//       type: Buffer,
+//       required: true,
+//     },
+//     // Add any other properties you need for the generated images
+//     userId: {
+//       type: Schema.Types.ObjectId,
+//       ref: 'User',
+//     },
+//   });
+  
+//   const User = mongoose.model('User', userSchema);
+//   const Subscription = mongoose.model('Subscription', subscriptionSchema);
+//   const GeneratedImage = mongoose.model('GeneratedImage', generatedImageSchema);
+//   // User has many GeneratedImages
+// userSchema.virtual('generatedImages', {
+//   ref: 'GeneratedImage',
+//   localField: '_id',
+//   foreignField: 'userId',
+// });
+
+// // Subscription has many Users
+// subscriptionSchema.virtual('users', {
+//   ref: 'User',
+//   localField: '_id',
+//   foreignField: 'subscriptionId',
+// });
+
+// // GeneratedImage belongs to User
+// generatedImageSchema.virtual('user', {
+//   ref: 'User',
+//   localField: 'userId',
+//   foreignField: '_id',
+// });
+
+// // ... (existing code)
+// app.use(express.static(path.join(__dirname, 'my-app/build')));
+
+// app.get('*', (req, res) => {
+//   res.sendFile(path.join(__dirname, 'my-app/build', 'index.html'));
+// });
+
+// // ... (existing code)
+
+// // Database seeding using Mongoose
+// const seedDatabase = async () => {
+//   try {
+//     // Clear existing data
+//     await Promise.all([
+//       User.deleteMany().maxTimeMS(30000),
+//       Subscription.deleteMany(),
+//       GeneratedImage.deleteMany(),
+//     ]);
+
+//     const subscriptionsData = [
+//       {
+//         name: "FREE",
+//         priceMonthly: 0,
+//         priceYearly: 0,
+//         generatedImages: 200,
+//         generationSpeed: "Slow",
+//         videoGenerations: 10,
+//         licenseType: "Personal use only",
+//         privacy: "Images are open to the public",
+//       },
+//       {
+//         name: "STARTER",
+//         priceMonthly: 8,
+//         priceYearly: 80,
+//         generatedImages: 1200,
+//         generationSpeed: "Slow",
+//         videoGenerations: 40,
+//         licenseType: "Personal use only",
+//         privacy: "Images are open to the public",
+//       },
+//       {
+//         name: "BUSINESS",
+//         priceMonthly: 24,
+//         priceYearly: 240,
+//         generatedImages: 4800,
+//         generationSpeed: "Fast",
+//         videoGenerations: 160,
+//         licenseType: "Commercial license",
+//         privacy: "Images are kept private",
+//       },
+//       {
+//         name: "PREMIUM",
+//         priceMonthly: 48,
+//         priceYearly: 480,
+//         generatedImages: 9600,
+//         generationSpeed: "Fast",
+//         videoGenerations: 320,
+//         licenseType: "Commercial license",
+//         privacy: "Images are kept private",
+//       },
+//     ];
+
+//     await Subscription.insertMany(subscriptionsData);
+//     console.log("Subscription data seeded successfully");
+//   } catch (error) {
+//     console.error("Error seeding database:", error);
+//   }
+// };
+
 // seedDatabase();
-// sequelize.sync({ force: true })
-//   .then(() => {
-//     console.log("Database and tables created");
-//   })
-//   .catch((error) => {
-//     console.error("Error creating database and tables:", error);
-//   });
 
 // ... (existing code)
-
-// sequelize.sync({ force: true }) // Set force to true to drop existing tables and recreate them
-//   .then(() => {
-//     console.log("Database and tables created");
-//   })
-//   .catch((error) => {
-//     console.error("Error creating database and tables:", error);
-//   });
-
-// Routes
-// Routes
 
 app.get("/subscriptions", async (req, res) => {
   try {
-    const subscriptions = await Subscription.findAll();
+    const subscriptions = await Subscription.find();
     res.send({ subscriptions });
   } catch (error) {
     console.error("Error fetching subscriptions:", error);
@@ -201,18 +215,21 @@ app.get("/subscriptions", async (req, res) => {
   }
 });
 
+// Example of updating a route to use Mongoose syntax
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;
   try {
-    const user = await User.findOne({ where: { email: email } });
+    const user = await User.findOne({ email: email });
     if (user) {
       if (password === user.password) {
-        res.send({ message: "Login successfully", user: user });
+        res.status(200).send({ message: "Login successfully", user: user });
       } else {
-        res.send({ message: "Password and confirm password didn't match" });
+        console.log("Wrong password");
+        res.status(401).send({ message: "Invalid email or password" });
       }
     } else {
-      res.send({ message: "Please login to proceed" });
+      console.log("User not found");
+      res.status(401).send({ message: "Invalid email or password" });
     }
   } catch (error) {
     console.error("Error during login:", error);
@@ -220,14 +237,16 @@ app.post("/login", async (req, res) => {
   }
 });
 
-app.post("/signup", async (req, res) => {
+
+// Example of updating a route to use Mongoose syntax
+app.post("/api/signup", async (req, res) => {
   const { fname, lname, email, password, subscriptionName } = req.body;
   try {
-    const existingUser = await User.findOne({ where: { email: email } });
+    const existingUser = await User.findOne({ email: email });
     if (existingUser) {
       res.send({ message: "User is already registered" });
     } else {
-      const subscription = await Subscription.findOne({ where: { name: subscriptionName } });
+      const subscription = await Subscription.findOne({ name: subscriptionName });
       if (!subscription) {
         res.send({ message: "Invalid subscription package" });
       } else {
@@ -239,22 +258,23 @@ app.post("/signup", async (req, res) => {
           no_of_images_left: subscription.generatedImages,
           subscribed_monthly: subscriptionName === "STARTER" || subscriptionName === "BUSINESS" || subscriptionName === "PREMIUM",
           subscribed_yearly: subscriptionName === "BUSINESS" || subscriptionName === "PREMIUM",
-          SubscriptionId: subscription.id,
+          subscriptionId: subscription.id,
         });
 
         res.send({ message: "Account has been created!! Please Login", user: newUser });
       }
     }
   } catch (error) {
-    console.error("Error during signup:", error); // Log the error for debugging
-    res.status(500).send({ message: "Internal server error", error: error.message }); // Include the error message in the response
+    console.error("Error during signup:", error);
+    res.status(500).send({ message: "Internal server error", error: error.message });
   }
 });
 
-// Image generation API endpoint
+// ... (existing code)
+
+// Example of updating a route to use Mongoose syntax
 app.post("/generate-image", async (req, res) => {
   const { generatorType, promptText, negativePromptText, styleType, aspectRatio, scale, userId } = req.body;
-  // console.log("image buffers::", userId)
 
   try {
     // For demonstration, use Lorem Picsum for placeholder images
@@ -263,8 +283,8 @@ app.post("/generate-image", async (req, res) => {
       axios.get("https://picsum.photos/512/512", { responseType: 'arraybuffer' }),
       axios.get("https://picsum.photos/512/512", { responseType: 'arraybuffer' }),
     ]);
-    // Save the binary image data in the database
-    const user = await User.findByPk(userId);
+
+    const user = await User.findById(userId);
 
     if (!user) {
       console.log("User not found. UserId:", userId);
@@ -272,24 +292,19 @@ app.post("/generate-image", async (req, res) => {
       return;
     }
 
-    // Check if the user has reached the image limit
     if (user.no_of_images_left <= 0) {
       return res.status(400).send({ message: "You have reached the image generation limit" });
     }
 
-    // Decrement no_of_images_left
-    const updatedUser = await User.update(
-      { no_of_images_left: sequelize.literal('no_of_images_left - 1') },
-      { where: { id: userId } }
-    );
+    const updatedUser = await User.findByIdAndUpdate(userId, { $inc: { no_of_images_left: -1 } });
 
-    // Check if the user was updated successfully
-    if (updatedUser[0] !== 1) {
+    if (!updatedUser) {
       console.log("Error updating user:", updatedUser);
       return res.status(500).send({ message: "Error updating user" });
     }
-    const generatedImages = await GeneratedImage.bulkCreate(
-      imageBuffers.map((response) => ({ image: response.data, UserId: user.id }))
+
+    const generatedImages = await GeneratedImage.insertMany(
+      imageBuffers.map((response) => ({ image: response.data, userId: user.id }))
     );
 
     res.send({ imageUrls: generatedImages.map((image) => `data:image/jpeg;base64,${image.image.toString('base64')}`) });
@@ -299,16 +314,13 @@ app.post("/generate-image", async (req, res) => {
   }
 });
 
-
 // ... (existing code)
 
 app.get("/images/:userId", async (req, res) => {
   const userId = req.params.userId;
 
   try {
-    const user = await User.findByPk(userId, {
-      include: [{ model: GeneratedImage }],
-    });
+    const user = await User.findById(userId).populate('generatedImages');
 
     if (!user) {
       console.log("User not found. UserId:", userId);
@@ -316,36 +328,23 @@ app.get("/images/:userId", async (req, res) => {
       return;
     }
 
-    const imageUrls = user.GeneratedImages.map((image) => `data:image/jpeg;base64,${image.image.toString('base64')}`);
+    const imageUrls = user.generatedImages.map((image) => `data:image/jpeg;base64,${image.image.toString('base64')}`);
     res.send({ images: imageUrls });
   } catch (error) {
     console.error("Error fetching images:", error);
     res.status(500).send({ message: "Internal server error" });
   }
 });
-// ... (existing code)
 
-// ... (existing code)
-
-// Add a GET route to fetch user data and subscribed package information
-// ... (existing code)
-User.belongsTo(Subscription, { foreignKey: 'SubscriptionId' });
-Subscription.hasMany(User, { foreignKey: 'SubscriptionId' });
-// Change the route from /user/:username to /user/:userId
-// Change the route parameter from :username to :userId
 app.get("/user/:userId", async (req, res) => {
   const userId = req.params.userId;
 
   try {
-    const user = await User.findOne({
-      where: { id: userId }, // Use id instead of email
-      include: [{ model: Subscription }],
-    });
+    const user = await User.findById(userId).populate('subscription');
 
     if (!user) {
       console.log("User not found. UserId:", userId);
-      res.status(404).send({ message: "User not found" });
-      return;
+      return res.status(404).send({ message: "User not found" });
     }
 
     const userData = {
@@ -355,17 +354,23 @@ app.get("/user/:userId", async (req, res) => {
       no_of_images_left: user.no_of_images_left,
       subscribed_monthly: user.subscribed_monthly,
       subscribed_yearly: user.subscribed_yearly,
-      subscription: {
-        name: user.Subscription.name,
-        priceMonthly: user.Subscription.priceMonthly,
-        priceYearly: user.Subscription.priceYearly,
-        generatedImages: user.Subscription.generatedImages,
-        generationSpeed: user.Subscription.generationSpeed,
-        videoGenerations: user.Subscription.videoGenerations,
-        licenseType: user.Subscription.licenseType,
-        privacy: user.Subscription.privacy,
-      },
     };
+
+    // Check if user has a subscription before accessing its properties
+    if (user.subscription) {
+      userData.subscription = {
+        name: user.subscription.name,
+        priceMonthly: user.subscription.priceMonthly,
+        priceYearly: user.subscription.priceYearly,
+        generatedImages: user.subscription.generatedImages,
+        generationSpeed: user.subscription.generationSpeed,
+        videoGenerations: user.subscription.videoGenerations,
+        licenseType: user.subscription.licenseType,
+        privacy: user.subscription.privacy,
+      };
+    } else {
+      userData.subscription = null;
+    }
 
     res.send({ user: userData });
   } catch (error) {
@@ -373,10 +378,6 @@ app.get("/user/:userId", async (req, res) => {
     res.status(500).send({ message: "Internal server error" });
   }
 });
-
-
-// ... (existing code)
-
 
 // ... (existing code)
 
