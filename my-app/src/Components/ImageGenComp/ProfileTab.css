@@ -13,7 +13,7 @@
   }
   
   .welcome-text {
-    color: #39ff14; /* Neon green */
+    color: #00ffcc; /* Neon green */
   }
   
   .btn-danger {
@@ -39,6 +39,6 @@
   
   .user-info p {
     margin: 8px 0;
-    color: #39ff14; /* Neon green */
+    color: #3498db; /* Neon green */
   }
   
