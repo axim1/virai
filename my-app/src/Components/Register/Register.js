@@ -7,6 +7,7 @@ import basestyle from "../Base.module.css";
 import axios from "axios";
 import { useNavigate, NavLink } from "react-router-dom";
 import "./Register.css"
+const apiUrl = process.env.REACT_APP_API_URL;
 
 const Register = () => {
   const navigate = useNavigate();
@@ -78,7 +79,7 @@ useEffect(() => {
   const submitForm = async () => {
     if (Object.keys(formErrors).length === 0 && isSubmit) {
       try {
-        const response = await axios.post("http://localhost:8000/api/signup", {
+        const response = await axios.post(`${apiUrl}api/signup`, {
           ...user,
           subscriptionName: selectedSubscription,
         });

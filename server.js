@@ -19,192 +19,8 @@ mongoose.connect(uri, clientOptions)
   .then(() => console.log("Connected to MongoDB"))
   .catch(error => console.error("Error connecting to MongoDB:", error));
 
-//   const { Schema } = require('mongoose');
-
-//   const userSchema = new Schema({
-//     fname: {
-//       type: String,
-//       required: true,
-//     },
-//     lname: {
-//       type: String,
-//       required: true,
-//     },
-//     email: {
-//       type: String,
-//       required: true,
-//       unique: true,
-//     },
-//     password: {
-//       type: String,
-//       required: true,
-//     },
-//     no_of_images_left: {
-//       type: Number,
-//       required: true,
-//       default: 0,
-//     },
-//     subscribed_monthly: {
-//       type: Boolean,
-//       required: true,
-//       default: false,
-//     },
-//     subscribed_yearly: {
-//       type: Boolean,
-//       required: true,
-//       default: false,
-//     },
-//     subscription_date: {
-//       type: Date,
-//       default: null,
-//     },
-//   });
-  
-//   const subscriptionSchema = new Schema({
-//     name: {
-//       type: String,
-//       required: true,
-//       unique: true,
-//     },
-//     priceMonthly: {
-//       type: Number,
-//       required: true,
-//     },
-//     priceYearly: {
-//       type: Number,
-//       required: true,
-//     },
-//     generatedImages: {
-//       type: Number,
-//       required: true,
-//     },
-//     generationSpeed: {
-//       type: String,
-//       required: true,
-//     },
-//     videoGenerations: {
-//       type: Number,
-//       required: true,
-//     },
-//     licenseType: {
-//       type: String,
-//       required: true,
-//     },
-//     privacy: {
-//       type: String,
-//       required: true,
-//     },
-//   });
-  
-//   const generatedImageSchema = new Schema({
-//     image: {
-//       type: Buffer,
-//       required: true,
-//     },
-//     // Add any other properties you need for the generated images
-//     userId: {
-//       type: Schema.Types.ObjectId,
-//       ref: 'User',
-//     },
-//   });
-  
-//   const User = mongoose.model('User', userSchema);
-//   const Subscription = mongoose.model('Subscription', subscriptionSchema);
-//   const GeneratedImage = mongoose.model('GeneratedImage', generatedImageSchema);
-//   // User has many GeneratedImages
-// userSchema.virtual('generatedImages', {
-//   ref: 'GeneratedImage',
-//   localField: '_id',
-//   foreignField: 'userId',
-// });
-
-// // Subscription has many Users
-// subscriptionSchema.virtual('users', {
-//   ref: 'User',
-//   localField: '_id',
-//   foreignField: 'subscriptionId',
-// });
-
-// // GeneratedImage belongs to User
-// generatedImageSchema.virtual('user', {
-//   ref: 'User',
-//   localField: 'userId',
-//   foreignField: '_id',
-// });
-
-// // ... (existing code)
 
 
-// // ... (existing code)
-
-// // Database seeding using Mongoose
-// const seedDatabase = async () => {
-//   try {
-//     // Clear existing data
-//     await Promise.all([
-//       User.deleteMany().maxTimeMS(30000),
-//       Subscription.deleteMany(),
-//       GeneratedImage.deleteMany(),
-//     ]);
-
-//     const subscriptionsData = [
-//       {
-//         name: "FREE",
-//         priceMonthly: 0,
-//         priceYearly: 0,
-//         generatedImages: 200,
-//         generationSpeed: "Slow",
-//         videoGenerations: 10,
-//         licenseType: "Personal use only",
-//         privacy: "Images are open to the public",
-//       },
-//       {
-//         name: "STARTER",
-//         priceMonthly: 8,
-//         priceYearly: 80,
-//         generatedImages: 1200,
-//         generationSpeed: "Slow",
-//         videoGenerations: 40,
-//         licenseType: "Personal use only",
-//         privacy: "Images are open to the public",
-//       },
-//       {
-//         name: "BUSINESS",
-//         priceMonthly: 24,
-//         priceYearly: 240,
-//         generatedImages: 4800,
-//         generationSpeed: "Fast",
-//         videoGenerations: 160,
-//         licenseType: "Commercial license",
-//         privacy: "Images are kept private",
-//       },
-//       {
-//         name: "PREMIUM",
-//         priceMonthly: 48,
-//         priceYearly: 480,
-//         generatedImages: 9600,
-//         generationSpeed: "Fast",
-//         videoGenerations: 320,
-//         licenseType: "Commercial license",
-//         privacy: "Images are kept private",
-//       },
-//     ];
-
-//     await Subscription.insertMany(subscriptionsData);
-//     console.log("Subscription data seeded successfully");
-//   } catch (error) {
-//     console.error("Error seeding database:", error);
-//   }
-// };
-
-// seedDatabase();
-
-// ... (existing code)
-app.use(express.static(path.join(__dirname, 'my-app/build')));
-
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'my-app/build', 'index.html'));
-});
 app.get("/subscriptions", async (req, res) => {
   try {
     const subscriptions = await Subscription.find();
@@ -318,7 +134,7 @@ app.post("/generate-image", async (req, res) => {
 
 app.get("/images/:userId", async (req, res) => {
   const userId = req.params.userId;
-
+console.log(userId)
   try {
     const user = await User.findById(userId).populate('generatedImages');
 
@@ -335,13 +151,12 @@ app.get("/images/:userId", async (req, res) => {
     res.status(500).send({ message: "Internal server error" });
   }
 });
-
-app.get("/user/:userId", async (req, res) => {
+app.get("/api/user/:userId", async (req, res) => {
   const userId = req.params.userId;
-
+console.log("tjos ", userId)
   try {
-    const user = await User.findById(userId).populate('subscription');
-
+    const user = await User.findById(userId).populate("subscription");
+console.log("user:::", user)
     if (!user) {
       console.log("User not found. UserId:", userId);
       return res.status(404).send({ message: "User not found" });
@@ -352,25 +167,20 @@ app.get("/user/:userId", async (req, res) => {
       lname: user.lname,
       email: user.email,
       no_of_images_left: user.no_of_images_left,
-      subscribed_monthly: user.subscribed_monthly,
-      subscribed_yearly: user.subscribed_yearly,
+      subscription: user.subscription
+        ? {
+             // ... other subscription properties
+            name: user.subscription.name,
+            priceMonthly: user.subscription.priceMonthly,
+            priceYearly: user.subscription.priceYearly,
+            generatedImages: user.subscription.generatedImages,
+            generationSpeed: user.subscription.generationSpeed,
+            videoGenerations: user.subscription.videoGenerations,
+            licenseType: user.subscription.licenseType,
+            privacy: user.subscription.privacy,
+          }
+        : null,
     };
-
-    // Check if user has a subscription before accessing its properties
-    if (user.subscription) {
-      userData.subscription = {
-        name: user.subscription.name,
-        priceMonthly: user.subscription.priceMonthly,
-        priceYearly: user.subscription.priceYearly,
-        generatedImages: user.subscription.generatedImages,
-        generationSpeed: user.subscription.generationSpeed,
-        videoGenerations: user.subscription.videoGenerations,
-        licenseType: user.subscription.licenseType,
-        privacy: user.subscription.privacy,
-      };
-    } else {
-      userData.subscription = null;
-    }
 
     res.send({ user: userData });
   } catch (error) {
@@ -378,6 +188,56 @@ app.get("/user/:userId", async (req, res) => {
     res.status(500).send({ message: "Internal server error" });
   }
 });
+app.use(express.static(path.join(__dirname, 'my-app/build')));
+
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'my-app/build', 'index.html'));
+});
+// app.listen(8000, () => {
+//   console.log(`Server is running on port `);
+// });
+// app.get("/user/:userId", async (req, res) => {
+//   const userId = req.params.userId;
+
+//   try {
+//     const user = await User.findById(userId).populate('subscription');
+
+//     if (!user) {
+//       console.log("User not found. UserId:", userId);
+//       return res.status(404).send({ message: "User not found" });
+//     }
+
+//     const userData = {
+//       fname: user.fname,
+//       lname: user.lname,
+//       email: user.email,
+//       no_of_images_left: user.no_of_images_left,
+//       subscribed_monthly: user.subscribed_monthly,
+//       subscribed_yearly: user.subscribed_yearly,
+//     };
+
+//     // Check if user has a subscription before accessing its properties
+//     if (user.subscription) {
+//       userData.subscription = {
+//         name: user.subscription.name,
+//         priceMonthly: user.subscription.priceMonthly,
+//         priceYearly: user.subscription.priceYearly,
+//         generatedImages: user.subscription.generatedImages,
+//         generationSpeed: user.subscription.generationSpeed,
+//         videoGenerations: user.subscription.videoGenerations,
+//         licenseType: user.subscription.licenseType,
+//         privacy: user.subscription.privacy,
+//       };
+//     } else {
+//       userData.subscription = null;
+//     }
+
+//     res.send({ user: userData });
+//   } catch (error) {
+//     console.error("Error fetching user data:", error);
+//     res.status(500).send({ message: "Internal server error" });
+//   }
+// });
 
 // ... (existing code)
 

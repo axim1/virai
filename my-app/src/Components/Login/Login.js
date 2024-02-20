@@ -4,6 +4,7 @@ import loginstyle from "./Login.module.css";
 import axios from "axios";
 import { useNavigate, NavLink } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
+const apiUrl = process.env.REACT_APP_API_URL;
 
 const Login = ({ setLoggedIn, setUserState }) => {
   const navigate = useNavigate();
@@ -37,7 +38,8 @@ const Login = ({ setLoggedIn, setUserState }) => {
 
   const loginHandler = async () => {
     try {
-      const response = await axios.post("http://localhost:8000/login", user);
+      console.log("env var:", apiUrl)
+      const response = await axios.post(`${apiUrl}login`, user);
       setUserState(response.data.user);
       setLoggedIn((prevState) => !prevState);
       navigate("/", { replace: true });

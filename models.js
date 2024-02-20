@@ -35,7 +35,7 @@ const userSchema = new Schema({
     required: true,
     default: false,
   },
-  subscription: {  // Add this field to reference the Subscription model
+  subscription: {
     type: Schema.Types.ObjectId,
     ref: 'Subscription',
   },
@@ -97,7 +97,7 @@ const Subscription = mongoose.model('Subscription', subscriptionSchema);
 subscriptionSchema.virtual('users', {
   ref: 'User',
   localField: '_id',
-  foreignField: 'subscriptionId',
+  foreignField: 'subscription',
 });
 
 // GeneratedImage model

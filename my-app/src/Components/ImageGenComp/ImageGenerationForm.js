@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import StyleSelection from "./StyleSelection";
 import "./ImageGenerationForm.css";
+const apiUrl = process.env.REACT_APP_API_URL;
 
 const ImageGenerationForm = ({ username, onGenerateImage }) => {
   const [generatorType, setGeneratorType] = useState("");
@@ -34,7 +35,7 @@ const ImageGenerationForm = ({ username, onGenerateImage }) => {
   const handleGenerateImage = async () => {
     try {
       // Make a POST request to the image generation API
-      const response = await axios.post("http://localhost:8000/generate-image", {
+      const response = await axios.post(`${apiUrl}generate-image`, {
         generatorType,
         promptText,
         negativePromptText,
