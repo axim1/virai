@@ -4,6 +4,8 @@
     background-color: #1c1c1c;
     color: #ffffff;
     padding: 20px;
+    /* height: 100vh; */
+    min-height: 100vh;
   }
   
   .nav-tabs {

@@ -2,13 +2,13 @@
 .profile {
     text-align: center;
     padding: 20px;
-    /* background-color: black; */
+    background-color: 1e1e1e;
     color: white;
 
     width: 100vw;
-    height: 100vh;
-    background-size: cover;
-    background-repeat: no-repeat;
+    /* height: 100%; */
+    /* background-size: cover; */
+    /* background-repeat: no-repeat; */
     
   }
   

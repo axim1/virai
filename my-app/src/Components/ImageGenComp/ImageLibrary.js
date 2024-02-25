@@ -7,15 +7,20 @@ const apiUrl = process.env.REACT_APP_API_URL;
 const ImageLibrary = ({ userId }) => {
   const [images, setImages] = useState([]);
   const [selectedImage, setSelectedImage] = useState(null);
+  const [isLoading, setIsLoading] = useState(false); // State to track loading
 
   useEffect(() => {
     const fetchImages = async () => {
+      setIsLoading(true); // Start loading
+
       try {
         const response = await axios.get(`${apiUrl}images/${userId}`);
-        setImages(response.data.images);
+        setImages(response.data.images.reverse());
       } catch (error) {
         console.error("Error fetching images:", error);
       }
+      setIsLoading(false); // Start loading
+
     };
 
     fetchImages();
@@ -39,6 +44,9 @@ const ImageLibrary = ({ userId }) => {
   return (
     <div className="image-library-container">
       <h2>Image Library</h2>
+      {isLoading ? (
+        <div className="loading-indicator">Loading...</div> // Display loading indicator
+      ) : (
       <div className="image-grid">
         {images.map((image, index) => (
           <div className="image-item" key={index}>
@@ -57,16 +65,15 @@ const ImageLibrary = ({ userId }) => {
             </div>
           </div>
         ))}
-      </div>
-
+      </div>)}
       {selectedImage && (
-        <div className="preview-modal">
-          <div className="modal-content">
-            <span className="close" onClick={closePreview}>&times;</span>
-            <img src={selectedImage} alt="Preview" />
-          </div>
+      <div className="preview-modal" onClick={closePreview}> {/* Add onClick event to close the modal when the backdrop is clicked */}
+        <div className="modal-content" onClick={e => e.stopPropagation()}> {/* Prevent click inside the modal from closing it */}
+          <span className="close" onClick={closePreview}>&times;</span>
+          <img src={selectedImage} alt="Preview" />
         </div>
-      )}
+      </div>
+    )}
     </div>
   );
 };

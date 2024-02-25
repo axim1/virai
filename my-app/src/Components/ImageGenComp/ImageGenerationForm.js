@@ -11,6 +11,8 @@ const ImageGenerationForm = ({ username, onGenerateImage }) => {
   const [styleType, setStyleType] = useState("");
   const [aspectRatio, setAspectRatio] = useState("");
   const [scale, setScale] = useState("");
+  const [formSubmitted, setFormSubmitted] = useState(false); // New state to track form submission
+
   const [generatedImages, setGeneratedImages] = useState([]); // State to store generated images
   console.log("inside generator",username._id);
 
@@ -33,8 +35,14 @@ const ImageGenerationForm = ({ username, onGenerateImage }) => {
   };
 
   const handleGenerateImage = async () => {
+
+    setFormSubmitted(true)
+
+    if (!isFormValid) {return}
     try {
       // Make a POST request to the image generation API
+   
+
       const response = await axios.post(`${apiUrl}generate-image`, {
         generatorType,
         promptText,
@@ -58,13 +66,14 @@ const ImageGenerationForm = ({ username, onGenerateImage }) => {
     }
 
     // Reset form state
-    setGeneratorType("");
-    setPromptText("");
-    setNegativePromptText("");
-    setStyleType("");
-    setAspectRatio("");
-    setScale("");
+    // setGeneratorType("");
+    // setPromptText("");
+    // setNegativePromptText("");
+    // setStyleType("");
+    // setAspectRatio("");
+    // setScale("");
   };
+  const isFormValid = promptText.trim() !== ''; // Checks if promptText is not just empty spaces
 
   return (
     <div className="form-container">
@@ -90,7 +99,9 @@ const ImageGenerationForm = ({ username, onGenerateImage }) => {
           onChange={(e) => handleTextChange("Text for prompts", e.target.value)}
         />
       </div>
-  
+      {formSubmitted && !isFormValid && (
+          <p className="error-message">This field is mandatory</p>
+        )}
       {/* TextBar for negative prompts */}
       <div>
         <label>Text for negative prompts</label>
@@ -107,9 +118,11 @@ const ImageGenerationForm = ({ username, onGenerateImage }) => {
   
       {/* Additional input fields for aspect ratio and scale */}
       <div className="button-container">
-        <button className="button" onClick={handleGenerateImage}>
+        <button className="button" onClick={handleGenerateImage}             disabled={!isFormValid}  // Button is disabled if form is not valid
+>
           Generate Image
         </button>
+
       </div>
   
       {/* Display generated images below the form */}
