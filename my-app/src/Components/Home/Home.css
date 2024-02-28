@@ -1,0 +1,426 @@
+
+h1{
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+
+}
+h2{
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+
+}
+h3{
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+
+}
+
+h4{
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+
+}
+h5{
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+
+}
+p{
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  font-size: 16px;
+
+}
+.herosection{
+    background-image: url('../../assets/bg-image.jpg'); /* Replace 'path_to_your_image.jpg' with the actual path to your image */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    /* max-width: ; */
+    height: 100vh;
+
+  }
+.content-herosection{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    max-width: 500px;
+    text-align: center;
+
+}
+
+.content-herosection p {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  /* background-color: aqua; */
+font-size: 20px;
+color: #4d4d4d;
+}
+
+.content-herosection h1{
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    /* background-color: aqua; */
+font-size: 46px;
+color: black;
+}
+
+.tools-section-2{
+    background-color: black;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    /* max-width: ; */
+    min-height: 100vh;
+    padding:200px;
+color: white;
+    /* background-color: aqua; */
+}
+.content-tools-section-2{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    max-width: 900px;
+    text-align: center;
+}
+
+
+.content-tools-section-2 p{
+  font-size: 22px;
+}
+
+
+
+
+.grid-tools-section-2 {
+    display: grid;
+    /* padding: 100px; */
+    grid-template-columns: repeat(3, 1fr);
+    grid-gap: 50px; /* Adjust grid gap as needed */
+    grid-row-gap: 200px; /* This will add a 20px gap between the rows */
+
+  }
+  
+
+  /* Example of a media query for a screen width of 768px or less */
+  @media (max-width: 1024px) {
+    .tools-section-2{
+      padding:00px;
+padding-top: 40px;
+    }
+    .grid-tools-section-2 {
+
+      grid-template-columns: repeat(2, 1fr); /* Change to 2 columns */
+    }
+  }
+  
+  /* Example of a media query for a screen width of 480px or less */
+  @media (max-width: 480px) {
+    .grid-tools-section-2 {
+        /* padding: 50px; */
+        grid-template-columns: repeat(1, 1fr); /* Switches to 1 column for small screens */
+        grid-gap: 30px; /* Reduces gap for smaller screens */
+      }
+  }
+  .items-grid-tools-section-2{
+    display: flex;
+    flex-direction: column;
+    /* justify-content: space-between; */
+    align-items: center;
+    max-width: 440px;
+    text-align: center;
+    /* padding :10px; */
+}
+  .items-grid-tools-section-2 img {
+    width: 100%; /* Make the image width responsive */
+
+    max-width: 440px;
+    max-height: 440px;
+    height: auto;
+    display: block;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: transform 0.3s ease-in-out;
+  }
+
+
+
+
+
+
+
+  .clients-section-2{
+    background-color: gray;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    /* align-items: center; */
+    /* max-width: ; */
+    /* min-height: ; */
+    padding: 80px;
+    padding-left:200px;
+    padding-right:200px;
+color: white;
+    /* background-color: aqua; */
+}
+
+
+
+.heading-clients-section-2{
+  /* background-color: gray; */
+  display: flex;
+  flex-direction: row;
+  justify-content: left;
+color: white;
+ 
+}
+.content-clients-section-2{
+  /* background-color: gray; */
+  /* display: flex;
+  flex-direction: row;
+  justify-content: spa;
+color: white; */
+  
+}
+  .grid-clients-section-2 {
+    display: grid;
+    /* justify-content: space-between; */
+    align-items: center;
+    grid-template-columns: repeat(3, 1fr);
+    grid-gap: 10px; 
+    /* grid-row-gap: 200px;  */
+
+  }
+  
+
+  /* Example of a media query for a screen width of 768px or less */
+  @media (max-width: 768px) {
+    .grid-clients-section-2 {
+      grid-template-columns: repeat(2, 1fr); /* Change to 2 columns */
+    }
+  }
+  
+  /* Example of a media query for a screen width of 480px or less */
+  @media (max-width: 480px) {
+    .grid-clients-section-2 {
+        padding: 50px;
+        grid-template-columns: repeat(1, 1fr); /* Switches to 1 column for small screens */
+        grid-gap: 30px; /* Reduces gap for smaller screens */
+      }
+  }
+
+  .items-grid-clients-section-2{
+    display: flex;
+    flex-direction: column;
+    /* justify-content: space-between; */
+    /* align-items: center; */
+    /* max-width: 340px; */
+    text-align: center;
+    /* padding :10px; */
+}
+  .grid-clients-section-2 img {
+    width: 100%; /* Make the image width responsive */
+
+    max-width: 440px;
+    max-height: 240px;
+    /* height: auto; */
+    display: block;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: transform 0.3s ease-in-out;
+  }
+/* 
+.content-herosection h1 {
+    
+    width:100%;
+    max-width: 400px;
+    text-align: center;
+    padding: 20px;
+
+}
+
+
+.content-herosection p  {
+    width:100%;
+    max-width: 400px;
+    text-align: center;
+    padding: 20px;
+
+} */
+
+
+
+
+.about-us-section{
+  display: flex;
+  /* height: 500px; */
+  /* width: 100%; */
+  background-color: aqua;
+  background: linear-gradient(to top, gray, #e6e6e6);
+  /* padding: 20px; */
+  align-items: center;
+  justify-content: space-between;
+  /* justify-content: ; */
+}
+
+.content-about-us-section .img-about-us-section{
+  /* display: flex;
+   */
+   /* flex-grow: 6; */
+   max-width: 50%;
+  /* justify-content: ; */
+}
+
+
+
+.img-about-us-section {
+  max-width: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.img-about-us-section img{
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+.content-about-us-section{
+/* background-color: bisque; */
+  padding-left: 100px;
+  padding-right: 100px;
+}
+.content-about-us-section h2 {
+  font-size: 2em;
+  margin-bottom: 20px;
+}
+
+.content-about-us-section p {
+  font-size: 1em;
+  line-height: 1.6;
+}
+@media (max-width: 768px) {
+  .about-us-section {
+      flex-direction: column;
+      text-align: center;
+  }
+
+  .content-about-us-section,
+  .img-about-us-section {
+      max-width: 100%;
+  }
+}
+/* 
+.about-us-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 50px;
+}
+
+.content-about-us-section {
+  max-width: 50%;
+}
+
+
+
+
+
+
+
+ */
+
+/*  */
+
+.contact-us-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: white;
+  /* background: linear-gradient(to top, #ffffff, #e6e6e6); Adjust the colors as needed */
+  padding-top: 70px;
+  padding-left: 200px;
+  padding-right: 200px;
+}
+
+.content-contact-us-section {
+  width: 50%;
+  padding-right: 20px; /* Adjust as needed */
+}
+
+.form-contact-us-section {
+  width: 50%;
+  padding-left: 20px; /* Adjust as needed */
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+input[type="text"],
+input[type="email"],
+textarea {
+  width: 100%;
+  padding: 10px;
+  margin-top: 5px;
+  border: 0px solid #ccc;
+  background-color: #ededed;
+
+  border-radius: 6px;
+}
+
+.form-input-top{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+
+}
+.form-group{
+  width:100%;
+  margin: 5px;
+}
+button[type="submit"] {
+  background-color: #4d4d4d; /* Adjust the color as needed */
+  color: white;
+  padding: 5px 30px;
+  margin: 8px 0;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  align-self: right;
+}
+
+button[type="submit"]:hover {
+  background-color: #45a049;
+}
+
+/* Additional responsive adjustments */
+@media (max-width: 768px) {
+  .contact-us-section {
+      flex-direction: column;
+      padding: 70px;
+  }
+
+  .content-contact-us-section, 
+  .form-contact-us-section {
+      width: 100%;
+      padding: 0;
+  }
+}
+
+.home-button{
+    color:black;
+    background-color: transparent;
+    border: 2px solid black;
+    border-radius: 5px;
+    padding: 10px 20px;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    /* background-color: aqua; */
+  font-size: 20px;
+  color: #4d4d4d;
+}
+
+.content-footer{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 100px;
+  background: linear-gradient(to top, #8c8c8c, white); 
+}

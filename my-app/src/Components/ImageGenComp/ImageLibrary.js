@@ -14,8 +14,10 @@ const ImageLibrary = ({ userId }) => {
       setIsLoading(true); // Start loading
 
       try {
+        console.log("before fetch")
         const response = await axios.get(`${apiUrl}images/${userId}`);
         setImages(response.data.images.reverse());
+        console.log("after fetch")
       } catch (error) {
         console.error("Error fetching images:", error);
       }

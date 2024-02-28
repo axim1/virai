@@ -4,6 +4,7 @@ import loginstyle from "./Login.module.css";
 import axios from "axios";
 import { useNavigate, NavLink } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
+import Navbar from "../Navbar/Navbar";
 const apiUrl = process.env.REACT_APP_API_URL;
 
 const Login = ({ setLoggedIn, setUserState }) => {
@@ -42,7 +43,7 @@ const Login = ({ setLoggedIn, setUserState }) => {
       const response = await axios.post(`${apiUrl}login`, user);
       setUserState(response.data.user);
       setLoggedIn((prevState) => !prevState);
-      navigate("/", { replace: true });
+      navigate("/login", { replace: true });
     } catch (error) {
       console.error("Login failed:", error);
 
@@ -64,7 +65,9 @@ const Login = ({ setLoggedIn, setUserState }) => {
   // }, [formErrors]);
 
   return (
-    <div className={loginstyle.login}>
+    <>  <Navbar/>
+      <div className={loginstyle.login}>
+
       <form>
         <h1 className="mb-4">Login</h1>
         <div className="mb-3">
@@ -99,6 +102,8 @@ const Login = ({ setLoggedIn, setUserState }) => {
         <NavLink to="/signup">Not yet registered? Register Now</NavLink>
       </div>
     </div>
+    </>
+
   );
 };
 

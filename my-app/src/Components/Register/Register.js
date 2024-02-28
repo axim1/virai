@@ -7,6 +7,7 @@ import basestyle from "../Base.module.css";
 import axios from "axios";
 import { useNavigate, NavLink } from "react-router-dom";
 import "./Register.css"
+import Navbar from "../Navbar/Navbar";
 const apiUrl = process.env.REACT_APP_API_URL;
 
 const Register = () => {
@@ -98,7 +99,7 @@ useEffect(() => {
 }, [formErrors, isSubmit, user, selectedSubscription, navigate]);
 
 useEffect(() => {
-  axios.get("http://localhost:8000/subscriptions")
+  axios.get(`${apiUrl}subscriptions`)
     .then((res) => {
       setSubscriptions(res.data.subscriptions || []); // Provide a default empty array
     })
@@ -110,7 +111,7 @@ useEffect(() => {
 
   return (
     <>
-    <div>this is div</div>
+  <Navbar/>
       <div className="register">
         <form>
           <h1 className="mb-4">Create your account</h1>
