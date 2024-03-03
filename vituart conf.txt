@@ -1,0 +1,7 @@
+ssh : root@92.240.254.103
+pass: pjp-2o-h
+
+
+systemctl start node-server@virtuartai.com
+systemctl restart node-server@virtuartai.com
+systemctl stop node-server@virtuartai.com
