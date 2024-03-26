@@ -384,7 +384,7 @@ app.post('/sketch-to-image', upload.single('sketch_image'), async (req, res) => 
 
     const imageUuid = sketch2imageResponse.data.images[0].image_uuid;
 console.log("image uuid", imageUuid )
-const delayInSeconds = 5; // Adjust the delay as needed
+const delayInSeconds = 10; // Adjust the delay as needed
 await new Promise(resolve => setTimeout(resolve, delayInSeconds * 1000));
 
     // Second API call to retrieve the generated image using the UUID
