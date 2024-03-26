@@ -4,11 +4,15 @@ const mongoose = require("mongoose");
 const axios = require("axios");
 const path = require('path');
 const { User, Subscription, GeneratedImage } = require('./models');
-
+const multer = require('multer');
+const upload = multer({ dest: 'uploads/' });
 const app = express();
+const FormData = require('form-data');
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
+const fs = require('fs');
 
 const uri = "mongodb+srv://asim6832475:1234@cluster0.ukza83p.mongodb.net/?retryWrites=true&w=majority";
 
@@ -327,13 +331,102 @@ app.post("/api/signup", async (req, res) => {
 
 
 
+// const upload = multer({ dest: 'uploads/' });
+
+app.post('/sketch-to-image', upload.single('sketch_image'), async (req, res) => {
+  try {
+    const sketchImagePath = req.file.path; // Path to the uploaded sketch image
+    const form = new FormData();
+    // form.append('sketch_image', fs.createReadStream(sketchImagePath), req.file.originalname);
+
+    // for (let [key, value] of form.entries()) {
+    //   console.log(`${key}: ${value}`);
+    // }
+    console.log(req.body.prompt); // Should log "cat"
+    console.log(req.body.sketch_image_uuid);
+    // Append parameters to form data
+    if (!req.file) {
+      return res.status(400).send({ message: 'No sketch image provided' });
+  }
 
 
+
+  // Append text fields
+  form.append('strength', '0.8');
+  form.append('guidance_scale', '7.5');
+  form.append('prompt', req.body.prompt || 'high quality interior'); // Use the prompt from the request or a default value
+  form.append('width', '512');
+  form.append('height', '512');
+  form.append('steps', '25');
+  form.append('safetensor', 'false');
+  form.append('model_xl', 'false');
+  form.append('negative_prompt', req.body.negativePrompt || 'two faces, black man, duplicate, copy, multi, two, disfigured, kitsch, ugly, oversaturated, contrast, grain, low resolution, deformed, blurred, bad anatomy, disfigured, badly drawn face, mutation, mutated, extra limb, ugly, bad holding object, badly drawn arms, missing limb, blurred, floating limbs, detached limbs, deformed arms, blurred, out of focus, long neck, long body, ugly, disgusting, badly drawn, childish, disfigured, disfigured, old ugly, tile, badly drawn arms, badly drawn legs, badly drawn face, out of frame, extra limbs, disfigured, deformed, body out of frame, blurred, bad anatomy, blurred, watermark, grainy, signature, clipped, draftbird view, bad proportion, hero, cropped image'); // Long string as in the example
+  form.append('clip_skip', '0');
+  form.append('num_images', '1');
+  form.append('style', 'default');
+  form.append('seed', ''); // Empty string or any specific value if needed
+  form.append('sketch_image_uuid', '456'); // Example UUID, replace with actual if available
+  form.append('revert_extra', ''); // Empty string or any specific value if needed
+  form.append('callback_url', ''); // Empty string or any specific value if needed
+  form.append('maintain_aspect_ratio', 'false');
+  form.append('scheduler', 'Default');
+
+  // Append the file
+  form.append('sketch_image', fs.createReadStream(sketchImagePath), req.file.originalname);
+
+    // First API call to generate the image
+    const sketch2imageResponse = await axios.post('http://34.231.176.149:8888/sketch2image', form, {
+      headers: {
+        ...form.getHeaders(),
+      },
+    });
+    console.log(sketch2imageResponse.data);
+
+    const imageUuid = sketch2imageResponse.data.images[0].image_uuid;
+console.log("image uuid", imageUuid )
+const delayInSeconds = 5; // Adjust the delay as needed
+await new Promise(resolve => setTimeout(resolve, delayInSeconds * 1000));
+
+    // Second API call to retrieve the generated image using the UUID
+    const response = await axios.get(`http://34.231.176.149:8888/getimage/${imageUuid}`, {
+      params: {
+        delete: true,
+        type: 'PNG',
+        base64_c: false,
+        quality_level: 90,
+      },
+      headers: {
+        'accept': 'application/json'
+      },
+      responseType: 'arraybuffer' // If you expect a binary image response
+    });
+console.log(response.data)
+    // Convert binary data to base64 string if needed
+    const imageBase64 = Buffer.from(response.data, 'binary').toString('base64');
+    const imageDataUrl = `data:image/png;base64,${imageBase64}`;
+
+
+    res.send({ imageUrls: imageDataUrl });
+  } catch (error) {
+    // console.error('Error during sketch to image process:', error);
+    if (error.response) {
+      console.error('Error details:', error.response.data.detail);
+    }
+    
+    res.status(500).send({ message: 'Internal server error' });
+  }
+});
 
 
 
 // Example of updating a route to use Mongoose syntax
 app.post("/generate-image", async (req, res) => {
+  console.log(req.body); // Now req.body should be populated with your JSON data.
+  const form = new FormData();
+  for (let [key, value] of form.entries()) {
+    console.log(`${key}: ${value}`);
+  }
+  
   const { generatorType, promptText, negativePromptText, styleType, aspectRatio, scale, userId } = req.body;
 
   try {
@@ -378,10 +471,11 @@ console.log("bodyrequest::::::", req.body)
       // "base64":"yes"
       // Add other necessary parameters for Stable Diffusion API
     });
+    console.log("running api ")
 
     // Initial request to generate images
     const initialResponse = await axios.post("https://stablediffusionapi.com/api/v4/dreambooth", apiBody, { headers: apiHeaders });
-console.log(initialResponse.data.status)
+
 console.log(initialResponse.data.future_links)
 
 //     if (initialResponse.data.status == 'processing') {
