@@ -322,7 +322,7 @@ app.post("/api/signup", async (req, res) => {
 //     });
     
 //     // Respond with the base64 encoded image data
-//     res.send({ imageUrls: imageBase64Strings });
+//     res.send({ iymageUrls: imageBase64Strings });
 //   } catch (error) {
 //     console.error("Error during image generation:", error);
 //     res.status(500).send({ message: "Internal server error" });
@@ -344,7 +344,26 @@ app.post('/sketch-to-image', upload.single('sketch_image'), async (req, res) => 
     if (!req.file) {
       return res.status(400).send({ message: 'No sketch image provided' });
   }
+  const userId = req.body.userId; // Assuming the userId is sent in the body of the request
+  const user = await User.findById(userId);
 
+  // Check if the user exists
+  if (!user) {
+    console.log("User not found. UserId:", userId);
+    return res.status(404).send({ message: "User not found" });
+  }
+
+  // Check if the user has any image generation limits left
+  if (user.no_of_images_left <= 0) {
+    return res.status(400).send({ message: "You have reached the image generation limit" });
+  }
+
+  // Decrement the user's image generation limit
+  const updatedUser = await User.findByIdAndUpdate(userId, { $inc: { no_of_images_left: -1 } }, { new: true });
+  if (!updatedUser) {
+    console.log("Error updating user:", updatedUser);
+    return res.status(500).send({ message: "Error updating user" });
+  }
 
 
   // Append text fields
@@ -380,8 +399,17 @@ app.post('/sketch-to-image', upload.single('sketch_image'), async (req, res) => 
 
     const imageUuid = sketch2imageResponse.data.images[0].image_uuid;
 console.log("image uuid", imageUuid )
-const delayInSeconds = 20; // Adjust the delay as needed
-await new Promise(resolve => setTimeout(resolve, delayInSeconds * 1000));
+    // Determine the delay based on the maximum of width or height
+    const maxDimension = Math.max(req.body.width || 512, req.body.height || 512);
+    let delayInSeconds = 15; // Default delay for 512
+    if (maxDimension > 512 && maxDimension <= 768) {
+      delayInSeconds = 25;
+    } else if (maxDimension > 768) {
+      delayInSeconds = 45;
+    }
+console.log(delayInSeconds)
+    // Wait for the specified delay
+    await new Promise(resolve => setTimeout(resolve, delayInSeconds * 1000));
 
     // Second API call to retrieve the generated image using the UUID
     const response = await axios.get(`http://34.231.176.149:8888/getimage/${imageUuid}`, {
@@ -397,6 +425,12 @@ await new Promise(resolve => setTimeout(resolve, delayInSeconds * 1000));
       responseType: 'arraybuffer' // If you expect a binary image response
     });
 console.log(response.data)
+    // Store the generated image in the database
+    const generatedImage = new GeneratedImage({
+      userId: userId,
+      image: response.data // Assuming the image is stored as binary data
+    });
+    await generatedImage.save();
     // Convert binary data to base64 string if needed
     const imageBase64 = Buffer.from(response.data, 'binary').toString('base64');
     const imageDataUrl = `data:image/png;base64,${imageBase64}`;

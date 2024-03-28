@@ -12,7 +12,7 @@ const ImageGenerationForm = ({ username, onGenerateImage }) => {
   const [generatorType, setGeneratorType] = useState("");
   const [promptText, setPromptText] = useState("");
   const [negativePromptText, setNegativePromptText] = useState("");
-  const [styleType, setStyleType] = useState("architecture_drawing");
+  const [styleType, setStyleType] = useState("default");
   const [aspectRatio, setAspectRatio] = useState("");
   const [scale, setScale] = useState("");
   const [uploadedImage, setUploadedImage] = useState(null); // State for uploaded sketch image
@@ -150,6 +150,8 @@ console.log("Form data: ", formData)
       <div className="div-cont">
         <label>Style of Image:</label>
         <select value={styleType} onChange={handleStyleTypeChange}>
+        <option value="default">Default</option>
+
           <option value="architecture_drawing">Architecture Drawing</option>
           <option value="exterior_fantasy">Exterior Fantasy</option>
           <option value="exterior_modern">Exterior Modern</option>
