@@ -449,116 +449,116 @@ console.log(response.data)
 
 
 
-// Example of updating a route to use Mongoose syntax
-app.post("/generate-image", async (req, res) => {
-  console.log(req.body); // Now req.body should be populated with your JSON data.
-  const form = new FormData();
-  for (let [key, value] of form.entries()) {
-    console.log(`${key}: ${value}`);
-  }
+// // Example of updating a route to use Mongoose syntax
+// app.post("/generate-image", async (req, res) => {
+//   console.log(req.body); // Now req.body should be populated with your JSON data.
+//   const form = new FormData();
+//   for (let [key, value] of form.entries()) {
+//     console.log(`${key}: ${value}`);
+//   }
   
-  const { generatorType, promptText, negativePromptText, styleType, aspectRatio, scale, userId } = req.body;
+//   const { generatorType, promptText, negativePromptText, styleType, aspectRatio, scale, userId } = req.body;
 
-  try {
-    // For demonstration, use Lorem Picsum for placeholder images
+//   try {
+//     // For demonstration, use Lorem Picsum for placeholder images
 
-console.log("bodyrequest::::::", req.body)
+// console.log("bodyrequest::::::", req.body)
 
-    // Prepare headers and body for the Stable Diffusion API request
-    const apiHeaders = {
-      "Content-Type": "application/json",
-      // "Authorization": "Bearer YOUR_API_KEY", // Replace 'YOUR_API_KEY' with your actual API key
-    };
+//     // Prepare headers and body for the Stable Diffusion API request
+//     const apiHeaders = {
+//       "Content-Type": "application/json",
+//       // "Authorization": "Bearer YOUR_API_KEY", // Replace 'YOUR_API_KEY' with your actual API key
+//     };
 
-    const apiBody = JSON.stringify({
+//     const apiBody = JSON.stringify({
 
-      "key": "0suXBgmo83crN2LystXdbOUv4q4MZwLCTEcHvqlPEUrjUWzuh8WbEyMBNysG",
-      "model_id": "sdxl",
-      "prompt": promptText,
-      "negative_prompt": negativePromptText,
-      "width": "512",
-      "height": "512",
-      "samples": "1",
-      "num_inference_steps": "30",
-      "safety_checker": "no",
-      "enhance_prompt": "yes",
-      "seed": null,
-      "guidance_scale": 7.5,
-      "multi_lingual": "no",
-      "panorama": "no",
-      "self_attention": "no",
-      "upscale": "no",
-      "embeddings_model": null,
-      "lora_model": null,
-      "tomesd": "yes",
-      "clip_skip": "2",
-      "use_karras_sigmas": "yes",
-      "vae": null,
-      "lora_strength": null,
-      "scheduler": "UniPCMultistepScheduler",
-      "webhook": null,
-      "track_id": null,
-      // "base64":"yes"
-      // Add other necessary parameters for Stable Diffusion API
-    });
-    console.log("running api ")
+//       "key": "0suXBgmo83crN2LystXdbOUv4q4MZwLCTEcHvqlPEUrjUWzuh8WbEyMBNysG",
+//       "model_id": "sdxl",
+//       "prompt": promptText,
+//       "negative_prompt": negativePromptText,
+//       "width": "512",
+//       "height": "512",
+//       "samples": "1",
+//       "num_inference_steps": "30",
+//       "safety_checker": "no",
+//       "enhance_prompt": "yes",
+//       "seed": null,
+//       "guidance_scale": 7.5,
+//       "multi_lingual": "no",
+//       "panorama": "no",
+//       "self_attention": "no",
+//       "upscale": "no",
+//       "embeddings_model": null,
+//       "lora_model": null,
+//       "tomesd": "yes",
+//       "clip_skip": "2",
+//       "use_karras_sigmas": "yes",
+//       "vae": null,
+//       "lora_strength": null,
+//       "scheduler": "UniPCMultistepScheduler",
+//       "webhook": null,
+//       "track_id": null,
+//       // "base64":"yes"
+//       // Add other necessary parameters for Stable Diffusion API
+//     });
+//     console.log("running api ")
 
-    // Initial request to generate images
-    const initialResponse = await axios.post("https://stablediffusionapi.com/api/v4/dreambooth", apiBody, { headers: apiHeaders });
+//     // Initial request to generate images
+//     const initialResponse = await axios.post("https://stablediffusionapi.com/api/v4/dreambooth", apiBody, { headers: apiHeaders });
 
-console.log(initialResponse.data.future_links)
+// console.log(initialResponse.data.future_links)
 
-//     if (initialResponse.data.status == 'processing') {
-//       throw new Error('Unexpected response status from the API');
+// //     if (initialResponse.data.status == 'processing') {
+// //       throw new Error('Unexpected response status from the API');
+// //     }
+// let imageBuffers=[]; // Define imageBuffers here to have a broader scope
+
+// if (initialResponse.data.status == 'success') {
+//    imageBuffers = await Promise.all([
+//     // axios.get("https://pub-3626123a908346a7a8be8d9295f44e26.r2.dev/generations/0-2bf46a60-4485-4aa6-89d7-492fc75d4676.png", { responseType: 'arraybuffer' }),
+//     axios.get(initialResponse.data.output, { responseType: 'arraybuffer' }),
+//     // axios.get("https://picsum.photos/512/512", { responseType: 'arraybuffer' }),
+//   ]);}
+//  else if (initialResponse.data.status == 'processing') {
+
+//       await new Promise(resolve => setTimeout(resolve, initialResponse.data.eta * 3000));
+//       const futureLink = initialResponse.data.future_links[0]; // Example: accessing the first link
+// console.log("future bright he:",futureLink)
+//      imageBuffers = await Promise.all([
+//       axios.get(futureLink,{ responseType: 'arraybuffer' }),
+
+//     ]);}
+
+//     console.log(imageBuffers)
+//     const user = await User.findById(userId);
+
+//     if (!user) {
+//       console.log("User not found. UserId:", userId);
+//       res.status(404).send({ message: "User not found" });
+//       return;
 //     }
-let imageBuffers=[]; // Define imageBuffers here to have a broader scope
 
-if (initialResponse.data.status == 'success') {
-   imageBuffers = await Promise.all([
-    // axios.get("https://pub-3626123a908346a7a8be8d9295f44e26.r2.dev/generations/0-2bf46a60-4485-4aa6-89d7-492fc75d4676.png", { responseType: 'arraybuffer' }),
-    axios.get(initialResponse.data.output, { responseType: 'arraybuffer' }),
-    // axios.get("https://picsum.photos/512/512", { responseType: 'arraybuffer' }),
-  ]);}
- else if (initialResponse.data.status == 'processing') {
+//     if (user.no_of_images_left <= 0) {
+//       return res.status(400).send({ message: "You have reached the image generation limit" });
+//     }
 
-      await new Promise(resolve => setTimeout(resolve, initialResponse.data.eta * 3000));
-      const futureLink = initialResponse.data.future_links[0]; // Example: accessing the first link
-console.log("future bright he:",futureLink)
-     imageBuffers = await Promise.all([
-      axios.get(futureLink,{ responseType: 'arraybuffer' }),
+//     const updatedUser = await User.findByIdAndUpdate(userId, { $inc: { no_of_images_left: -1 } });
 
-    ]);}
+//     if (!updatedUser) {
+//       console.log("Error updating user:", updatedUser);
+//       return res.status(500).send({ message: "Error updating user" });
+//     }
 
-    console.log(imageBuffers)
-    const user = await User.findById(userId);
+//     const generatedImages = await GeneratedImage.insertMany(
+//       imageBuffers.map((response) => ({ image: response.data, userId: user.id }))
+//     );
 
-    if (!user) {
-      console.log("User not found. UserId:", userId);
-      res.status(404).send({ message: "User not found" });
-      return;
-    }
-
-    if (user.no_of_images_left <= 0) {
-      return res.status(400).send({ message: "You have reached the image generation limit" });
-    }
-
-    const updatedUser = await User.findByIdAndUpdate(userId, { $inc: { no_of_images_left: -1 } });
-
-    if (!updatedUser) {
-      console.log("Error updating user:", updatedUser);
-      return res.status(500).send({ message: "Error updating user" });
-    }
-
-    const generatedImages = await GeneratedImage.insertMany(
-      imageBuffers.map((response) => ({ image: response.data, userId: user.id }))
-    );
-
-    res.send({ imageUrls: generatedImages.map((image) => `data:image/jpeg;base64,${image.image.toString('base64')}`) });
-  } catch (error) {
-    console.error("Error during image generation:", error);
-    res.status(500).send({ message: "Internal server error" });
-  }
-});
+//     res.send({ imageUrls: generatedImages.map((image) => `data:image/jpeg;base64,${image.image.toString('base64')}`) });
+//   } catch (error) {
+//     console.error("Error during image generation:", error);
+//     res.status(500).send({ message: "Internal server error" });
+//   }
+// });
 
 // ... (existing code)
 
