@@ -375,7 +375,7 @@ app.post('/sketch-to-image', upload.single('sketch_image'), async (req, res) => 
   form.append('steps', '25');
   form.append('safetensor', 'false');
   form.append('model_xl', 'false');
-  form.append('negative_prompt', req.body.negativePrompt || 'default'); // Long string as in the example
+  form.append('negative_prompt', req.body.negativePrompt || 'two faces,  cartoonish, poorly detailed, unrealistic, low resolution, low quality, pixelated, flat lighting, lack of detail, poor composition, amateurish, unrealistic, unappealing color palette, duplicate, copy, multi, two, disfigured, kitsch, ugly, oversaturated, contrast, grain, low resolution, deformed, blurred, bad anatomy, disfigured, badly drawn face, mutation, mutated, extra limb, ugly, , badly drawn arms, missing limb, blurred, floating limbs, detached limbs, deformed arms, blurred, out of focus, long neck, long body, ugly, disgusting, badly drawn, childish, disfigured, disfigured, old ugly, tile, badly drawn arms, badly drawn legs, badly drawn face, disfigured, deformed, body out of frame, blurred, bad anatomy, blurred, watermark, grainy, signature, clipped, draftbird view, bad proportion, hero, cropped image'); // Long string as in the example
   form.append('clip_skip', '0');
   form.append('num_images', '1');
   form.append('style', req.body.styleType||'default');
