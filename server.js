@@ -337,13 +337,9 @@ app.post('/sketch-to-image', upload.single('sketch_image'), async (req, res) => 
   try {
     const sketchImagePath = req.file.path; // Path to the uploaded sketch image
     const form = new FormData();
-    // form.append('sketch_image', fs.createReadStream(sketchImagePath), req.file.originalname);
 
-    // for (let [key, value] of form.entries()) {
-    //   console.log(`${key}: ${value}`);
-    // }
     console.log(req.body.prompt); // Should log "cat"
-    console.log(req.body.sketch_image_uuid);
+    console.log( req.body.maintainAspectRatio);
     // Append parameters to form data
     if (!req.file) {
       return res.status(400).send({ message: 'No sketch image provided' });
@@ -355,20 +351,20 @@ app.post('/sketch-to-image', upload.single('sketch_image'), async (req, res) => 
   form.append('strength', '0.8');
   form.append('guidance_scale', '7.5');
   form.append('prompt', req.body.prompt || 'high quality interior'); // Use the prompt from the request or a default value
-  form.append('width', '512');
-  form.append('height', '512');
+  form.append('width', req.body.width||'512');
+  form.append('height', req.body.height||'512');
   form.append('steps', '25');
   form.append('safetensor', 'false');
   form.append('model_xl', 'false');
-  form.append('negative_prompt', req.body.negativePrompt || 'two faces, black man, duplicate, copy, multi, two, disfigured, kitsch, ugly, oversaturated, contrast, grain, low resolution, deformed, blurred, bad anatomy, disfigured, badly drawn face, mutation, mutated, extra limb, ugly, bad holding object, badly drawn arms, missing limb, blurred, floating limbs, detached limbs, deformed arms, blurred, out of focus, long neck, long body, ugly, disgusting, badly drawn, childish, disfigured, disfigured, old ugly, tile, badly drawn arms, badly drawn legs, badly drawn face, out of frame, extra limbs, disfigured, deformed, body out of frame, blurred, bad anatomy, blurred, watermark, grainy, signature, clipped, draftbird view, bad proportion, hero, cropped image'); // Long string as in the example
+  form.append('negative_prompt', req.body.negativePrompt || 'default'); // Long string as in the example
   form.append('clip_skip', '0');
   form.append('num_images', '1');
-  form.append('style', 'default');
+  form.append('style', req.body.styleType||'default');
   form.append('seed', ''); // Empty string or any specific value if needed
   form.append('sketch_image_uuid', '456'); // Example UUID, replace with actual if available
   form.append('revert_extra', ''); // Empty string or any specific value if needed
   form.append('callback_url', ''); // Empty string or any specific value if needed
-  form.append('maintain_aspect_ratio', 'false');
+  form.append('maintain_aspect_ratio', req.body.maintainAspectRatio|| 'false');
   form.append('scheduler', 'Default');
 
   // Append the file
@@ -384,7 +380,7 @@ app.post('/sketch-to-image', upload.single('sketch_image'), async (req, res) => 
 
     const imageUuid = sketch2imageResponse.data.images[0].image_uuid;
 console.log("image uuid", imageUuid )
-const delayInSeconds = 10; // Adjust the delay as needed
+const delayInSeconds = 20; // Adjust the delay as needed
 await new Promise(resolve => setTimeout(resolve, delayInSeconds * 1000));
 
     // Second API call to retrieve the generated image using the UUID
