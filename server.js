@@ -8,6 +8,8 @@ const multer = require('multer');
 const upload = multer({ dest: 'uploads/' });
 const app = express();
 const FormData = require('form-data');
+require('dotenv').config();
+const callbackUrl = process.env.CALLBACK_URL;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -320,7 +322,7 @@ app.post("/api/signup", async (req, res) => {
 //     const imageBase64Strings = generatedImagesData.map(binaryData => {
 //       return `data:image/jpeg;base64,${Buffer.from(binaryData).toString('base64')}`;
 //     });
-    
+
 //     // Respond with the base64 encoded image data
 //     res.send({ iymageUrls: imageBase64Strings });
 //   } catch (error) {
@@ -333,88 +335,18 @@ app.post("/api/signup", async (req, res) => {
 
 // const upload = multer({ dest: 'uploads/' });
 
-app.post('/sketch-to-image', upload.single('sketch_image'), async (req, res) => {
+
+let imageResults;
+const respData = {};
+
+app.post('/image-callback', async (req, res) => {
   try {
-    const sketchImagePath = req.file.path; // Path to the uploaded sketch image
-    const form = new FormData();
-
-    console.log(req.body.prompt); // Should log "cat"
-    console.log( req.body.maintainAspectRatio);
-    // Append parameters to form data
-    if (!req.file) {
-      return res.status(400).send({ message: 'No sketch image provided' });
-  }
-  const userId = req.body.userId; // Assuming the userId is sent in the body of the request
-  const user = await User.findById(userId);
-
-  // Check if the user exists
-  if (!user) {
-    console.log("User not found. UserId:", userId);
-    return res.status(404).send({ message: "User not found" });
-  }
-
-  // Check if the user has any image generation limits left
-  if (user.no_of_images_left <= 0) {
-    return res.status(400).send({ message: "You have reached the image generation limit" });
-  }
-
-  // Decrement the user's image generation limit
-  const updatedUser = await User.findByIdAndUpdate(userId, { $inc: { no_of_images_left: -1 } }, { new: true });
-  if (!updatedUser) {
-    console.log("Error updating user:", updatedUser);
-    return res.status(500).send({ message: "Error updating user" });
-  }
-
-
-  // Append text fields
-  form.append('strength', '0.8');
-  form.append('guidance_scale', '7.5');
-  form.append('prompt', req.body.prompt || 'high quality interior'); // Use the prompt from the request or a default value
-  form.append('width', req.body.width||'512');
-  form.append('height', req.body.height||'512');
-  form.append('steps', '25');
-  form.append('safetensor', 'false');
-  form.append('model_xl', 'false');
-  form.append('negative_prompt', req.body.negativePrompt || 'bad, blurry, low quality, low resolution, deformed'); // Long string as in the example
-  form.append('clip_skip', '0');
-  form.append('num_images', '1');
-  form.append('style', req.body.styleType||'default');
-  form.append('seed', ''); // Empty string or any specific value if needed
-  form.append('sketch_image_uuid', '456'); // Example UUID, replace with actual if available
-  form.append('revert_extra', ''); // Empty string or any specific value if needed
-  form.append('callback_url', ''); // Empty string or any specific value if needed
-  form.append('maintain_aspect_ratio', req.body.maintainAspectRatio|| 'false');
-  form.append('scheduler', 'Default');
-
-  // Append the file
-  form.append('sketch_image', fs.createReadStream(sketchImagePath), req.file.originalname);
-
-    // First API call to generate the image
-    const sketch2imageResponse = await axios.post('http://34.231.176.149:8888/sketch2image', form, {
-      headers: {
-        ...form.getHeaders(),
-      },
-    });
-    console.log(sketch2imageResponse.data);
-
-    const imageUuid = sketch2imageResponse.data.images[0].image_uuid;
-console.log("image uuid", imageUuid )
-    // Determine the delay based on the maximum of width or height
-    const maxDimension = Math.max(req.body.width || 512, req.body.height || 512);
-    let delayInSeconds = 15; // Default delay for 512
-    if (maxDimension > 512 && maxDimension <= 768) {
-      delayInSeconds = 25;
-    } else if (maxDimension > 768) {
-      delayInSeconds = 45;
-    }
-console.log(delayInSeconds)
-    // Wait for the specified delay
-    await new Promise(resolve => setTimeout(resolve, delayInSeconds * 1000));
-
-    // Second API call to retrieve the generated image using the UUID
+    console.log("callback called")
+    const imageUuid = req.body.uuid;
+    // console.log("uuid :", imageUuid)
     const response = await axios.get(`http://34.231.176.149:8888/getimage/${imageUuid}`, {
       params: {
-        delete: true,
+        delete: false,
         type: 'PNG',
         base64_c: false,
         quality_level: 90,
@@ -422,30 +354,283 @@ console.log(delayInSeconds)
       headers: {
         'accept': 'application/json'
       },
-      responseType: 'arraybuffer' // If you expect a binary image response
+      responseType: 'arraybuffer'
     });
-console.log(response.data)
+
+    // console.log(response.data)
+    respData[imageUuid] = response.data
     // Store the generated image in the database
-    const generatedImage = new GeneratedImage({
-      userId: userId,
-      image: response.data // Assuming the image is stored as binary data
-    });
-    await generatedImage.save();
+    // const generatedImage = new GeneratedImage({
+    //   userId: userId,
+    //   image: response.data // Assuming the image is stored as binary data
+    // });
+    // await generatedImage.save();
     // Convert binary data to base64 string if needed
     const imageBase64 = Buffer.from(response.data, 'binary').toString('base64');
     const imageDataUrl = `data:image/png;base64,${imageBase64}`;
 
+    imageResults = imageDataUrl; // Store the result
+    // console.log("image results::",imageResults[imageUuid])
+    // res.send({ imageUrls: imageDataUrl });
+    res.status(200).send({ message: 'Image processed successfully' });
+  } catch (error) {
+    console.error('Error handling image callback:', error);
+    res.status(500).send({ message: 'Error handling image callback' });
+  }
+});
 
-    res.send({ imageUrls: imageDataUrl });
+app.get('/check-image-status/:userId/:uuid', async (req, res) => {
+  const { uuid, userId } = req.params;
+  // console.log("checking status for :::", uuid, userId)
+  if (imageResults) {
+    console.log("checking status for")
+
+    // res.json(imageResults[uuid]);
+    const generatedImage = new GeneratedImage({
+      userId: userId,
+      image: respData[uuid] // Assuming the image is stored as binary data
+    });
+    await generatedImage.save();
+
+
+    res.status(200).send({ imageUrls: imageResults });
+
+    delete respData[uuid];
+    delete imageResults; // Clean up after sending
+    if (!imageResults) {
+      console.log("deleted image results :::")
+    }
+
+  } else {
+    res.status(202).send({ message: 'Processing' }); // 202 Accepted - processing not complete
+  }
+});
+
+
+app.post('/sketch-to-image', upload.single('sketch_image'), async (req, res) => {
+  try {
+    const sketchImagePath = req.file.path; // Path to the uploaded sketch image
+    const form = new FormData();
+
+    console.log(req.body.prompt); // Should log "cat"
+    console.log( "model xl :: ",req.body.model_xl);
+    // Append parameters to form data
+    if (!req.file) {
+      return res.status(400).send({ message: 'No sketch image provided' });
+    }
+    const userId = req.body.userId; // Assuming the userId is sent in the body of the request
+    const user = await User.findById(userId);
+
+    // Check if the user exists
+    if (!user) {
+      console.log("User not found. UserId:", userId);
+      return res.status(404).send({ message: "User not found" });
+    }
+
+    // Check if the user has any image generation limits left
+    if (user.no_of_images_left <= 0) {
+      return res.status(400).send({ message: "You have reached the image generation limit" });
+    }
+
+    // Decrement the user's image generation limit
+    const updatedUser = await User.findByIdAndUpdate(userId, { $inc: { no_of_images_left: -1 } }, { new: true });
+    if (!updatedUser) {
+      console.log("Error updating user:", updatedUser);
+      return res.status(500).send({ message: "Error updating user" });
+    }
+
+
+    // Append text fields
+    form.append('strength', '0.8');
+    form.append('guidance_scale', '7.5');
+    form.append('prompt', req.body.prompt || 'high quality interior'); // Use the prompt from the request or a default value
+    form.append('width', req.body.width || '512');
+    form.append('height', req.body.height || '512');
+    form.append('steps', '25');
+    form.append('safetensor', 'false');
+    form.append('model_xl', req.body.model_xl);
+    form.append('negative_prompt', req.body.negativePrompt || 'bad, blurry, low quality, low resolution, deformed'); // Long string as in the example
+    form.append('clip_skip', '0');
+    form.append('num_images', '1');
+    form.append('style', req.body.styleType || 'default');
+    form.append('seed', ''); // Empty string or any specific value if needed
+    form.append('sketch_image_uuid', '456'); // Example UUID, replace with actual if available
+    form.append('revert_extra', ''); // Empty string or any specific value if needed
+    // form.append('callback_url', ''); // Empty string or any specific value if needed
+    form.append('maintain_aspect_ratio', req.body.maintainAspectRatio || 'false');
+    form.append('scheduler', 'Default');
+    form.append("strength", req.body.strength);
+
+    // Append the file
+    form.append('sketch_image', fs.createReadStream(sketchImagePath), req.file.originalname);
+    // Assuming your application's host and port are configured correctly
+    const callbackUrlImg = `${callbackUrl}/image-callback`; // Replace with your actual callback endpoint URL
+    form.append('callback_url', callbackUrlImg);
+
+    // First API call to generate the image
+    const sketch2imageResponse = await axios.post('http://34.231.176.149:8888/sketch2image', form, {
+      headers: {
+        ...form.getHeaders(),
+      },
+    });
+    // console.log(sketch2imageResponse.data);
+
+    const imageUuid = sketch2imageResponse.data.images[0].image_uuid;
+    console.log("image uuid", imageUuid)
+
+
+    res.send({ uuid: imageUuid });
+    // res.status(200).send({ message: 'Image processed successfully' });
+
   } catch (error) {
     // console.error('Error during sketch to image process:', error);
     if (error.response) {
       console.error('Error details:', error.response.data.detail);
     }
-    
+
     res.status(500).send({ message: 'Internal server error' });
   }
 });
+
+
+
+
+
+let respTextData;
+app.post('/text-callback', async (req, res) => {
+  try {
+    console.log("text callback called")
+    const textUuid = req.body.text_uuid;
+    console.log("uuid :",textUuid )
+    const response = await axios.get(`http://34.231.176.149:8888/gettext/${textUuid}`, {
+      headers: {
+        'accept': 'application/json'
+      }});
+
+    console.log(response.data)
+    respTextData = response.data.prompt_variants[0]
+    res.status(200).send({ message: 'Text processed successfully' });
+  } catch (error) {
+    console.error('Error handling image callback:', error);
+    res.status(500).send({ message: 'Error handling image callback' });
+  }
+});
+
+app.get('/check-text-status/:userId/:uuid', async (req, res) => {
+  const { uuid, userId } = req.params;
+  // console.log("checking status for :::", uuid, userId)
+  if (respTextData) {
+    console.log("checking status for")
+
+
+
+    res.status(200).send({ en_prompt: respTextData });
+
+    delete respTextData;
+    if (!respTextData) {
+      console.log("deleted image results :::")
+    }
+
+  } else {
+    res.status(202).send({ message: 'Processing' }); // 202 Accepted - processing not complete
+  }
+});
+
+app.post('/prompt-enhancer', upload.none(), async (req, res) => {
+  try {
+    const form = new FormData();
+
+    console.log(req.body.prompt); // Should log "cat"
+    // Append parameters to form data
+
+    const userId = req.body.userId; // Assuming the userId is sent in the body of the request
+    const user = await User.findById(userId);
+
+    // Check if the user exists
+    if (!user) {
+      console.log("User not found. UserId:", userId);
+      return res.status(404).send({ message: "User not found" });
+    }
+
+
+
+    // Decrement the user's image generation limit
+
+
+    // Append text fields
+
+    form.append('prompt', req.body.prompt); // Use the prompt from the request or a default value
+
+    form.append('sketch_image_uuid', ''); // Example UUID, replace with actual if available
+    form.append('revert_extra', ''); // Empty string or any specific value if needed
+    form.append('max_length', '150'); // Empty string or any specific value if needed
+    // num_return_sequences
+    form.append('num_return_sequences', '1'); // Empty string or any specific value if needed
+
+    const callbackUrltext = `${callbackUrl}/text-callback`; // Replace with your actual callback endpoint URL
+    form.append('callback_url', callbackUrltext);
+
+    // First API call to generate the image
+    const response = await axios.post('http://34.231.176.149:8888/promptenhancer', form, {
+      headers: {
+        ...form.getHeaders(),
+      },
+    });
+    console.log(response.data);
+
+    const textUuid = response.data.text_uuid;
+    console.log("image uuid", textUuid)
+
+
+    res.send({ uuid: textUuid });
+    // res.status(200).send({ message: 'Image processed successfully' });
+
+  } catch (error) {
+    // console.error('Error during sketch to image process:', error);
+    if (error.response) {
+      console.error('Error details:', error.response.data.detail);
+    }
+
+    res.status(500).send({ message: 'Internal server error' });
+  }
+});
+
+// Determine the delay based on the maximum of width or height
+// const maxDimension = Math.max(req.body.width || 512, req.body.height || 512);
+// let delayInSeconds = 15; // Default delay for 512
+// if (maxDimension > 512 && maxDimension <= 768) {
+//   delayInSeconds = 25;
+// } else if (maxDimension > 768) {
+//   delayInSeconds = 45;
+// }
+// console.log(delayInSeconds)
+// // Wait for the specified delay
+// await new Promise(resolve => setTimeout(resolve, delayInSeconds * 1000));
+
+// // Second API call to retrieve the generated image using the UUID
+// const response = await axios.get(`http://34.231.176.149:8888/getimage/${imageUuid}`, {
+//   params: {
+//     delete: true,
+//     type: 'PNG',
+//     base64_c: false,
+//     quality_level: 90,
+//   },
+//   headers: {
+//     'accept': 'application/json'
+//   },
+//   responseType: 'arraybuffer' // If you expect a binary image response
+// });
+// console.log(response.data)
+// // Store the generated image in the database
+// const generatedImage = new GeneratedImage({
+//   userId: userId,
+//   image: response.data // Assuming the image is stored as binary data
+// });
+// await generatedImage.save();
+// // Convert binary data to base64 string if needed
+// const imageBase64 = Buffer.from(response.data, 'binary').toString('base64');
+// const imageDataUrl = `data:image/png;base64,${imageBase64}`;
+
 
 
 
@@ -456,7 +641,7 @@ console.log(response.data)
 //   for (let [key, value] of form.entries()) {
 //     console.log(`${key}: ${value}`);
 //   }
-  
+
 //   const { generatorType, promptText, negativePromptText, styleType, aspectRatio, scale, userId } = req.body;
 
 //   try {
@@ -564,7 +749,7 @@ console.log(response.data)
 
 app.get("/images/:userId", async (req, res) => {
   const userId = req.params.userId;
-console.log(userId)
+  console.log(userId)
   try {
     const user = await User.findById(userId).populate('generatedImages');
 
@@ -583,10 +768,10 @@ console.log(userId)
 });
 app.get("/api/user/:userId", async (req, res) => {
   const userId = req.params.userId;
-console.log("tjos ", userId)
+  console.log("tjos ", userId)
   try {
     const user = await User.findById(userId).populate("subscription");
-console.log("user:::", user)
+    console.log("user:::", user)
     if (!user) {
       console.log("User not found. UserId:", userId);
       return res.status(404).send({ message: "User not found" });
@@ -599,16 +784,16 @@ console.log("user:::", user)
       no_of_images_left: user.no_of_images_left,
       subscription: user.subscription
         ? {
-             // ... other subscription properties
-            name: user.subscription.name,
-            priceMonthly: user.subscription.priceMonthly,
-            priceYearly: user.subscription.priceYearly,
-            generatedImages: user.subscription.generatedImages,
-            generationSpeed: user.subscription.generationSpeed,
-            videoGenerations: user.subscription.videoGenerations,
-            licenseType: user.subscription.licenseType,
-            privacy: user.subscription.privacy,
-          }
+          // ... other subscription properties
+          name: user.subscription.name,
+          priceMonthly: user.subscription.priceMonthly,
+          priceYearly: user.subscription.priceYearly,
+          generatedImages: user.subscription.generatedImages,
+          generationSpeed: user.subscription.generationSpeed,
+          videoGenerations: user.subscription.videoGenerations,
+          licenseType: user.subscription.licenseType,
+          privacy: user.subscription.privacy,
+        }
         : null,
     };
 
