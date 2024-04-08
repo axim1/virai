@@ -409,6 +409,11 @@ app.get('/check-image-status/:userId/:uuid', async (req, res) => {
 
 app.post('/sketch-to-image', upload.single('sketch_image'), async (req, res) => {
   try {
+    if (!req.file) {
+      return res.status(400).send({ message: 'No sketch image provided' });
+    }
+    // const sketchImagePath = req.file.path; // Path to the uploaded sketch image
+
     const sketchImagePath = req.file.path; // Path to the uploaded sketch image
     const form = new FormData();
 
@@ -478,7 +483,13 @@ app.post('/sketch-to-image', upload.single('sketch_image'), async (req, res) => 
     const imageUuid = sketch2imageResponse.data.images[0].image_uuid;
     console.log("image uuid", imageUuid)
 
-
+    fs.unlink(sketchImagePath, (err) => {
+      if (err) {
+        console.error('Failed to delete the uploaded sketch image:', err);
+      } else {
+        console.log(`Uploaded sketch image ${sketchImagePath} was deleted.`);
+      }
+    });
     res.send({ uuid: imageUuid });
     // res.status(200).send({ message: 'Image processed successfully' });
 
@@ -570,7 +581,7 @@ app.post('/prompt-enhancer', upload.none(), async (req, res) => {
     const callbackUrltext = `${callbackUrl}/text-callback`; // Replace with your actual callback endpoint URL
     form.append('callback_url', callbackUrltext);
 
-    // First API call to generate the image
+    // First API call to generate the image 
     const response = await axios.post('http://34.231.176.149:8888/promptenhancer', form, {
       headers: {
         ...form.getHeaders(),
