@@ -337,7 +337,7 @@ app.post("/api/signup", async (req, res) => {
 
 
 let imageResults;
-const respData = {};
+let respData;
 
 app.post('/image-callback', async (req, res) => {
   try {
@@ -358,7 +358,7 @@ app.post('/image-callback', async (req, res) => {
     });
 
     // console.log(response.data)
-    respData[imageUuid] = response.data
+    respData = response.data
     // Store the generated image in the database
     // const generatedImage = new GeneratedImage({
     //   userId: userId,
@@ -388,15 +388,15 @@ app.get('/check-image-status/:userId/:uuid', async (req, res) => {
     // res.json(imageResults[uuid]);
     const generatedImage = new GeneratedImage({
       userId: userId,
-      image: respData[uuid] // Assuming the image is stored as binary data
+      image: respData
     });
     await generatedImage.save();
 
 
     res.status(200).send({ imageUrls: imageResults });
 
-    delete respData[uuid];
-    delete imageResults; // Clean up after sending
+     respData='';
+     imageResults=''; // Clean up after sending
     if (!imageResults) {
       console.log("deleted image results :::")
     }
