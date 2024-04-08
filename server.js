@@ -536,8 +536,9 @@ app.get('/check-text-status/:userId/:uuid', async (req, res) => {
 
 
     res.status(200).send({ en_prompt: respTextData });
-
+    respTextData='';
     delete respTextData;
+    
     if (!respTextData) {
       console.log("deleted image results :::")
     }
