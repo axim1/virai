@@ -1,17 +1,21 @@
 {
   "files": {
-    "main.css": "/static/css/main.c21e4338.css",
-    "main.js": "/static/js/main.433c264c.js",
+    "main.css": "/static/css/main.d9002205.css",
+    "main.js": "/static/js/main.ef801817.js",
     "static/js/787.cfd8f164.chunk.js": "/static/js/787.cfd8f164.chunk.js",
-    "static/media/workspace.jpg": "/static/media/workspace.e170676cf0fce6d9089f.jpg",
-    "static/media/bg-image.jpg": "/static/media/bg-image.5804874a08ad11153a37.jpg",
+    "static/media/Organic shapes mansion on a cliff.jpg": "/static/media/Organic shapes mansion on a cliff.35562c8d278054637b6b.jpg",
+    "static/media/House_sketch to image.jpg": "/static/media/House_sketch to image.86acd992eb85bb872358.jpg",
+    "static/media/bg-image.jpg": "/static/media/bg-image.599abb9c871e66d0e9d2.jpg",
+    "static/media/House_sketch-to-image_web.jpg": "/static/media/House_sketch-to-image_web.33bd4a26b86e74b0ba09.jpg",
+    "static/media/3D object chair.jpg": "/static/media/3D object chair.f430749e9308c9e79343.jpg",
+    "static/media/3D object chair 02.jpg": "/static/media/3D object chair 02.cb63b940102e829c4569.jpg",
     "index.html": "/index.html",
-    "main.c21e4338.css.map": "/static/css/main.c21e4338.css.map",
-    "main.433c264c.js.map": "/static/js/main.433c264c.js.map",
+    "main.d9002205.css.map": "/static/css/main.d9002205.css.map",
+    "main.ef801817.js.map": "/static/js/main.ef801817.js.map",
     "787.cfd8f164.chunk.js.map": "/static/js/787.cfd8f164.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.c21e4338.css",
-    "static/js/main.433c264c.js"
+    "static/css/main.d9002205.css",
+    "static/js/main.ef801817.js"
   ]
 }

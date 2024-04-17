@@ -22,7 +22,7 @@
   
   .navbar-logo {
     font-size: 24px; /* Adjust the size as needed */
-    color: #fff; /* Logo color */
+    color: #ffde59; /* Logo color */
   }
   
   .navbar-links {
@@ -33,9 +33,9 @@
   
   .nav-item {
     text-decoration: none;
-    color:white;
+    color:#ffde59;
     background-color: transparent;
-    border: 1px solid white;
+    border: none;
     border-radius: 5px;
     padding: 5px 10px;
     font-size: 20px;

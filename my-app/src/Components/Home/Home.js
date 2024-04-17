@@ -1,6 +1,16 @@
 import React from 'react';
 import './Home.css'; // Your CSS file for styling
-import wsImage from '../../assets/workspace.jpg'; // Replace with your image path
+import wsImage from '../../assets/House_sketch to image.jpg'; // Replace with your image path
+import wsImage1 from '../../assets/House_sketch-to-image_web.jpg'; // Replace with your image path
+import wsImage2 from '../../assets/Organic shapes mansion on a cliff.jpg'; // Replace with your image path
+import wsImage3 from '../../assets/3D object chair.jpg'; // Replace with your image path
+import wsImage4 from '../../assets/3D object chair 02.jpg'; // Replace with your image path
+import wsImage5 from '../../assets/House_sketch-to-image_web.jpg'; // Replace with your image path
+// D:\virai\my-app\src\assets\House_sketch to image.jpg
+
+// my-app\src\assets\House_sketch-to-image_web.jpg
+// 
+// my-app\src\assets\Organic shapes mansion on a cliff.jpg
 import Navbar from '../Navbar/Navbar';
 
 function Home() {
@@ -9,9 +19,10 @@ function Home() {
         <Navbar/>
             <div className="herosection" >
                 <div className='content-herosection'>
-                    <h1>You don't need eyes to see, You need vision.</h1>
-                    <p>Your Vision Becomes Reality. Experience the breath taking AI tools while creating your digital art. Create stunning inspirations in architecture. Unleash your imagination and transform it into reality.</p>
-                    <button className='home-button'>Learn More</button>
+                    <h1 style={{color:"#ffde59"}}>You don't need eyes to see,</h1>
+                    <h1 style={{color:"#ffde59", fontSize:"90px"}} >You need vision.</h1>
+                    <h1 style={{color:"#ffde59", fontSize:"25px"}}>Your Vision Becomes Reality. Experience the breath taking AI tools while creating your digital art. Create stunning inspirations in architecture. Unleash your imagination and transform it into reality.</h1>
+                    <button className='home-button'>CREATE</button>
                 </div>
             </div>
 
@@ -38,32 +49,32 @@ function Home() {
                         <p>Convert your textual ideas into stunning images. Create art, architectural renderings or any other imagination.</p>
                     </div>
                     <div className='items-grid-tools-section-2'>
-                        <img src={wsImage} alt="Descriptive text" className="my-image-class" />
+                        <img src={wsImage2} alt="Descriptive text" className="my-image-class" />
                         <br />
                         <h2>Video generator</h2>
                         <br />
                         <p>Generate videos from your images or text prompts. Use realistic virtual human avatars, or create your own custom character.</p>
                     </div>
                     <div className='items-grid-tools-section-2'>
-                        <img src={wsImage} alt="Descriptive text" className="my-image-class" />
+                        <img src={wsImage1} alt="Descriptive text" className="my-image-class" />
                         <br />
                         <h2>3D Object generator</h2>
                         <br />
                         <p>Using text prompts create 3D objects or interiors, download them and insert into your project.</p>
                     </div>                    <div className='items-grid-tools-section-2'>
-                        <img src={wsImage} alt="Descriptive text" className="my-image-class" />
+                        <img src={wsImage3} alt="Descriptive text" className="my-image-class" />
                         <br />
                         <h2>Image to sketch generator</h2>
                         <br />
                         <p>Upload images, photographs, portraits and transform them into beautiful pencil drawings, colored sketches or artistic paintings.</p>
                     </div>                    <div className='items-grid-tools-section-2'>
-                        <img src={wsImage} alt="Descriptive text" className="my-image-class" />
+                        <img src={wsImage4} alt="Descriptive text" className="my-image-class" />
                         <br />
                         <h2>Sketch to image generator</h2>
                         <br />
                         <p>Upload sketches and transform them into beautiful renderings, photographs, colored drawings or artistic idea</p>
                     </div>                    <div className='items-grid-tools-section-2'>
-                        <img src={wsImage} alt="Descriptive text" className="my-image-class" />
+                        <img src={wsImage5} alt="Descriptive text" className="my-image-class" />
                         <br />
                         <h2>Image variation</h2>
                         <br />
