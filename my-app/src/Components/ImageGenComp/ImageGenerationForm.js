@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "./ImageGenerationForm.css";
 const apiUrl = process.env.REACT_APP_API_URL;
@@ -6,6 +6,9 @@ const apiUrl = process.env.REACT_APP_API_URL;
 const ImageGenerationForm = ({ username, onGenerateImage }) => {
 
   const [isLoading, setIsLoading] = useState(false); // New loading state
+  const [images, setImages] = useState([]);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [isLoading2, setIsLoading2] = useState(false); // State to track loading
 
 
   const [apiType, setApiType] = useState("sketch-to-image"); // State to track selected API type
@@ -50,60 +53,40 @@ const ImageGenerationForm = ({ username, onGenerateImage }) => {
     setUploadedImage(event.target.files[0]);
   };
 
-  //   const handleGenerateImage = async () => {
-  //     setFormSubmitted(true);
 
-  //     setIsLoading(true); // Start loading
+  useEffect(() => {
+    const fetchImages = async () => {
+      setIsLoading2(true); // Start loading
 
-  //     if (!isFormValid) {
-  //       setIsLoading(false); // Stop loading if form is not valid
-  //       return;
-  //     }
+      try {
+        console.log("before fetch")
+        const response = await axios.get(`${apiUrl}topimages/${username._id}`);
+        setImages(response.data.images.reverse());
+        console.log("after fetch")
+      } catch (error) {
+        console.error("Error fetching images:", error);
+      }
+      setIsLoading2(false); 
 
-  //     try {
-  //       const formData = new FormData();
-  //       formData.append("generatorType", generatorType);
-  //       console.log("Prompt text before appending:", promptText); // Add this line for debugging
-  //       formData.append("prompt", promptText);
-  //       console.log("style type = ", styleType)
-  //       formData.append("negativePromptText", negativePromptText);
-  //       formData.append("styleType", styleType);
-  //       formData.append("aspectRatio", aspectRatio);
-  //       formData.append("scale", scale);
-  //       formData.append("userId", username._id);
-  //       formData.append("width", imageWidth);
-  //       formData.append("height", imageHeight);
-  //       formData.append("maintainAspectRatio",  maintainAspectRatio.toString());
+    };
 
-  //       if (apiType === "sketch-to-image" && uploadedImage) {
-  //         formData.append("sketch_image", uploadedImage);
-  //         formData.append("sketch_image_uuid", 1234); // Ensure you have a UUID to append
+    fetchImages();
+  }, [username._id]);
 
-  //       }
-  //       for (let [key, value] of formData.entries()) {
-  //         console.log(`${key}: ${value}`);
-  //       }
+  const downloadImage = (url, filename) => {
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    link.click();
+  };
 
-  // console.log("Form data: ", formData)
-  //       const response = await axios.post(`${apiUrl}${apiType}`, formData, {
-  //         headers: {
-  //           "Content-Type": "multipart/form-data",
-  //         },
-  //       });
+  const openPreview = (image) => {
+    setSelectedImage(image);
+  };
 
-  //       const imageUrls = Array.isArray(response.data.imageUrls) ? response.data.imageUrls : [response.data.imageUrls];
-  //       console.log("Generated Image URLs:", imageUrls);
-  //       setGeneratedImages(imageUrls);
-  //       onGenerateImage(imageUrls);
-  //     } catch (error) {
-  //       console.error("Error generating image:", error);
-  //       setIsLoading(false); // Stop loading after API call
-
-  //     }
-  //     setIsLoading(false); // Stop loading after API call
-
-  //   };
-
+  const closePreview = () => {
+    setSelectedImage(null);
+  };
 
 
 
@@ -236,10 +219,10 @@ const ImageGenerationForm = ({ username, onGenerateImage }) => {
             setGeneratedImages(imageUrls);
             onGenerateImage(imageUrls);
 
-            setIsLoading(false); 
+            setIsLoading(false);
           } else {
             console.log("in the pool");
-            setIsLoading(true); 
+            setIsLoading(true);
 
             // Continue polling if the processing is not complete
             setTimeout(() => pollImageStatus(uuid), 4000); // Poll every 5 seconds
@@ -292,29 +275,18 @@ const ImageGenerationForm = ({ username, onGenerateImage }) => {
 
   return (
     <div className="form-container">
-      <h1>Image Generation Form</h1>
 
-
-      <div className="div-cont">
-        <label>Choose API Type:</label>
-        <select value={apiType} onChange={handleApiTypeChange}>
-          {/* <option value="generate-image">Generate Image</option> */}
-          <option value="sketch-to-image">Sketch to Image</option>
-        </select>
-      </div>
-
-
-
-      {apiType === "sketch-to-image" && (
-        <div className="div-cont div-cont-choosefile">
-          <label>Upload Sketch:</label>
-          <input className="input-field2" type="file" name="sketch_image" onChange={handleImageUpload} />
+<div className="sidebar-container">
+      {/* <h1>Image Generation</h1> */}
+      <div className="sidebar-content">
         </div>
-      )}
 
-      {/* Style Selection */}
-      <div className="div-cont">
-        <label>Style of Image:</label>
+
+
+        <div className="div-cont">
+        <label style={{
+        margin:'30px'
+        }}>STYLE</label>
         <select value={styleType} onChange={handleStyleTypeChange}>
           <option value="default">Default</option>
 
@@ -330,62 +302,43 @@ const ImageGenerationForm = ({ username, onGenerateImage }) => {
           <option value="technical_drawing">Technical Drawing</option>
         </select>
       </div>
-      <div style={{ display: "flex", justifyContent: "space-between", width: "100%", maxWidth: "500px" }}>
-        {/* Input fields for width and height */}
-        <div className="div-cont">
-          <label>Width:</label>
+
+
+        <label style={{
+        margin:'30px'
+        }}>SIZE</label>
+
+
+        <div className="size-inner1">
+          <label>Width</label>
           <input
             type="number"
-            className="input-field2"
+            className="size-input"
             value={imageWidth}
             onChange={handleWidthChange}
             min="1" // Optional: Set minimum value to prevent 0 or negative numbers
           />
         </div>
 
-        <div className="div-cont">
-          <label>Height:</label>
+        <div className="size-inner2">
+          <label>Height</label>
           <input
             type="number"
-            className="input-field2"
+            className="size-input"
             value={imageHeight}
             onChange={handleHeightChange}
             min="1" // Optional: Set minimum value to prevent 0 or negative numbers
           />
         </div>
 
-      </div>
       {/* TextBar for prompts */}
-      <div className="div-cont">
-        <label>Text for prompts</label>
 
-        <input
-          className="input-field"
-          type="text"
-          value={promptText}
-          onChange={(e) => handleTextChange("Text for prompts", e.target.value)}
-        />
-        <button className="button" onClick={handlePromptEnhancer} style={{ width: "100%", marginTop: '5px' }}>
-          Enhance Text{/* Change button text based on loading state */}
-        </button>
-      </div>
-
-
-      {formSubmitted && !isFormValid && (
-        <p className="error-message">This field is mandatory</p>
-      )}
-      {/* TextBar for negative prompts */}
       <div className="div-cont">
-        <label>Text for negative prompts</label>
-        <input
-          className="input-field"
-          type="text"
-          value={negativePromptText}
-          onChange={(e) => handleTextChange("Text for negative prompts", e.target.value)}
-        />
-      </div>
-      <div className="div-cont">
-        <label htmlFor="strength">Strength: {strength}</label>
+        <label htmlFor="strength" style={{
+        margin:'20px',
+        marginTop:'40px'
+        }}>STRENGTH </label>
+       <p>{strength}</p>
         <input
           id="strength"
           type="range"
@@ -418,16 +371,81 @@ const ImageGenerationForm = ({ username, onGenerateImage }) => {
           model_xl
         </label>
       </div>
-      {/* Style Selection */}
 
-      {/* Additional input fields for aspect ratio and scale */}
-      {/* <div className="button-container ">
-        <button className="button" onClick={handleGenerateImage}             disabled={!isFormValid}  // Button is disabled if form is not valid
->
-          Generate Image
-        </button>
 
+
+
+
+
+
+
+
+
+        </div>
+      <p style={{fontSize:"30px"}}>LET YOUR VISION TO BE GENERATED</p>
+      <hr style={{ 
+      color: 'white', 
+      backgroundColor: 'white', 
+      height: 1 
+    }} />
+        <div style={{ 
+      borderTop: `1px solid white` 
+    }} />
+      {apiType === "sketch-to-image" && (
+        <div className="prompt">
+          <label>Upload Sketch:</label>
+          <input className="input-field2" type="file" name="sketch_image" onChange={handleImageUpload} />
+        </div>
+      )}
+
+
+      {/* <div className="div-cont">
+        <label>Choose API Type:</label>
+        <select value={apiType} onChange={handleApiTypeChange}>
+          <option value="sketch-to-image">Sketch to Image</option>
+        </select>
       </div> */}
+      <div className="prompt">
+        <div className="prompt-inner">
+          <label>PROMPT</label>
+          <button className="magic-button" onClick={handlePromptEnhancer} style={{ width: "100%", marginTop: '5px' }}>
+            MAGIC{/* Change button text based on loading state */}
+          </button>
+        </div>
+        <div className="prompt-inner2">
+          <input
+            className="prompt-input"
+            // type="text"
+            value={promptText}
+            onChange={(e) => handleTextChange("Text for prompts", e.target.value)}
+          />
+        </div>
+      </div>
+
+
+      {formSubmitted && !isFormValid && (
+        <p className="error-message">This field is mandatory</p>
+      )}
+      <div className="prompt">
+        <div className="prompt-inner">
+          <label >NEGATIVE PROMPT</label>
+
+        </div>
+        <div className="prompt-inner2">
+          <input
+            className="prompt-input"
+            // type="text"
+            value={negativePromptText}
+            onChange={(e) => handleTextChange("Text for negative prompts", e.target.value)}
+          />
+        </div>
+      </div>
+
+
+
+
+      {/* Style Selection */}
+   
 
       <div className="button-container">
         <button className="button" onClick={handleGenerateImage} disabled={isLoading || !isFormValid}>
@@ -456,6 +474,41 @@ const ImageGenerationForm = ({ username, onGenerateImage }) => {
         </div>
       )}
 
+
+
+
+<div className="image-library-container" style={{marginTop:"30px"}}>
+      {isLoading2 ? (
+        <div className="loading-indicator">Loading...</div> // Display loading indicator
+      ) : (
+      <div className="image-grid" style={{width: '1000px'}}>
+        {images.map((image, index) => (
+          <div className="image-item" key={index}>
+            <img
+              src={image}
+              alt={`Generated Image ${index}`}
+              onClick={() => openPreview(image)}
+            />
+            <div className="image-overlay">
+              <button className="download-button" onClick={() => downloadImage(image, `Generated_Image_${index}.jpeg`)}>
+                Download
+              </button>
+              <button className="preview-button" onClick={() => openPreview(image)}>
+                Preview
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>)}
+      {selectedImage && (
+      <div className="preview-modal" onClick={closePreview}> {/* Add onClick event to close the modal when the backdrop is clicked */}
+        <div className="modal-content" onClick={e => e.stopPropagation()}> {/* Prevent click inside the modal from closing it */}
+          <span className="close" onClick={closePreview}>&times;</span>
+          <img src={selectedImage} alt="Preview" />
+        </div>
+      </div>
+    )}
+    </div>
     </div>
   );
 };
