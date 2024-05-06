@@ -1,0 +1,45 @@
+.generatorContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    /* background-color: #f0f0f0; */
+    width: 100%;
+  }
+  
+  .inputField {
+    padding: 10px;
+    margin: 10px 0;
+    width: 300px;
+    background-color: transparent;
+  }
+  
+  .generateButton {
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    margin: 10px;
+  }
+  
+  .tagContainer {
+    display: flex;
+    gap: 10px;
+    margin: 10px 0;
+  }
+  
+  .tag {
+    background-color: #ddd;
+    border-radius: 5px;
+    padding: 5px 10px;
+    cursor: pointer;
+  }
+  
+  .limitInfo {
+    font-size: 0.8em;
+    color: #666;
+    margin-top: 10px;
+  }
+  

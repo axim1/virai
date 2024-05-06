@@ -1,0 +1,19 @@
+.features-section {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 50px 20%; /* Adjust padding as needed */
+    /* background-color: #000; Dark background */
+    color: #fff; /* White text */
+  }
+  
+  .feature-item {
+    text-align: left; /* Centers the text below the icons */
+    width: 20%; /* Adjust based on your layout preference */
+    border-right: 1px solid rgb(112, 112, 112);
+  }
+  
+  .feature-item svg {
+    margin-bottom: 20px; /* Space between icon and text */
+  }
+  

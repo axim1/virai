@@ -7,26 +7,95 @@ import wsImage3 from '../../assets/3D object chair.jpg'; // Replace with your im
 import wsImage4 from '../../assets/3D object chair 02.jpg'; // Replace with your image path
 import wsImage5 from '../../assets/House_sketch-to-image_web.jpg'; // Replace with your image path
 // D:\virai\my-app\src\assets\House_sketch to image.jpg
-
+import './Switcher.css'
 // my-app\src\assets\House_sketch-to-image_web.jpg
 // 
 // my-app\src\assets\Organic shapes mansion on a cliff.jpg
 import Navbar from '../Navbar/Navbar';
-
+import ImageSlider from './Components/ImageSlider';
+import FeaturesSection from './Components/FeaturesSection';
+import Gallery from './Components/Gallery';
+import TestimonialCarousel from './Components/TestimonialCarousel';
+import ImageGenerator from './Components/ImageGenerator';
 function Home() {
+
+
+
+
+
+    const sliderImages = [
+        { image: wsImage },
+        { image: wsImage },
+        { image: wsImage },
+      ];
+      
+
+
+
+
+
+
     return (
-        <>
+        <div style={{backgroundColor:"#13181d"}}>
         <Navbar/>
             <div className="herosection" >
                 <div className='content-herosection'>
-                    <h1 style={{color:"#ffde59"}}>You don't need eyes to see,</h1>
-                    <h1 style={{color:"#ffde59", fontSize:"90px"}} >You need vision.</h1>
-                    <h1 style={{color:"#ffde59", fontSize:"25px"}}>Your Vision Becomes Reality. Experience the breath taking AI tools while creating your digital art. Create stunning inspirations in architecture. Unleash your imagination and transform it into reality.</h1>
-                    <button className='home-button'>CREATE</button>
+                    <h1 style={{fontSize:"70px"}}>Create beautiful art with Artificial Intelligence</h1>
+                    <p>Be advised that image generation requires an active OpenAI, Stability AI or Stable Diffusion token.
+
+</p>
+                    {/* <h1 style={{color:"#ffde59", fontSize:"90px"}} >You need vision.</h1> */}
+                    {/* <h1 style={{color:"#ffde59", fontSize:"25px"}}>Your Vision Becomes Reality. Experience the breath taking AI tools while creating your digital art. Create stunning inspirations in architecture. Unleash your imagination and transform it into reality.</h1> */}
+                    {/* <button className='home-button'>CREATE</button> */}
                 </div>
             </div>
 
+            <div className="sc_switcher_controls">
+			<div className="sc_switcher_controls_section1">
+				<h3 className="sc_switcher_controls_section_title">Standard</h3>
+			</div>
+			<div className="sc_switcher_controls_toggle sc_switcher_controls_toggle_on">
+				<span className="sc_switcher_controls_toggle_button"></span>
+			</div>
+			<div className="sc_switcher_controls_section2">
+				<h3 className="sc_switcher_controls_section_title">Advanced</h3>
+			</div>
+		</div> 
 
+
+        <div style={{ width:"100%",padding:" 50px 25%"}}>
+
+
+<ImageGenerator/>
+</div> 
+
+
+        <ImageSlider slides={sliderImages}/>
+
+        <div className="huge-collection-section">
+    <div className="content-container">
+        <div className="text-block">
+            <p className="subtitle">HUGE COLLECTION</p>
+            <h2 className="title">More algorithms than anywhere else.</h2>
+        </div>
+        <div className="description-block">
+            <p className="description">Adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco.</p>
+            <p className="description">Adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.</p>
+        </div>
+    </div>
+</div>
+
+
+<FeaturesSection/>
+<div style={{ width:"100%",padding:"50px 20%"}}>
+<Gallery/>
+     
+     
+</div>
+
+<div style={{ width:"100%",padding:" 50px 20%"}}>
+<TestimonialCarousel/>
+</div>
             <div className="tools-section-2" >
                 <div className='content-tools-section-2'>
                     <h1>Try out the most amazing AI tools.</h1>
@@ -87,26 +156,21 @@ function Home() {
 
 
             </div>
-            <div className="clients-section-2">
+            {/* <div className="clients-section-2">
                 <div className='heading-clients-section-2'><h2>Our Clients</h2></div>
                 <div className='content-clients-section-2'>
                     <div className='grid-clients-section-2'>
-                        {/* <div className='items-grid-clients-section-2'> */}
-                        <img src={wsImage} alt="Descriptive text" className="my-image-class" />
-                        {/* </div> */}
-                        {/* <div className='items-grid-clients-section-2'> */}
-                        <img src={wsImage} alt="Descriptive text" className="my-image-class" />
-                        {/* </div> */}
-                        {/* <div className='items-grid-clients-section-2'> */}
-                        <img src={wsImage} alt="Descriptive text" className="my-image-class" />
-                        {/* </div> */}
+                     <img src={wsImage} alt="Descriptive text" className="my-image-class" />
+                       <img src={wsImage} alt="Descriptive text" className="my-image-class" />
+                      <img src={wsImage} alt="Descriptive text" className="my-image-class" />
+                      
                     </div>
                 </div>
-            </div>
+            </div> */}
 
 
 
-            <div className='about-us-section'>
+            {/* <div className='about-us-section'>
                 <div className='content-about-us-section'>
                     <h1>About us</h1>
                     <p>Welcome to VirtuartAI, a leading digital development and design company based in Slovakia. With a focus on innovation and creativity, we strive to deliver exceptional solutions tailored to meet our clients' unique needs.</p>
@@ -117,11 +181,11 @@ function Home() {
                     <img src={wsImage} alt="Descriptive text" className="my-image-class" />
 
                 </div>
-            </div>
+            </div> */}
 
 
 
-
+{/* 
 
             <div className='contact-us-section'>
                 <div className='content-contact-us-section'>
@@ -150,17 +214,81 @@ function Home() {
                         </div>
                     </form>
                 </div>
-            </div>
+            </div> */}
 
 
 
 
     
-                <div className='content-footer'>
+                {/* <div className='content-footer'>
                     <h5>VirtuartAI</h5>
 
-                </div>
-        </>
+                </div> */}
+
+                {/* <footer className="footer">
+  <div className="footer-content">
+    <h1>We develop & create digital future.</h1>
+    <div className="footer-links">
+      <div className="link-section">
+        <p>About Us</p>
+        <p>Services</p>
+        <p>Contacts</p>
+      </div>
+      <div className="address-section">
+        <h4>Address</h4>
+        <p>Germany —</p>
+        <p>785 15h Street, Office 478</p>
+        <p>Berlin, De 81566</p>
+      </div>
+      <div className="contact-section">
+        <h4>Say Hello</h4>
+        <p>info@email.com</p>
+        <p>+1 800 555 25 65</p>
+      </div>
+      <div className="social-links">
+        <a href="#"><i className="fa fa-facebook"></i></a>
+        <a href="#"><i className="fa fa-twitter"></i></a>
+        <a href="#"><i className="fa fa-instagram"></i></a>
+        <a href="#"><i className="fa fa-dribbble"></i></a>
+      </div>
+    </div>
+  </div>
+  <div className="footer-bottom">
+    <p>AxiomThemes © 2024. All Rights Reserved.</p>
+  </div>
+</footer> */}
+<footer className="footer">
+  <div className="footer-top">
+    <h1 style={{fontSize:"35px"}}>We develop & create digital future.</h1>
+    {/* <div className="footer-links">
+      <a href="#">About Us</a>
+      <a href="#">Services</a>
+      <a href="#">Contacts</a>
+    </div> */}
+    <div className="footer-address">
+      <h1>Address</h1>
+      <p>Germany —</p>
+      <p>785 15h Street, Office 478</p>
+      <p>Berlin, De 81566</p>
+    </div>
+    <div className="footer-contact">
+      <h1>Say Hello</h1>
+      <p>info@email.com</p>
+      <p>+1 800 555 25 65</p>
+    </div>
+    <div className="footer-social">
+      <a href="#"><i className="fa fa-facebook"></i></a>
+      <a href="#"><i className="fa fa-twitter"></i></a>
+      <a href="#"><i className="fa fa-instagram"></i></a>
+    </div>
+  </div>
+  <div className="footer-bottom">
+    <p>AxiomThemes © 2024. All Rights Reserved.</p>
+  </div>
+</footer>
+
+
+        </div>
     );
 }
 

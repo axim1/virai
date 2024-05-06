@@ -26,14 +26,15 @@ p{
 
 }
 .herosection{
-    background-image: url('../../assets/bg-image.jpg'); /* Replace 'path_to_your_image.jpg' with the actual path to your image */
+    /* background-image: url('../../assets/bg-image.jpg'); Replace 'path_to_your_image.jpg' with the actual path to your image */
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    padding: 200px;
     /* max-width: ; */
-    height: 100vh;
-
+    /* height: 100vh; */
+background-color: #13181d;
     background-repeat: no-repeat; /* This prevents the image from repeating */
     background-size: cover; /* This makes the image cover the entire div without repeating */
 }
@@ -55,14 +56,84 @@ color: #4d4d4d;
 }
 
 .content-herosection h1{
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-    /* background-color: aqua; */
-font-size: 46px;
-color: black;
+  color: #E8B98A;
+  background: linear-gradient(45deg, #E8B98A, #C6E296, #7DD591, #D8CC90, #99DA93);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-size: 200% 100%;
+  animation: animated-text 10s ease infinite;
 }
 
+
+
+.sc_switcher_controls{
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  -webkit-align-items: center;
+  -ms-flex-align: center;
+  align-items: center;
+  margin-bottom: 3em;
+}
+
+
+.huge-collection-section {
+  /* background-color: #000; Dark background */
+  color: #fff; /* White text */
+  padding: 100px 20% ; /* Top and bottom padding */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* max-width: 1000px; */
+  /* align-items: center; */
+  align-self: center;
+}
+
+.content-container {
+  display: flex; /* Enables flexbox */
+  align-items: center; /* Vertically aligns the items */
+  justify-content: space-between; /* Distributes space between and around content items */
+  max-width: 1834px; /* Maximum width as per your image */
+  width: 100%; /* Full width */
+  padding: 0 20px; /* Padding on the sides for small screens */
+}
+
+.text-block, .description-block {
+  flex: 1; /* Flex grow to take up equal space */
+  padding: 0 20px; /* Padding for spacing */
+}
+
+.title {
+  font-size: 48px; /* Large font size for the title */
+  font-weight: bold; /* Bold font weight */
+  margin-bottom: 10px; /* Space below the title */
+}
+
+.subtitle {
+  font-size: 14px; /* Smaller font size for the subtitle */
+  letter-spacing: 2px; /* More spacing between letters */
+  text-transform: uppercase; /* UPPERCASE letters */
+  margin-bottom: 10px; /* Space below the subtitle */
+}
+
+.description {
+  font-size: 18px; /* Suitable font size for readability */
+  line-height: 1.6; /* Line height for better readability */
+  margin-top: 0; /* No top margin */
+  margin-bottom: 10px; /* Bottom margin for spacing */
+}
+
+
+
+
+
 .tools-section-2{
-    background-color: black;
+    background-color: 13181d;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -132,7 +203,7 @@ padding-top: 40px;
   .items-grid-tools-section-2 img {
     width: 100%; /* Make the image width responsive */
 
-    width: 440px;
+      width: 440px;
     height: 440px;
     height: auto;
     display: block;
@@ -148,7 +219,7 @@ padding-top: 40px;
 
 
   .clients-section-2{
-    background-color: gray;
+    background-color: #13181d;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -427,4 +498,85 @@ button[type="submit"]:hover {
   justify-content: center;
   padding: 100px;
   background: linear-gradient(to top, #8c8c8c, white); 
+}
+
+
+.footer {
+  background-color: #000;
+  color: #fff;
+  padding: 40px 60px;
+}
+
+.footer-content {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  align-items: start;
+  padding: 100px 0;
+  gap: 20px;
+}
+.footer {
+  background-color: #000;
+  color: #fff;
+  padding: 40px 25%;
+  font-family: 'Arial', sans-serif;
+}
+
+.footer-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  text-align: left;
+  margin-bottom: 20px; /* Space before the bottom copyright */
+}
+
+.footer h1 {
+  font-size: 24px;
+  margin: 0; /* Remove default margin */
+  flex: 1; /* Take the required space */
+}
+.footer p {
+  /* font-size: 24px; */
+  color: #8c8c8c;
+  margin: 0; /* Remove default margin */
+  flex: 1; /* Take the required space */
+}
+
+
+.footer-links, .footer-address, .footer-contact, .footer-social {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding-left: 20px;
+}
+
+.footer-links a, .footer-social a {
+  color: #fff; /* Ensure links are white */
+  text-decoration: none; /* No underline */
+  margin: 5px 0; /* Margin for spacing */
+}
+
+.footer-social {
+  flex-direction: row;
+}
+
+.footer-social a {
+  margin-right: 10px; /* Space between social icons */
+}
+
+.footer-bottom {
+  text-align: center;
+  font-size: 14px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .footer-top {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .footer-links, .footer-address, .footer-contact, .footer-social {
+    align-items: center;
+  }
 }

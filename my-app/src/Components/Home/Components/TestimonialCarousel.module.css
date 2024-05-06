@@ -1,0 +1,47 @@
+.container {
+  width: 80%;
+  margin: auto;
+  padding: 20px;
+  color: #fff; /* Customize color */
+  /* background: #333; Customize background */
+}
+
+.testimonialItem {
+  text-align: center;
+  padding: 20px;
+}
+
+.avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  margin: 10px auto;
+}
+
+.quote {
+  font-style: italic;
+  font-size: 30px;
+}
+
+.author {
+  font-weight: bold;
+}
+
+.position {
+  display: block;
+  font-size: 0.8em;
+  font-weight: normal;
+}
+/* TestimonialCarousel.module.css */
+
+.slick-arrow {
+  z-index: 1;  /* Ensure arrows are above other content */
+}
+
+.slick-prev {
+  left: 20px;  /* Adjust based on your design */
+}
+
+.slick-next {
+  right: 20px;  /* Adjust based on your design */
+}

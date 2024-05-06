@@ -13,16 +13,17 @@
   }
   
   .navbarTransparent {
-    background-color: black;
+    background-color: transparent;
   }
   
   .navbarSolid {
-    background-color: #000; /* or any dark color */
+    background-color: black; /* or any dark color */
   }
   
   .navbar-logo {
     font-size: 24px; /* Adjust the size as needed */
-    color: #ffde59; /* Logo color */
+    color: white; /* Logo color */
+    margin-left: 30px;
   }
   
   .navbar-links {
@@ -33,7 +34,7 @@
   
   .nav-item {
     text-decoration: none;
-    color:#ffde59;
+    color:white;
     background-color: transparent;
     border: none;
     border-radius: 5px;
