@@ -230,7 +230,7 @@ app.post('/sketch-to-image', upload.single('sketch_image'), async (req, res) => 
     const callbackUrlImg = `${callbackUrl}/image-callback`; // Replace with your actual callback endpoint URL
     // form.append('callback_url', callbackUrlImg);
     try {
-      sketch2imageResponse = await axios.post('http://34.231.176.149:8888/text2image', form, {
+      sketch2imageResponse = await axios.post('http://34.231.176.149:8888/sketch2image', form, {
         headers: {
           ...form.getHeaders(),
         },
