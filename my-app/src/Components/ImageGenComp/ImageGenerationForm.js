@@ -66,7 +66,7 @@ const ImageGenerationForm = ({ username, onGenerateImage }) => {
       } catch (error) {
         console.error("Error fetching images:", error);
       }
-      setIsLoading2(false); 
+      setIsLoading2(false);
 
     };
 
@@ -184,11 +184,11 @@ const ImageGenerationForm = ({ username, onGenerateImage }) => {
       formData.append("maintainAspectRatio", maintainAspectRatio.toString());
       formData.append("model_xl", modelXl.toString());
 
-      formData.append("strength", strength);
 
       if (apiType === "sketch-to-image" && uploadedImage) {
         formData.append("sketch_image", uploadedImage);
         formData.append("sketch_image_uuid", 1234); // Ensure you have a UUID to append
+        formData.append("strength", strength);
 
       }
       for (let [key, value] of formData.entries()) {
@@ -201,44 +201,17 @@ const ImageGenerationForm = ({ username, onGenerateImage }) => {
           "Content-Type": "multipart/form-data",
         },
       });
+      console.log("response : ", response)
+      const imageUrls = Array.isArray(response.data.imageUrls) ? response.data.imageUrls : [response.data.imageUrls];
+      console.log("Generated Image URLs:", imageUrls);
+      setGeneratedImages(imageUrls);
+      onGenerateImage(imageUrls);
+
+      setIsLoading(false);
 
 
 
-      const { uuid } = response.data;
-      console.log("uuid recieved initialize callback:", uuid)
-      // Start polling for the image status using the received UUID
-      const pollImageStatus = async (uuid) => {
-        try {
-          const statusResponse = await axios.get(`${apiUrl}check-image-status/${username._id}/${uuid}`);
-          console.log("status reponse data : ", statusResponse.data)
-          if (statusResponse.status === 200 && statusResponse.data.imageUrls) {
-            // Image processing complete, update state with the image URL
-            // setGeneratedImages((prevImages) => [...prevImages, statusResponse.data.imageUrl]);
-            const imageUrls = Array.isArray(statusResponse.data.imageUrls) ? statusResponse.data.imageUrls : [statusResponse.data.imageUrls];
-            console.log("Generated Image URLs:", imageUrls);
-            setGeneratedImages(imageUrls);
-            onGenerateImage(imageUrls);
 
-            setIsLoading(false);
-          } else {
-            console.log("in the pool");
-            setIsLoading(true);
-
-            // Continue polling if the processing is not complete
-            setTimeout(() => pollImageStatus(uuid), 4000); // Poll every 5 seconds
-          }
-        } catch (pollingError) {
-          console.error("Error polling image status:", pollingError);
-          setIsLoading(false); // Stop polling and loading on error
-        }
-      };
-
-      pollImageStatus(uuid); // Initiate polling
-
-      // const imageUrls = Array.isArray(response.data.imageUrls) ? response.data.imageUrls : [response.data.imageUrls];
-      // console.log("Generated Image URLs:", imageUrls);
-      // setGeneratedImages(imageUrls);
-      // onGenerateImage(imageUrls);
     } catch (error) {
       console.error("Error generating image:", error);
       setIsLoading(false); // Stop loading after API call
@@ -249,7 +222,41 @@ const ImageGenerationForm = ({ username, onGenerateImage }) => {
 
 
 
+      // const { uuid } = response.data;
+      // console.log("uuid recieved initialize callback:", uuid)
+      // // Start polling for the image status using the received UUID
+      // const pollImageStatus = async (uuid) => {
+      //   try {
+      //     const statusResponse = await axios.get(`${apiUrl}check-image-status/${username._id}/${uuid}`);
+      //     console.log("status reponse data : ", statusResponse.data)
+      //     if (statusResponse.status === 200 && statusResponse.data.imageUrls) {
+      //       // Image processing complete, update state with the image URL
+      //       // setGeneratedImages((prevImages) => [...prevImages, statusResponse.data.imageUrl]);
+      //       const imageUrls = Array.isArray(statusResponse.data.imageUrls) ? statusResponse.data.imageUrls : [statusResponse.data.imageUrls];
+      //       console.log("Generated Image URLs:", imageUrls);
+      //       setGeneratedImages(imageUrls);
+      //       onGenerateImage(imageUrls);
 
+      //       setIsLoading(false);
+      //     } else {
+      //       console.log("in the pool");
+      //       setIsLoading(true);
+
+      //       // Continue polling if the processing is not complete
+      //       setTimeout(() => pollImageStatus(uuid), 4000); // Poll every 5 seconds
+      //     }
+      //   } catch (pollingError) {
+      //     console.error("Error polling image status:", pollingError);
+      //     setIsLoading(false); // Stop polling and loading on error
+      //   }
+      // };
+
+      // pollImageStatus(uuid); // Initiate polling
+
+      // const imageUrls = Array.isArray(response.data.imageUrls) ? response.data.imageUrls : [response.data.imageUrls];
+      // console.log("Generated Image URLs:", imageUrls);
+      // setGeneratedImages(imageUrls);
+      // onGenerateImage(imageUrls);
 
   const isFormValid = promptText.trim() !== '' || apiType === "sketch-to-image";
 
@@ -276,36 +283,48 @@ const ImageGenerationForm = ({ username, onGenerateImage }) => {
   return (
     <div className="form-container">
 
-<div className="sidebar-container">
-      {/* <h1>Image Generation</h1> */}
-      <div className="sidebar-content">
+      <div className="sidebar-container">
+        {/* <h1>Image Generation</h1> */}
+        <div className="sidebar-content">
+        </div>
+
+        <div className="div-cont">
+          <label style={{
+            margin: '30px'
+          }}>Select</label>
+          <select value={apiType} onChange={handleApiTypeChange}>
+            {/* <option value="default">Default</option> */}
+
+            <option value="sketch-to-image">Sketch to Image</option>
+            <option value="text-to-image">Text to Image</option>
+
+          </select>
         </div>
 
 
-
         <div className="div-cont">
+          <label style={{
+            margin: '30px'
+          }}>STYLE</label>
+          <select value={styleType} onChange={handleStyleTypeChange}>
+            <option value="default">Default</option>
+
+            <option value="architecture_drawing">Architecture Drawing</option>
+            <option value="exterior_fantasy">Exterior Fantasy</option>
+            <option value="exterior_modern">Exterior Modern</option>
+            <option value="garden">Garden</option>
+            <option value="floor_plan">Floor Plan</option>
+            <option value="interior_cosy">Interior Cosy</option>
+            <option value="interior_modern">Interior Modern</option>
+            <option value="interior_painted">Interior Painted</option>
+            <option value="marker_sketch">Marker Sketch</option>
+            <option value="technical_drawing">Technical Drawing</option>
+          </select>
+        </div>
+
+
         <label style={{
-        margin:'30px'
-        }}>STYLE</label>
-        <select value={styleType} onChange={handleStyleTypeChange}>
-          <option value="default">Default</option>
-
-          <option value="architecture_drawing">Architecture Drawing</option>
-          <option value="exterior_fantasy">Exterior Fantasy</option>
-          <option value="exterior_modern">Exterior Modern</option>
-          <option value="garden">Garden</option>
-          <option value="floor_plan">Floor Plan</option>
-          <option value="interior_cosy">Interior Cosy</option>
-          <option value="interior_modern">Interior Modern</option>
-          <option value="interior_painted">Interior Painted</option>
-          <option value="marker_sketch">Marker Sketch</option>
-          <option value="technical_drawing">Technical Drawing</option>
-        </select>
-      </div>
-
-
-        <label style={{
-        margin:'30px'
+          margin: '30px'
         }}>SIZE</label>
 
 
@@ -331,66 +350,66 @@ const ImageGenerationForm = ({ username, onGenerateImage }) => {
           />
         </div>
 
-      {/* TextBar for prompts */}
+        {/* TextBar for prompts */}
 
-      <div className="div-cont">
-        <label htmlFor="strength" style={{
-        margin:'20px',
-        marginTop:'40px'
-        }}>STRENGTH </label>
-       <p>{strength}</p>
-        <input
-          id="strength"
-          type="range"
-          min="0"
-          max="1"
-          step="0.01"
-          value={strength}
-          onChange={(e) => setStrength(e.target.value)}
-          className="slider"
-        />
-      </div>
-
-      <div className="div-cont">
-        <label>
+{(apiType==="sketch-to-image")&&(        <div className="div-cont">
+          <label htmlFor="strength" style={{
+            margin: '20px',
+            marginTop: '40px'
+          }}>STRENGTH </label>
+          <p>{strength}</p>
           <input
-            type="checkbox"
-            checked={maintainAspectRatio}
-            onChange={(e) => setMaintainAspectRatio(e.target.checked)}
+            id="strength"
+            type="range"
+            min="0"
+            max="1"
+            step="0.01"
+            value={strength}
+            onChange={(e) => setStrength(e.target.value)}
+            className="slider"
           />
-          Maintain Aspect Ratio
-        </label>
-      </div>
-      <div className="div-cont">
-        <label>
-          <input
-            type="checkbox"
-            checked={modelXl}
-            onChange={(e) => setModelXl(e.target.checked)}
-          />
-          model_xl
-        </label>
-      </div>
+        </div>)}
 
-
-
-
-
-
-
-
-
-
+        <div className="div-cont">
+          <label>
+            <input
+              type="checkbox"
+              checked={maintainAspectRatio}
+              onChange={(e) => setMaintainAspectRatio(e.target.checked)}
+            />
+            Maintain Aspect Ratio
+          </label>
         </div>
-      <p style={{fontSize:"30px"}}>LET YOUR VISION TO BE GENERATED</p>
-      <hr style={{ 
-      color: 'white', 
-      backgroundColor: 'white', 
-      height: 1 
-    }} />
-        <div style={{ 
-      borderTop: `1px solid white` 
-    }} />
+        <div className="div-cont">
+          <label>
+            <input
+              type="checkbox"
+              checked={modelXl}
+              onChange={(e) => setModelXl(e.target.checked)}
+            />
+            model_xl
+          </label>
+        </div>
+
+
+
+
+
+
+
+
+
+
+      </div>
+      <p style={{ fontSize: "30px" }}>LET YOUR VISION TO BE GENERATED</p>
+      <hr style={{
+        color: 'white',
+        backgroundColor: 'white',
+        height: 1
+      }} />
+      <div style={{
+        borderTop: `1px solid white`
+      }} />
       {apiType === "sketch-to-image" && (
         <div className="prompt">
           <label>Upload Sketch:</label>
@@ -445,7 +464,7 @@ const ImageGenerationForm = ({ username, onGenerateImage }) => {
 
 
       {/* Style Selection */}
-   
+
 
       <div className="button-container">
         <button className="button" onClick={handleGenerateImage} disabled={isLoading || !isFormValid}>
@@ -477,38 +496,38 @@ const ImageGenerationForm = ({ username, onGenerateImage }) => {
 
 
 
-<div className="image-library-container" style={{marginTop:"30px"}}>
-      {isLoading2 ? (
-        <div className="loading-indicator">Loading...</div> // Display loading indicator
-      ) : (
-      <div className="image-grid" style={{width: '1000px'}}>
-        {images.map((image, index) => (
-          <div className="image-item" key={index}>
-            <img
-              src={image}
-              alt={`Generated Image ${index}`}
-              onClick={() => openPreview(image)}
-            />
-            <div className="image-overlay">
-              <button className="download-button" onClick={() => downloadImage(image, `Generated_Image_${index}.jpeg`)}>
-                Download
-              </button>
-              <button className="preview-button" onClick={() => openPreview(image)}>
-                Preview
-              </button>
+      <div className="image-library-container" style={{ marginTop: "30px" }}>
+        {isLoading2 ? (
+          <div className="loading-indicator">Loading...</div> // Display loading indicator
+        ) : (
+          <div className="image-grid" style={{ width: '1000px' }}>
+            {images.map((image, index) => (
+              <div className="image-item" key={index}>
+                <img
+                  src={image}
+                  alt={`Generated Image ${index}`}
+                  onClick={() => openPreview(image)}
+                />
+                <div className="image-overlay">
+                  <button className="download-button" onClick={() => downloadImage(image, `Generated_Image_${index}.jpeg`)}>
+                    Download
+                  </button>
+                  <button className="preview-button" onClick={() => openPreview(image)}>
+                    Preview
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>)}
+        {selectedImage && (
+          <div className="preview-modal" onClick={closePreview}> {/* Add onClick event to close the modal when the backdrop is clicked */}
+            <div className="modal-content" onClick={e => e.stopPropagation()}> {/* Prevent click inside the modal from closing it */}
+              <span className="close" onClick={closePreview}>&times;</span>
+              <img src={selectedImage} alt="Preview" />
             </div>
           </div>
-        ))}
-      </div>)}
-      {selectedImage && (
-      <div className="preview-modal" onClick={closePreview}> {/* Add onClick event to close the modal when the backdrop is clicked */}
-        <div className="modal-content" onClick={e => e.stopPropagation()}> {/* Prevent click inside the modal from closing it */}
-          <span className="close" onClick={closePreview}>&times;</span>
-          <img src={selectedImage} alt="Preview" />
-        </div>
+        )}
       </div>
-    )}
-    </div>
     </div>
   );
 };

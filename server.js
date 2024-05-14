@@ -176,7 +176,7 @@ app.post('/sketch-to-image', upload.single('sketch_image'), async (req, res) => 
     const form = new FormData();
 
     console.log(req.body.prompt); // Should log "cat"
-    console.log( "model xl :: ",req.body.model_xl);
+    console.log( "model xl :: ",req.body.strength, req.body.styleType);
     // Append parameters to form data
     if (!req.file) {
       return res.status(400).send({ message: 'No sketch image provided' });
@@ -228,18 +228,25 @@ app.post('/sketch-to-image', upload.single('sketch_image'), async (req, res) => 
     form.append('sketch_image', fs.createReadStream(sketchImagePath), req.file.originalname);
     // Assuming your application's host and port are configured correctly
     const callbackUrlImg = `${callbackUrl}/image-callback`; // Replace with your actual callback endpoint URL
-    form.append('callback_url', callbackUrlImg);
+    // form.append('callback_url', callbackUrlImg);
+    try {
+      sketch2imageResponse = await axios.post('http://34.231.176.149:8888/text2image', form, {
+        headers: {
+          ...form.getHeaders(),
+        },
+      });
 
-    // First API call to generate the image
-    const sketch2imageResponse = await axios.post('http://34.231.176.149:8888/sketch2image', form, {
-      headers: {
-        ...form.getHeaders(),
-      },
-    });
-    // console.log(sketch2imageResponse.data);
+      imageUuid = sketch2imageResponse.data.images[0].image_uuid;
+      console.log("image uuid", imageUuid);
 
-    const imageUuid = sketch2imageResponse.data.images[0].image_uuid;
-    console.log("image uuid", imageUuid)
+    } catch (error) {
+      console.error('Error during sketch2image API call:', error);
+      if (error.response) {
+        console.error('Error details:', error.response.data);
+      }
+      return res.status(500).send({ message: 'Error during image generation request.' });
+    }
+    // console.log("image uuid", imageUuid)
 
     fs.unlink(sketchImagePath, (err) => {
       if (err) {
@@ -248,7 +255,58 @@ app.post('/sketch-to-image', upload.single('sketch_image'), async (req, res) => 
         console.log(`Uploaded sketch image ${sketchImagePath} was deleted.`);
       }
     });
-    res.send({ uuid: imageUuid });
+    
+    const endTime = Date.now() + 100000;
+
+    const intervalId = setInterval(async () => {
+      if (Date.now() >= endTime) {
+        clearInterval(intervalId);
+        return res.status(408).send({ message: 'Request Timeout: Image could not be retrieved in time.' });
+      }
+
+      try {
+        const response = await axios.get(`http://34.231.176.149:8888/getimage/${imageUuid}`, {
+          params: {
+            delete: false,
+            type: 'PNG',
+            base64_c: false,
+            quality_level: 90,
+          },
+          headers: {
+            'accept': 'application/json'
+          },
+          responseType: 'arraybuffer'
+        });
+
+        if (response.data) {
+          const dataStr = response.data.toString();
+          if (dataStr.includes("Image not found")) {
+            console.log("Image not found in response, retrying...");
+          } else {
+            const imageBase64 = Buffer.from(response.data, 'binary').toString('base64');
+            const imageDataUrl = `data:image/png;base64,${imageBase64}`;
+
+            const generatedImage = new GeneratedImage({
+              userId: userId,
+              image: response.data
+            });
+            await generatedImage.save();
+
+            clearInterval(intervalId);
+            return res.status(200).send({ imageUrls: imageDataUrl, message: 'Image processed successfully' });
+          }
+        }
+      } catch (error) {
+        if (error.response && (error.response.status === 404 || error.response.data.includes("Image not found"))) {
+          console.log("Image not found, retrying...");
+        } else {
+          console.error('Error during image retrieval:', error);
+          clearInterval(intervalId);
+          return res.status(500).send({ message: 'Internal server error during image retrieval.' });
+        }
+      }
+    }, 3000);
+    // res.send({ uuid: imageUuid });
     // res.status(200).send({ message: 'Image processed successfully' });
 
   } catch (error) {
@@ -261,6 +319,178 @@ app.post('/sketch-to-image', upload.single('sketch_image'), async (req, res) => 
   }
 });
 
+
+
+app.post('/text-to-image',upload.none(), async (req, res) => {
+  try {
+    console.log("Request Body:", req.body); // Log the raw request body
+
+    console.log("API called: text to image");
+    console.log("Headers:", req.headers);
+    console.log("Request Body:", req.body); // Log the raw request body
+
+    const form = new FormData();
+    const { prompt, width, height, styleType, model_xl, negativePrompt, maintainAspectRatio } = req.body;
+    const userId = req.body.userId; // Assuming the userId is sent in the body of the request
+
+    // Check and log the received values
+    console.log("Prompt:", prompt );
+    console.log("Style Type:", styleType);
+    console.log("User ID:", userId);
+    console.log(req.body.prompt); // Should log "cat"
+    console.log( "model xl :: ",req.body.styleType);
+    // Append parameters to form data
+
+    // const userId = req.body.userId; // Assuming the userId is sent in the body of the request
+    const user = await User.findById(userId);
+
+    // Check if the user exists
+    if (!user) {
+      console.log("User not found. UserId:", userId);
+      return res.status(404).send({ message: "User not found" });
+    }
+
+    // Check if the user has any image generation limits left
+    if (user.no_of_images_left <= 0) {
+      return res.status(400).send({ message: "You have reached the image generation limit" });
+    }
+
+    // Decrement the user's image generation limit
+    const updatedUser = await User.findByIdAndUpdate(userId, { $inc: { no_of_images_left: -1 } }, { new: true });
+    if (!updatedUser) {
+      console.log("Error updating user:", updatedUser);
+      return res.status(500).send({ message: "Error updating user" });
+    }
+
+
+    // Append text fields
+    // form.append('strength', '0.8');
+    form.append('guidance_scale', '7.5');
+    form.append('prompt', req.body.prompt || 'high quality interior'); // Use the prompt from the request or a default value
+    form.append('width', req.body.width || '512');
+    form.append('height', req.body.height || '512');
+    form.append('steps', '25');
+    form.append('safetensor', 'false');
+    form.append('model_xl', req.body.model_xl||'false');
+    form.append('negative_prompt', req.body.negativePrompt || 'bad, blurry, low quality, low resolution, deformed'); // Long string as in the example
+    form.append('clip_skip', '0');
+    form.append('num_images', '1');
+    form.append('style', req.body.styleType || 'default');
+    form.append('seed', ''); // Empty string or any specific value if needed
+    form.append('sketch_image_uuid', '456'); // Example UUID, replace with actual if available
+    form.append('revert_extra', ''); // Empty string or any specific value if needed
+    // form.append('callback_url', ''); // Empty string or any specific value if needed
+    form.append('maintain_aspect_ratio', req.body.maintainAspectRatio || 'false');
+    form.append('scheduler', 'Default');    
+    try {
+      sketch2imageResponse = await axios.post('http://34.231.176.149:8888/text2image', form, {
+        headers: {
+          ...form.getHeaders(),
+        },
+      });
+
+      imageUuid = sketch2imageResponse.data.images[0].image_uuid;
+      console.log("image uuid", imageUuid);
+
+    } catch (error) {
+      console.error('Error during sketch2image API call:', error);
+      if (error.response) {
+        console.error('Error details:', error.response.data);
+      }
+      return res.status(500).send({ message: 'Error during image generation request.' });
+    }
+    console.log("image uuid", imageUuid)
+
+
+    const endTime = Date.now() + 100000;
+
+    const intervalId = setInterval(async () => {
+      if (Date.now() >= endTime) {
+        clearInterval(intervalId);
+        return res.status(408).send({ message: 'Request Timeout: Image could not be retrieved in time.' });
+      }
+
+      try {
+        const response = await axios.get(`http://34.231.176.149:8888/getimage/${imageUuid}`, {
+          params: {
+            delete: true,
+            type: 'PNG',
+            base64_c: false,
+            quality_level: 90,
+          },
+          headers: {
+            'accept': 'application/json'
+          },
+          responseType: 'arraybuffer'
+        });
+
+        if (response.data) {
+          const dataStr = response.data.toString();
+          if (dataStr.includes("Image not found")) {
+            console.log("Image not found in response, retrying...");
+          } else {
+            const imageBase64 = Buffer.from(response.data, 'binary').toString('base64');
+            const imageDataUrl = `data:image/png;base64,${imageBase64}`;
+
+            const generatedImage = new GeneratedImage({
+              userId: userId,
+              image: response.data
+            });
+            await generatedImage.save();
+
+            clearInterval(intervalId);
+            return res.status(200).send({ imageUrls: imageDataUrl, message: 'Image processed successfully' });
+          }
+        }
+      } catch (error) {
+        if (error.response && (error.response.status === 404 || error.response.data.includes("Image not found"))) {
+          console.log("Image not found, retrying...");
+        } else {
+          console.error('Error during image retrieval:', error);
+          clearInterval(intervalId);
+          return res.status(500).send({ message: 'Internal server error during image retrieval.' });
+        }
+      }
+    }, 3000);
+
+    // setTimeout(async () => {
+    //   const response = await axios.get(`http://34.231.176.149:8888/getimage/${imageUuid}`, {
+    //     params: {
+    //       delete: true,
+    //       type: 'PNG',
+    //       base64_c: false,
+    //       quality_level: 90,
+    //     },
+    //     headers: {
+    //       'accept': 'application/json'
+    //     },
+    //     responseType: 'arraybuffer'
+    //   });
+
+    //   const imageBase64 = Buffer.from(response.data, 'binary').toString('base64');
+    //   const imageDataUrl = `data:image/png;base64,${imageBase64}`;
+
+    //   const generatedImage = new GeneratedImage({
+    //     userId: userId,
+    //     image: response.data
+    //   });
+    //   await generatedImage.save();
+      
+    //   res.status(200).send({ imageUrls: imageDataUrl, message: 'Image processed successfully' });
+    // }, 50000); // Delay time in milliseconds
+
+    // res.status(200).send({ message: 'Image processed successfully' });
+    // res.status(200).send({ message: 'Image processed successfully' });
+
+  } catch (error) {
+    // console.error('Error during sketch to image process:', error);
+    if (error.response) {
+      console.error('Error details:', error.response);
+    }
+
+    res.status(500).send({ message: 'Internal server error' });
+  }
+});
 
 
 
