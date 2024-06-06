@@ -102,7 +102,7 @@ app.post('/image-callback', async (req, res) => {
     console.log("callback called")
     const imageUuid = req.body.uuid;
     // console.log("uuid :", imageUuid)
-    const response = await axios.get(`http://34.231.176.149:8888/getimage/${imageUuid}`, {
+    const response = await axios.get(`https://atqub3d57lnf09-8000.proxy.runpod.net/getimage/${imageUuid}`, {
       params: {
         delete: true,
         type: 'PNG',
@@ -230,7 +230,7 @@ app.post('/sketch-to-image', upload.single('sketch_image'), async (req, res) => 
     const callbackUrlImg = `${callbackUrl}/image-callback`; // Replace with your actual callback endpoint URL
     // form.append('callback_url', callbackUrlImg);
     try {
-      sketch2imageResponse = await axios.post('http://34.231.176.149:8888/sketch2image', form, {
+      sketch2imageResponse = await axios.post('https://atqub3d57lnf09-8000.proxy.runpod.net/sketch2image', form, {
         headers: {
           ...form.getHeaders(),
         },
@@ -265,7 +265,7 @@ app.post('/sketch-to-image', upload.single('sketch_image'), async (req, res) => 
       }
 
       try {
-        const response = await axios.get(`http://34.231.176.149:8888/getimage/${imageUuid}`, {
+        const response = await axios.get(`https://atqub3d57lnf09-8000.proxy.runpod.net/getimage/${imageUuid}`, {
           params: {
             delete: false,
             type: 'PNG',
@@ -383,7 +383,7 @@ app.post('/text-to-image',upload.none(), async (req, res) => {
     form.append('maintain_aspect_ratio', req.body.maintainAspectRatio || 'false');
     form.append('scheduler', 'Default');    
     try {
-      sketch2imageResponse = await axios.post('http://34.231.176.149:8888/text2image', form, {
+      sketch2imageResponse = await axios.post('https://atqub3d57lnf09-8000.proxy.runpod.net/text2image', form, {
         headers: {
           ...form.getHeaders(),
         },
@@ -411,7 +411,7 @@ app.post('/text-to-image',upload.none(), async (req, res) => {
       }
 
       try {
-        const response = await axios.get(`http://34.231.176.149:8888/getimage/${imageUuid}`, {
+        const response = await axios.get(`https://atqub3d57lnf09-8000.proxy.runpod.net/getimage/${imageUuid}`, {
           params: {
             delete: true,
             type: 'PNG',
@@ -454,7 +454,7 @@ app.post('/text-to-image',upload.none(), async (req, res) => {
     }, 3000);
 
     // setTimeout(async () => {
-    //   const response = await axios.get(`http://34.231.176.149:8888/getimage/${imageUuid}`, {
+    //   const response = await axios.get(`https://atqub3d57lnf09-8000.proxy.runpod.net/getimage/${imageUuid}`, {
     //     params: {
     //       delete: true,
     //       type: 'PNG',
@@ -501,7 +501,7 @@ app.post('/text-callback', async (req, res) => {
     console.log("text callback called")
     const textUuid = req.body.text_uuid;
     console.log("uuid :",textUuid )
-    const response = await axios.get(`http://34.231.176.149:8888/gettext/${textUuid}`, {
+    const response = await axios.get(`https://atqub3d57lnf09-8000.proxy.runpod.net/gettext/${textUuid}`, {
       headers: {
         'accept': 'application/json'
       }});
@@ -571,7 +571,7 @@ app.post('/prompt-enhancer', upload.none(), async (req, res) => {
     form.append('callback_url', callbackUrltext);
 
     // First API call to generate the image 
-    const response = await axios.post('http://34.231.176.149:8888/promptenhancer', form, {
+    const response = await axios.post('https://atqub3d57lnf09-8000.proxy.runpod.net/promptenhancer', form, {
       headers: {
         ...form.getHeaders(),
       },
@@ -608,7 +608,7 @@ app.post('/prompt-enhancer', upload.none(), async (req, res) => {
 // await new Promise(resolve => setTimeout(resolve, delayInSeconds * 1000));
 
 // // Second API call to retrieve the generated image using the UUID
-// const response = await axios.get(`http://34.231.176.149:8888/getimage/${imageUuid}`, {
+// const response = await axios.get(`https://atqub3d57lnf09-8000.proxy.runpod.net/getimage/${imageUuid}`, {
 //   params: {
 //     delete: true,
 //     type: 'PNG',
