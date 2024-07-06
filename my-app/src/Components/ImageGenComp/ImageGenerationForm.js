@@ -222,42 +222,6 @@ const ImageGenerationForm = ({ username, onGenerateImage }) => {
 
 
 
-      // const { uuid } = response.data;
-      // console.log("uuid recieved initialize callback:", uuid)
-      // // Start polling for the image status using the received UUID
-      // const pollImageStatus = async (uuid) => {
-      //   try {
-      //     const statusResponse = await axios.get(`${apiUrl}check-image-status/${username._id}/${uuid}`);
-      //     console.log("status reponse data : ", statusResponse.data)
-      //     if (statusResponse.status === 200 && statusResponse.data.imageUrls) {
-      //       // Image processing complete, update state with the image URL
-      //       // setGeneratedImages((prevImages) => [...prevImages, statusResponse.data.imageUrl]);
-      //       const imageUrls = Array.isArray(statusResponse.data.imageUrls) ? statusResponse.data.imageUrls : [statusResponse.data.imageUrls];
-      //       console.log("Generated Image URLs:", imageUrls);
-      //       setGeneratedImages(imageUrls);
-      //       onGenerateImage(imageUrls);
-
-      //       setIsLoading(false);
-      //     } else {
-      //       console.log("in the pool");
-      //       setIsLoading(true);
-
-      //       // Continue polling if the processing is not complete
-      //       setTimeout(() => pollImageStatus(uuid), 4000); // Poll every 5 seconds
-      //     }
-      //   } catch (pollingError) {
-      //     console.error("Error polling image status:", pollingError);
-      //     setIsLoading(false); // Stop polling and loading on error
-      //   }
-      // };
-
-      // pollImageStatus(uuid); // Initiate polling
-
-      // const imageUrls = Array.isArray(response.data.imageUrls) ? response.data.imageUrls : [response.data.imageUrls];
-      // console.log("Generated Image URLs:", imageUrls);
-      // setGeneratedImages(imageUrls);
-      // onGenerateImage(imageUrls);
-
   const isFormValid = promptText.trim() !== '' || apiType === "sketch-to-image";
 
 

@@ -1,45 +1,228 @@
 .generatorContainer {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px;
-    /* background-color: #f0f0f0; */
-    width: 100%;
-  }
-  
-  .inputField {
-    padding: 10px;
-    margin: 10px 0;
-    width: 300px;
-    background-color: transparent;
-  }
-  
-  .generateButton {
-    padding: 10px 20px;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    margin: 10px;
-  }
-  
-  .tagContainer {
-    display: flex;
-    gap: 10px;
-    margin: 10px 0;
-  }
-  
-  .tag {
-    background-color: #ddd;
-    border-radius: 5px;
-    padding: 5px 10px;
-    cursor: pointer;
-  }
-  
-  .limitInfo {
-    font-size: 0.8em;
-    color: #666;
-    margin-top: 10px;
-  }
-  
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  width: 100%;
+  /* background-color: #1e1e1e; */
+  color: white;
+}
+
+.inputRow {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.inputColumn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin: 0 10px;
+}
+
+.inputField {
+  padding: 10px;
+  margin-top: 10px;
+  background-color: #2e2e2e;
+  border: 1px solid #555;
+  border-radius: 5px;
+  /* color: white; */
+}
+
+.select {
+  padding: 10px;
+  margin-top: 10px;
+  background-color: #2e2e2e;
+  border: 1px solid #555;
+  border-radius: 5px;
+  color: white;
+}
+
+.label {
+  margin-bottom: 5px;
+}
+
+.advancedButton {
+  background-color: #2e2e2e;
+  border: 1px solid #555;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.advancedOptions {
+  background-color: #2e2e2e;
+  border: 1px solid #555;
+  border-radius: 5px;
+  margin-top: 10px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+.advancedLabel {
+  margin-top: 10px;
+}
+
+.advancedInput {
+  padding: 10px;
+  margin-top: 10px;
+  background-color: #2e2e2e;
+  border: 1px solid #555;
+  border-radius: 5px;
+  color: white;
+}
+
+.checkboxLabel {
+  margin-top: 10px;
+}
+
+.sizeInputRow {
+  display: flex;
+  align-items: center;
+}
+
+.sizeSeparator {
+  margin: 0 10px;
+  color: white;
+}
+
+.tagContainer {
+  display: flex;
+  gap: 10px;
+  margin: 20px 0;
+}
+
+.tag {
+  background-color: #2e2e2e;
+  border-radius: 5px;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+.selectedTag {
+  border: 1px solid #4CAF50;
+}
+
+.buttonRow {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-top: 20px;
+}
+
+.generateButton {
+  padding: 10px 20px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.magicButton {
+  background-color: #FFA500;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  padding: 10px;
+  margin-top: 10px;
+}
+
+.spinner {
+  margin-top: 10px;
+}
+
+.limitInfo {
+  font-size: 0.8em;
+  color: #666;
+  margin-top: 10px;
+}
+
+.generatedImagesContainer {
+  margin-top: 20px;
+}
+
+.generatedImage {
+  max-width: 100%;
+  margin-bottom: 10px;
+}
+
+.imageLibraryContainer {
+  margin-top: 30px;
+}
+
+.loadingIndicator {
+  font-size: 1em;
+  color: #666;
+}
+
+.imageGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.imageItem {
+  position: relative;
+}
+
+.imageOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.imageItem:hover .imageOverlay {
+  opacity: 1;
+}
+
+.downloadButton,
+.previewButton {
+  padding: 5px 10px;
+  margin: 5px;
+  background-color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.previewModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modalContent {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  position: relative;
+}
+
+.close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 1.5em;
+  cursor: pointer;
+}

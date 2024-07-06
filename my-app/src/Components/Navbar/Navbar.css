@@ -1,66 +1,99 @@
-/* Navbar.css */
 .navbar {
-    position: fixed;
+  position: fixed;
+  width: 100%;
+  top: 0;
+  left: 0;
+  transition: background-color 0.3s;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 50px;
+  z-index: 1000;
+  background-color: transparent;
+}
+
+.navbarSolid {
+  background-color: #1e1e1e; /* Dark background for solid navbar */
+}
+
+.navbarTransparent {
+  background-color: transparent;
+}
+
+.navbar-left {
+  display: flex;
+  align-items: center;
+}
+
+.navbar-logo {
+  font-size: 24px; /* Adjust the size as needed */
+  color: white; /* Logo color */
+}
+
+.navbar-links {
+  display: flex;
+  align-items: center;
+  margin-left: 30px;
+}
+
+.nav-item {
+  text-decoration: none;
+  color: white;
+  background-color: transparent;
+  border: none;
+  border-radius: 5px;
+  padding: 5px 10px;
+  font-size: 16px; /* Adjust the size as needed */
+  margin: 0 15px; /* Adjust margin for spacing */
+  transition: color 0.3s, border-bottom 0.3s;
+}
+
+.nav-item:hover,
+.active {
+  color: #ddd; /* Lighter color on hover/active */
+  border-bottom: 2px solid #fff; /* Bottom border on hover/active */
+}
+
+.navbar-right {
+  display: flex;
+  align-items: center;
+}
+
+.login-signup {
+  background-color: #333;
+  padding: 10px 20px;
+  border-radius: 20px;
+}
+
+.username {
+  color: white;
+  background-color: #333;
+  padding: 10px 20px;
+  border-radius: 20px;
+}
+
+@media (max-width: 768px) {
+  .navbar {
+    flex-direction: column;
+    padding: 20px;
+  }
+
+  .navbar-left,
+  .navbar-right {
     width: 100%;
-    top: 0;
-    left: 0;
-    transition: background-color 0.3s;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 50px;
-    z-index: 1000;
+    justify-content: center;
   }
-  
-  .navbarTransparent {
-    background-color: transparent;
-  }
-  
-  .navbarSolid {
-    background-color: black; /* or any dark color */
-  }
-  
-  .navbar-logo {
-    font-size: 24px; /* Adjust the size as needed */
-    color: white; /* Logo color */
-    margin-left: 30px;
-  }
-  
+
   .navbar-links {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+    flex-direction: column;
+    margin-left: 0;
   }
-  
+
   .nav-item {
-    text-decoration: none;
-    color:white;
-    background-color: transparent;
-    border: none;
-    border-radius: 5px;
-    padding: 5px 10px;
-    font-size: 20px;
-    margin:10px;
+    margin: 10px 0; /* More space between links on smaller screens */
   }
-  
-  .nav-item:hover,
-  .active {
-    color: #ddd; /* Lighter color on hover/active */
-    border-bottom: 2px solid #fff; /* Bottom border on hover/active */
+
+  .login-signup {
+    margin-top: 10px;
   }
-  
-  @media (max-width: 768px) {
-    .navbar {
-      flex-direction: column;
-      padding: 20px;
-    }
-  
-    .navbar-links {
-      flex-direction: column;
-    }
-  
-    .nav-item {
-      margin: 10px 0; /* More space between links on smaller screens */
-    }
-  }
-  
+}

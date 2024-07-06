@@ -45,7 +45,7 @@ const ImageLibrary = ({ userId }) => {
 
   return (
     <div className="image-library-container">
-      <h2>Image Library</h2>
+      <h2 style={{color:"white"}}>Gallery</h2>
       {isLoading ? (
         <div className="loading-indicator">Loading...</div> // Display loading indicator
       ) : (

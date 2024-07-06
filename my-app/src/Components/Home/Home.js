@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import './Home.css'; // Your CSS file for styling
 import wsImage from '../../assets/House_sketch to image.jpg'; // Replace with your image path
 import wsImage1 from '../../assets/House_sketch-to-image_web.jpg'; // Replace with your image path
@@ -17,11 +17,19 @@ import FeaturesSection from './Components/FeaturesSection';
 import Gallery from './Components/Gallery';
 import TestimonialCarousel from './Components/TestimonialCarousel';
 import ImageGenerator from './Components/ImageGenerator';
+import ImageLibrary from '../ImageGenComp/ImageLibrary';
+import PricingSection from './Components/PricingSection';
+const username = JSON.parse(localStorage.getItem('user')) || {};
+const userId = username._id;
 function Home() {
 
+    const [generatedImages, setGeneratedImages] = useState([]); // State to store generated images
 
 
-
+    const generateImages = (images) => {
+        setGeneratedImages(images);
+      };
+    
 
     const sliderImages = [
         { image: wsImage },
@@ -66,10 +74,12 @@ function Home() {
         <div style={{ width:"100%",padding:" 50px 25%"}}>
 
 
-<ImageGenerator/>
+<ImageGenerator onGenerateImage={generateImages}/>
 </div> 
-
-
+{userId &&
+<div className="scrollableContainer" id="gallery-section">
+        <ImageLibrary userId={userId} />
+      </div>}
         <ImageSlider slides={sliderImages}/>
 
         <div className="huge-collection-section">
@@ -156,6 +166,7 @@ function Home() {
 
 
             </div>
+            <PricingSection/>
             {/* <div className="clients-section-2">
                 <div className='heading-clients-section-2'><h2>Our Clients</h2></div>
                 <div className='content-clients-section-2'>

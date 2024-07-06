@@ -43,7 +43,9 @@ const Login = ({ setLoggedIn, setUserState }) => {
       const response = await axios.post(`${apiUrl}login`, user);
       setUserState(response.data.user);
       setLoggedIn((prevState) => !prevState);
-      navigate("/login", { replace: true });
+      navigate("/", { replace: true });
+      localStorage.setItem("user", JSON.stringify(response.data.user));
+
     } catch (error) {
       console.error("Login failed:", error);
 

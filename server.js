@@ -540,7 +540,7 @@ app.post('/prompt-enhancer', upload.none(), async (req, res) => {
   try {
     const form = new FormData();
 
-    console.log(req.body.prompt); // Should log "cat"
+    console.log(req.body.userId); // Should log "cat"
     // Append parameters to form data
 
     const userId = req.body.userId; // Assuming the userId is sent in the body of the request

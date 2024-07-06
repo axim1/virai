@@ -1,0 +1,115 @@
+
+
+.pricing-section {
+    display: flex;
+    justify-content: space-between;
+    padding: 50px;
+    background-color: #13181d;
+    color: white;
+  }
+  
+  .pricing-content {
+    flex: 1;
+  }
+  
+  .subtitle {
+    font-size: 18px;
+    color: #ccc;
+    margin-bottom: 10px;
+  }
+  
+  .title {
+    font-size: 36px;
+    margin-bottom: 20px;
+  }
+  
+  .description {
+    font-size: 16px;
+    margin-bottom: 30px;
+    color: #aaa;
+  }
+  
+  .features-list {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .features-list li {
+    font-size: 16px;
+    margin-bottom: 10px;
+  }
+  
+  .pricing-cards {
+    display: flex;
+    flex: 2;
+    gap: 20px;
+  }
+  
+  .pricing-card {
+    background-color: #1c1f24;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    flex: 1;
+  }
+  
+  .card-icon {
+    margin-bottom: 20px;
+  }
+  
+  .card-title {
+    font-size: 24px;
+    margin-bottom: 10px;
+  }
+  
+  .card-subtitle {
+    font-size: 14px;
+    color: #aaa;
+    margin-bottom: 20px;
+  }
+  
+  .card-price {
+    display: flex;
+    justify-content: center;
+    align-items: baseline;
+    margin-bottom: 20px;
+  }
+  
+  .price-currency {
+    font-size: 18px;
+    margin-right: 5px;
+  }
+  
+  .price-amount {
+    font-size: 48px;
+    margin-right: 5px;
+  }
+  
+  .price-duration {
+    font-size: 18px;
+  }
+  
+  .card-features {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 20px;
+  }
+  
+  .card-features li {
+    font-size: 16px;
+    margin-bottom: 10px;
+  }
+  
+  .card-button {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .card-button:hover {
+    background-color: #0056b3;
+  }
+  

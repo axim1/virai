@@ -500,6 +500,13 @@ button[type="submit"]:hover {
   background: linear-gradient(to top, #8c8c8c, white); 
 }
 
+.scrollableContainer {
+  max-height: 800px;
+  overflow-y: auto;
+  width: 100%;
+  margin-top: 20px;
+  padding: 0px 350px ;
+}
 
 .footer {
   background-color: #000;
