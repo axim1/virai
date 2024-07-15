@@ -28,15 +28,15 @@ function Home() {
 
     const generateImages = (images) => {
         setGeneratedImages(images);
-      };
-    
+    };
+
 
     const sliderImages = [
         { image: wsImage },
         { image: wsImage },
         { image: wsImage },
-      ];
-      
+    ];
+
 
 
 
@@ -44,68 +44,70 @@ function Home() {
 
 
     return (
-        <div style={{backgroundColor:"#13181d"}}>
-        <Navbar/>
+        <div style={{ backgroundColor: "#13181d" }} id='home-section'>
+        <div className='homenavbar'>              <Navbar />
+        </div>
             <div className="herosection" >
                 <div className='content-herosection'>
-                    <h1 style={{fontSize:"70px"}}>Create beautiful art with Artificial Intelligence</h1>
+                    <h1 style={{ fontSize: "70px" }}>Create beautiful art with Artificial Intelligence</h1>
                     <p>Be advised that image generation requires an active OpenAI, Stability AI or Stable Diffusion token.
 
-</p>
+                    </p>
                     {/* <h1 style={{color:"#ffde59", fontSize:"90px"}} >You need vision.</h1> */}
                     {/* <h1 style={{color:"#ffde59", fontSize:"25px"}}>Your Vision Becomes Reality. Experience the breath taking AI tools while creating your digital art. Create stunning inspirations in architecture. Unleash your imagination and transform it into reality.</h1> */}
                     {/* <button className='home-button'>CREATE</button> */}
                 </div>
             </div>
+<div className='sc_widthe_control' style={{margin:"0px"}}>
 
             <div className="sc_switcher_controls">
-			<div className="sc_switcher_controls_section1">
-				<h3 className="sc_switcher_controls_section_title">Standard</h3>
-			</div>
-			<div className="sc_switcher_controls_toggle sc_switcher_controls_toggle_on">
-				<span className="sc_switcher_controls_toggle_button"></span>
-			</div>
-			<div className="sc_switcher_controls_section2">
-				<h3 className="sc_switcher_controls_section_title">Advanced</h3>
-			</div>
-		</div> 
+                <div className="sc_switcher_controls_section1">
+                    <h3 className="sc_switcher_controls_section_title">Standard</h3>
+                </div>
+                <div className="sc_switcher_controls_toggle sc_switcher_controls_toggle_on">
+                    <span className="sc_switcher_controls_toggle_button"></span>
+                </div>
+                <div className="sc_switcher_controls_section2">
+                    <h3 className="sc_switcher_controls_section_title">Advanced</h3>
+                </div>
+            </div>
+            </div>
+
+            <div style={{ width: "100%", padding: " 50px 25%" }}>
 
 
-        <div style={{ width:"100%",padding:" 50px 25%"}}>
+                <ImageGenerator onGenerateImage={generateImages} />
+            </div>
+            {userId &&
+                <div className="scrollableContainer" id="gallery-section">
+                    <ImageLibrary userId={userId} />
+                </div>}
+            <ImageSlider slides={sliderImages} />
+
+            <div className="huge-collection-section">
+                <div className="content-container">
+                    <div className="text-block">
+                        <p className="subtitle">HUGE COLLECTION</p>
+                        <h2 className="title">More algorithms than anywhere else.</h2>
+                    </div>
+                    <div className="description-block">
+                        <p className="description">Adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco.</p>
+                        <p className="description">Adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.</p>
+                    </div>
+                </div>
+            </div>
 
 
-<ImageGenerator onGenerateImage={generateImages}/>
-</div> 
-{userId &&
-<div className="scrollableContainer" id="gallery-section">
-        <ImageLibrary userId={userId} />
-      </div>}
-        <ImageSlider slides={sliderImages}/>
-
-        <div className="huge-collection-section">
-    <div className="content-container">
-        <div className="text-block">
-            <p className="subtitle">HUGE COLLECTION</p>
-            <h2 className="title">More algorithms than anywhere else.</h2>
-        </div>
-        <div className="description-block">
-            <p className="description">Adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco.</p>
-            <p className="description">Adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.</p>
-        </div>
-    </div>
-</div>
+            <FeaturesSection />
+            <div style={{ width: "100%", padding: "50px 20%" }}>
+                <Gallery />
 
 
-<FeaturesSection/>
-<div style={{ width:"100%",padding:"50px 20%"}}>
-<Gallery/>
-     
-     
-</div>
+            </div>
 
-<div style={{ width:"100%",padding:" 50px 20%"}}>
-<TestimonialCarousel/>
-</div>
+            <div style={{ width: "100%", padding: " 50px 20%" }}>
+                <TestimonialCarousel />
+            </div>
             <div className="tools-section-2" >
                 <div className='content-tools-section-2'>
                     <h1>Try out the most amazing AI tools.</h1>
@@ -166,7 +168,7 @@ function Home() {
 
 
             </div>
-            <PricingSection/>
+            <PricingSection id="pricing-section" />
             {/* <div className="clients-section-2">
                 <div className='heading-clients-section-2'><h2>Our Clients</h2></div>
                 <div className='content-clients-section-2'>
@@ -196,7 +198,7 @@ function Home() {
 
 
 
-{/* 
+            {/* 
 
             <div className='contact-us-section'>
                 <div className='content-contact-us-section'>
@@ -230,13 +232,13 @@ function Home() {
 
 
 
-    
-                {/* <div className='content-footer'>
+
+            {/* <div className='content-footer'>
                     <h5>VirtuartAI</h5>
 
                 </div> */}
 
-                {/* <footer className="footer">
+            {/* <footer className="footer">
   <div className="footer-content">
     <h1>We develop & create digital future.</h1>
     <div className="footer-links">
@@ -268,35 +270,35 @@ function Home() {
     <p>AxiomThemes © 2024. All Rights Reserved.</p>
   </div>
 </footer> */}
-<footer className="footer">
-  <div className="footer-top">
-    <h1 style={{fontSize:"35px"}}>We develop & create digital future.</h1>
-    {/* <div className="footer-links">
+            <footer className="footer">
+                <div className="footer-top">
+                    <h1 style={{ fontSize: "35px" }}>We develop & create digital future.</h1>
+                    {/* <div className="footer-links">
       <a href="#">About Us</a>
       <a href="#">Services</a>
       <a href="#">Contacts</a>
     </div> */}
-    <div className="footer-address">
-      <h1>Address</h1>
-      <p>Germany —</p>
-      <p>785 15h Street, Office 478</p>
-      <p>Berlin, De 81566</p>
-    </div>
-    <div className="footer-contact">
-      <h1>Say Hello</h1>
-      <p>info@email.com</p>
-      <p>+1 800 555 25 65</p>
-    </div>
-    <div className="footer-social">
-      <a href="#"><i className="fa fa-facebook"></i></a>
-      <a href="#"><i className="fa fa-twitter"></i></a>
-      <a href="#"><i className="fa fa-instagram"></i></a>
-    </div>
-  </div>
-  <div className="footer-bottom">
-    <p>AxiomThemes © 2024. All Rights Reserved.</p>
-  </div>
-</footer>
+                    <div className="footer-address">
+                        <h1>Address</h1>
+                        <p>Germany —</p>
+                        <p>785 15h Street, Office 478</p>
+                        <p>Berlin, De 81566</p>
+                    </div>
+                    <div className="footer-contact">
+                        <h1>Say Hello</h1>
+                        <p>info@email.com</p>
+                        <p>+1 800 555 25 65</p>
+                    </div>
+                    <div className="footer-social">
+                        <a href="#"><i className="fa fa-facebook"></i></a>
+                        <a href="#"><i className="fa fa-twitter"></i></a>
+                        <a href="#"><i className="fa fa-instagram"></i></a>
+                    </div>
+                </div>
+                <div className="footer-bottom">
+                    <p>AxiomThemes © 2024. All Rights Reserved.</p>
+                </div>
+            </footer>
 
 
         </div>

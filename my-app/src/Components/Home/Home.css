@@ -31,7 +31,7 @@ p{
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    padding: 200px;
+    padding: 100px;
     /* max-width: ; */
     /* height: 100vh; */
 background-color: #13181d;
@@ -78,7 +78,9 @@ color: #4d4d4d;
   -webkit-align-items: center;
   -ms-flex-align: center;
   align-items: center;
-  margin-bottom: 3em;
+  margin-bottom: 1em;
+  margin: -40px;
+  height: 10px;
 }
 
 
@@ -586,4 +588,20 @@ button[type="submit"]:hover {
   .footer-links, .footer-address, .footer-contact, .footer-social {
     align-items: center;
   }
+}
+
+
+/* Navbar.css */
+.homenavbar {
+  width: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  transition: background-color 0.3s ease;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding:  0px 0px;
 }
