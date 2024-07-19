@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './Home.css'; // Your CSS file for styling
+import { Link } from 'react-router-dom'; // Ensure you are using react-router-dom for navigation
+
 import wsImage from '../../assets/House_sketch to image.jpg'; // Replace with your image path
 import wsImage1 from '../../assets/House_sketch-to-image_web.jpg'; // Replace with your image path
 import wsImage2 from '../../assets/Organic shapes mansion on a cliff.jpg'; // Replace with your image path
@@ -19,6 +21,7 @@ import TestimonialCarousel from './Components/TestimonialCarousel';
 import ImageGenerator from './Components/ImageGenerator';
 import ImageLibrary from '../ImageGenComp/ImageLibrary';
 import PricingSection from './Components/PricingSection';
+import FAQ from '../FAQ/faq'
 const username = JSON.parse(localStorage.getItem('user')) || {};
 const userId = username._id;
 function Home() {
@@ -108,66 +111,44 @@ function Home() {
             <div style={{ width: "100%", padding: " 50px 20%" }}>
                 <TestimonialCarousel />
             </div>
-            <div className="tools-section-2" >
-                <div className='content-tools-section-2'>
-                    <h1>Try out the most amazing AI tools.</h1>
-                    <br />
-                    <p>Are you looking for inspirations in art, architecture, or design? Using our AI tools you can generate high-quality images, videos or 3D objects. Trust VirtuartAI to bring your digital vision to life.</p>
-                    <br />
-                    <br />
-                    <br />
-                    <br />
-                    <br />
-
-                </div>
-                <div className='grid-tools-section-2'>
-                    <div className='items-grid-tools-section-2'>
-                        <img src={wsImage} alt="Descriptive text" className="my-image-class" />
-                        <br />
-
-                        <h2>Text to Image generator</h2>
-                        <br />
-                        <p>Convert your textual ideas into stunning images. Create art, architectural renderings or any other imagination.</p>
-                    </div>
-                    <div className='items-grid-tools-section-2'>
-                        <img src={wsImage2} alt="Descriptive text" className="my-image-class" />
-                        <br />
-                        <h2>Video generator</h2>
-                        <br />
-                        <p>Generate videos from your images or text prompts. Use realistic virtual human avatars, or create your own custom character.</p>
-                    </div>
-                    <div className='items-grid-tools-section-2'>
-                        <img src={wsImage1} alt="Descriptive text" className="my-image-class" />
-                        <br />
-                        <h2>3D Object generator</h2>
-                        <br />
-                        <p>Using text prompts create 3D objects or interiors, download them and insert into your project.</p>
-                    </div>                    <div className='items-grid-tools-section-2'>
-                        <img src={wsImage3} alt="Descriptive text" className="my-image-class" />
-                        <br />
-                        <h2>Image to sketch generator</h2>
-                        <br />
-                        <p>Upload images, photographs, portraits and transform them into beautiful pencil drawings, colored sketches or artistic paintings.</p>
-                    </div>                    <div className='items-grid-tools-section-2'>
-                        <img src={wsImage4} alt="Descriptive text" className="my-image-class" />
-                        <br />
-                        <h2>Sketch to image generator</h2>
-                        <br />
-                        <p>Upload sketches and transform them into beautiful renderings, photographs, colored drawings or artistic idea</p>
-                    </div>                    <div className='items-grid-tools-section-2'>
-                        <img src={wsImage5} alt="Descriptive text" className="my-image-class" />
-                        <br />
-                        <h2>Image variation</h2>
-                        <br />
-                        <p>Add variation to your images, improve colors, extend images, replace marked areas or remove background or elements.</p>
-                    </div>
-
-                </div>
-
-
-
-
-            </div>
+            <div className="tools-section-2">
+    <div className='content-tools-section-2'>
+        <h1>Try out the most amazing AI tools.</h1>
+        <p>Are you looking for inspirations in art, architecture, or design? Using our AI tools you can generate high-quality images, videos or 3D objects. Trust VirtuartAI to bring your digital vision to life.</p>
+    </div>
+    <div className='grid-tools-section-2'>
+        <div className='items-grid-tools-section-2'>
+            <img src={wsImage} alt="Descriptive text" className="my-image-class" />
+            <h2>Text to Image generator</h2>
+            <p>Convert your textual ideas into stunning images. Create art, architectural renderings or any other imagination.</p>
+        </div>
+        <div className='items-grid-tools-section-2'>
+            <img src={wsImage2} alt="Descriptive text" className="my-image-class" />
+            <h2>Video generator</h2>
+            <p>Generate videos from your images or text prompts. Use realistic virtual human avatars, or create your own custom character.</p>
+        </div>
+        <div className='items-grid-tools-section-2'>
+            <img src={wsImage1} alt="Descriptive text" className="my-image-class" />
+            <h2>3D Object generator</h2>
+            <p>Using text prompts create 3D objects or interiors, download them and insert into your project.</p>
+        </div>
+        <div className='items-grid-tools-section-2'>
+            <img src={wsImage3} alt="Descriptive text" className="my-image-class" />
+            <h2>Image to sketch generator</h2>
+            <p>Upload images, photographs, portraits and transform them into beautiful pencil drawings, colored sketches or artistic paintings.</p>
+        </div>
+        <div className='items-grid-tools-section-2'>
+            <img src={wsImage4} alt="Descriptive text" className="my-image-class" />
+            <h2>Sketch to image generator</h2>
+            <p>Upload sketches and transform them into beautiful renderings, photographs, colored drawings or artistic idea</p>
+        </div>
+        <div className='items-grid-tools-section-2'>
+            <img src={wsImage5} alt="Descriptive text" className="my-image-class" />
+            <h2>Image variation</h2>
+            <p>Add variation to your images, improve colors, extend images, replace marked areas or remove background or elements.</p>
+        </div>
+    </div>
+</div>
             <PricingSection id="pricing-section" />
             {/* <div className="clients-section-2">
                 <div className='heading-clients-section-2'><h2>Our Clients</h2></div>
@@ -270,35 +251,34 @@ function Home() {
     <p>AxiomThemes © 2024. All Rights Reserved.</p>
   </div>
 </footer> */}
-            <footer className="footer">
-                <div className="footer-top">
-                    <h1 style={{ fontSize: "35px" }}>We develop & create digital future.</h1>
-                    {/* <div className="footer-links">
-      <a href="#">About Us</a>
-      <a href="#">Services</a>
-      <a href="#">Contacts</a>
-    </div> */}
-                    <div className="footer-address">
-                        <h1>Address</h1>
-                        <p>Germany —</p>
-                        <p>785 15h Street, Office 478</p>
-                        <p>Berlin, De 81566</p>
-                    </div>
-                    <div className="footer-contact">
-                        <h1>Say Hello</h1>
-                        <p>info@email.com</p>
-                        <p>+1 800 555 25 65</p>
-                    </div>
-                    <div className="footer-social">
-                        <a href="#"><i className="fa fa-facebook"></i></a>
-                        <a href="#"><i className="fa fa-twitter"></i></a>
-                        <a href="#"><i className="fa fa-instagram"></i></a>
-                    </div>
-                </div>
-                <div className="footer-bottom">
-                    <p>AxiomThemes © 2024. All Rights Reserved.</p>
-                </div>
-            </footer>
+
+
+<FAQ />
+
+<footer className="footer">
+      <div className="footer-top">
+        <h1 className="footer-title">We develop & create digital future.</h1>
+        <div className="footer-address">
+          <h1>Address</h1>
+          <p>Germany —</p>
+          <p>785 15h Street, Office 478</p>
+          <p>Berlin, De 81566</p>
+        </div>
+        <div className="footer-contact">
+          <h1>Say Hello</h1>
+          <p>info@email.com</p>
+          <p>+1 800 555 25 65</p>
+        </div>
+        <div className="footer-social">
+          <a href="#"><i className="fa fa-facebook"></i></a>
+          <a href="#"><i className="fa fa-twitter"></i></a>
+          <a href="#"><i className="fa fa-instagram"></i></a>
+        </div>
+      </div>
+      <div className="footer-bottom">
+        <p>AxiomThemes © 2024. All Rights Reserved. <Link to="/terms-of-service">Terms of Service</Link></p>
+      </div>
+    </footer>
 
 
         </div>

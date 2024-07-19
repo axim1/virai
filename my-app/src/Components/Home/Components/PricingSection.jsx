@@ -34,8 +34,9 @@ const PricingSection = () => {
             <li>Download prototypes</li>
           </ul>
           <Link to="/signup">
-  <button className="card-button">Get Now</button>
-</Link>        </div>
+            <button className="card-button">Get Now</button>
+          </Link>
+        </div>
         <div className="pricing-card">
           <div className="card-icon"> {/* Add your icon here */}</div>
           <h2 className="card-title">Gold Pack</h2>
@@ -50,10 +51,9 @@ const PricingSection = () => {
             <li>Unlimited Projects</li>
             <li>Download prototypes</li>
           </ul>
-       
-<Link to="/signup">
-  <button className="card-button">Get Now</button>
-</Link>
+          <Link to="/signup">
+            <button className="card-button">Get Now</button>
+          </Link>
         </div>
       </div>
     </div>

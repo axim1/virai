@@ -1,19 +1,55 @@
 .features-section {
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    padding: 50px 20%; /* Adjust padding as needed */
-    /* background-color: #000; Dark background */
-    color: #fff; /* White text */
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 50px 10%; /* Adjusted padding for smaller screens */
+  color: #fff; /* White text */
+  text-align: center; /* Center text for smaller screens */
+}
+
+.feature-item {
+  text-align: center; /* Centers the text below the icons */
+  width: 20%; /* Adjust based on your layout preference */
+  border-right: 1px solid rgb(112, 112, 112);
+  padding: 10px;
+}
+
+.feature-item:last-child {
+  border-right: none; /* Remove border from the last item */
+}
+
+.feature-item svg {
+  margin-bottom: 20px; /* Space between icon and text */
+}
+
+@media (max-width: 768px) {
+  .features-section {
+    flex-direction: column; /* Stack items vertically on smaller screens */
+    padding: 30px 5%; /* Adjust padding for smaller screens */
   }
-  
+
   .feature-item {
-    text-align: left; /* Centers the text below the icons */
-    width: 20%; /* Adjust based on your layout preference */
-    border-right: 1px solid rgb(112, 112, 112);
+    width: 100%;
+    border-right: none; /* Remove border on smaller screens */
+    border-bottom: 1px solid rgb(112, 112, 112);
+    padding: 20px 0;
   }
-  
+
+  .feature-item:last-child {
+    border-bottom: none; /* Remove bottom border from the last item */
+  }
+}
+
+@media (max-width: 480px) {
+  .features-section {
+    padding: 20px 5%; /* Adjust padding for very small screens */
+  }
+
   .feature-item svg {
-    margin-bottom: 20px; /* Space between icon and text */
+    margin-bottom: 10px; /* Reduce space between icon and text */
   }
-  
+
+  .feature-item p {
+    font-size: 14px; /* Reduce font size for very small screens */
+  }
+}

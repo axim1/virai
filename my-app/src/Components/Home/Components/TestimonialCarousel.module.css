@@ -21,6 +21,7 @@
 .quote {
   font-style: italic;
   font-size: 30px;
+  margin: 20px 0;
 }
 
 .author {
@@ -32,16 +33,64 @@
   font-size: 0.8em;
   font-weight: normal;
 }
-/* TestimonialCarousel.module.css */
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .container {
+    width: 90%;
+    padding: 15px;
+  }
+
+  .quote {
+    font-size: 25px;
+  }
+
+  .avatar {
+    width: 70px;
+    height: 70px;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    width: 95%;
+    padding: 10px;
+  }
+
+  .quote {
+    font-size: 20px;
+  }
+
+  .avatar {
+    width: 60px;
+    height: 60px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    width: 100%;
+    padding: 5px;
+  }
+
+  .quote {
+    font-size: 18px;
+  }
+
+  .avatar {
+    width: 50px;
+    height: 50px;
+  }
+}
 
 .slick-arrow {
-  z-index: 1;  /* Ensure arrows are above other content */
+  z-index: 1; /* Ensure arrows are above other content */
 }
 
 .slick-prev {
-  left: 20px;  /* Adjust based on your design */
+  left: 20px; /* Adjust based on your design */
 }
 
 .slick-next {
-  right: 20px;  /* Adjust based on your design */
+  right: 20px; /* Adjust based on your design */
 }

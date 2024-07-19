@@ -85,141 +85,152 @@ color: #4d4d4d;
 
 
 .huge-collection-section {
-  /* background-color: #000; Dark background */
-  color: #fff; /* White text */
-  padding: 100px 20% ; /* Top and bottom padding */
+  color: #fff; 
+  padding: 100px 20%; 
   display: flex;
   justify-content: center;
   align-items: center;
-  /* max-width: 1000px; */
-  /* align-items: center; */
-  align-self: center;
+  text-align: left; /* Default text alignment */
 }
 
 .content-container {
-  display: flex; /* Enables flexbox */
-  align-items: center; /* Vertically aligns the items */
-  justify-content: space-between; /* Distributes space between and around content items */
-  max-width: 1834px; /* Maximum width as per your image */
-  width: 100%; /* Full width */
-  padding: 0 20px; /* Padding on the sides for small screens */
+  display: flex; 
+  align-items: center; 
+  justify-content: space-between; 
+  max-width: 1834px; 
+  width: 100%; 
+  padding: 0 20px; 
 }
 
 .text-block, .description-block {
-  flex: 1; /* Flex grow to take up equal space */
-  padding: 0 20px; /* Padding for spacing */
+  flex: 1;
+  padding: 0 20px;
 }
 
 .title {
-  font-size: 48px; /* Large font size for the title */
-  font-weight: bold; /* Bold font weight */
-  margin-bottom: 10px; /* Space below the title */
+  font-size: 48px; 
+  font-weight: bold; 
+  margin-bottom: 10px;
 }
 
 .subtitle {
-  font-size: 14px; /* Smaller font size for the subtitle */
-  letter-spacing: 2px; /* More spacing between letters */
-  text-transform: uppercase; /* UPPERCASE letters */
-  margin-bottom: 10px; /* Space below the subtitle */
+  font-size: 14px; 
+  letter-spacing: 2px; 
+  text-transform: uppercase; 
+  margin-bottom: 10px;
 }
 
 .description {
-  font-size: 18px; /* Suitable font size for readability */
-  line-height: 1.6; /* Line height for better readability */
-  margin-top: 0; /* No top margin */
-  margin-bottom: 10px; /* Bottom margin for spacing */
+  font-size: 18px; 
+  line-height: 1.6; 
+  margin-top: 0; 
+  margin-bottom: 10px;
 }
 
+@media (max-width: 768px) {
+  .huge-collection-section {
+    padding: 60px 10%;
+  }
 
+  .content-container {
+    flex-direction: column; /* Stack content vertically on smaller screens */
+    text-align: center; /* Center text for smaller screens */
+  }
 
+  .text-block, .description-block {
+    padding: 10px 0;
+  }
 
+  .title {
+    font-size: 32px;
+  }
 
-.tools-section-2{
-    background-color: 13181d;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    /* max-width: ; */
-    min-height: 100vh;
-    padding:200px;
-color: white;
-    /* background-color: aqua; */
-}
-.content-tools-section-2{
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    max-width: 900px;
-    text-align: center;
+  .description {
+    font-size: 16px;
+  }
 }
 
+@media (max-width: 480px) {
+  .huge-collection-section {
+    padding: 40px 5%;
+  }
 
-.content-tools-section-2 p{
+  .title {
+    font-size: 28px;
+  }
+
+  .description {
+    font-size: 14px;
+  }
+}
+
+.tools-section-2 {
+  background-color: #13181d;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 50px 20px;
+  color: white;
+}
+
+.content-tools-section-2 {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  max-width: 900px;
+  text-align: center;
+}
+
+.content-tools-section-2 p {
   font-size: 22px;
 }
 
-
-
-
 .grid-tools-section-2 {
-    display: grid;
-    /* padding: 100px; */
-    grid-template-columns: repeat(3, 1fr);
-    grid-gap: 50px; /* Adjust grid gap as needed */
-    grid-row-gap: 200px; /* This will add a 20px gap between the rows */
-
-  }
-  
-
-  /* Example of a media query for a screen width of 768px or less */
-  @media (max-width: 1024px) {
-    .tools-section-2{
-      padding:00px;
-padding-top: 40px;
-    }
-    .grid-tools-section-2 {
-
-      grid-template-columns: repeat(2, 1fr); /* Change to 2 columns */
-    }
-  }
-  
-  /* Example of a media query for a screen width of 480px or less */
-  @media (max-width: 480px) {
-    .grid-tools-section-2 {
-        /* padding: 50px; */
-        grid-template-columns: repeat(1, 1fr); /* Switches to 1 column for small screens */
-        grid-gap: 30px; /* Reduces gap for smaller screens */
-      }
-  }
-  .items-grid-tools-section-2{
-    display: flex;
-    flex-direction: column;
-    /* justify-content: space-between; */
-    align-items: center;
-    max-width: 440px;
-    text-align: center;
-    /* padding :10px; */
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-gap: 50px;
+  padding: 20px;
 }
-  .items-grid-tools-section-2 img {
-    width: 100%; /* Make the image width responsive */
 
-      width: 440px;
-    height: 440px;
-    height: auto;
-    display: block;
-    border-radius: 20px;
-    cursor: pointer;
-    transition: transform 0.3s ease-in-out;
+@media (max-width: 1024px) {
+  .grid-tools-section-2 {
+      grid-template-columns: repeat(2, 1fr);
+      grid-gap: 40px;
   }
+}
 
+@media (max-width: 768px) {
+  .grid-tools-section-2 {
+      grid-template-columns: repeat(1, 1fr);
+      grid-gap: 30px;
+  }
+}
 
+.items-grid-tools-section-2 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  text-align: center;
+  padding: 10px;
+}
 
+.items-grid-tools-section-2 img {
+  width: 100%;
+  max-width: 440px;
+  height: auto;
+  display: block;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: transform 0.3s ease-in-out;
+}
 
-
-
-
+.items-grid-tools-section-2 img:hover {
+  transform: scale(1.05);
+}
   .clients-section-2{
     background-color: #13181d;
     display: flex;
@@ -509,20 +520,8 @@ button[type="submit"]:hover {
   margin-top: 20px;
   padding: 0px 350px ;
 }
+/* Footer.css */
 
-.footer {
-  background-color: #000;
-  color: #fff;
-  padding: 40px 60px;
-}
-
-.footer-content {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  align-items: start;
-  padding: 100px 0;
-  gap: 20px;
-}
 .footer {
   background-color: #000;
   color: #fff;
@@ -532,45 +531,39 @@ button[type="submit"]:hover {
 
 .footer-top {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   align-items: center;
-  text-align: left;
+  text-align: center;
   margin-bottom: 20px; /* Space before the bottom copyright */
+}
+
+.footer-title {
+  font-size: 35px;
+  margin-bottom: 20px;
 }
 
 .footer h1 {
   font-size: 24px;
   margin: 0; /* Remove default margin */
+  margin-bottom: 10px;
   flex: 1; /* Take the required space */
 }
+
 .footer p {
-  /* font-size: 24px; */
   color: #8c8c8c;
   margin: 0; /* Remove default margin */
   flex: 1; /* Take the required space */
 }
 
-
-.footer-links, .footer-address, .footer-contact, .footer-social {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: flex-start;
-  padding-left: 20px;
-}
-
-.footer-links a, .footer-social a {
-  color: #fff; /* Ensure links are white */
-  text-decoration: none; /* No underline */
-  margin: 5px 0; /* Margin for spacing */
-}
-
-.footer-social {
-  flex-direction: row;
+.footer-address, .footer-contact, .footer-social {
+  margin-bottom: 20px;
 }
 
 .footer-social a {
-  margin-right: 10px; /* Space between social icons */
+  color: #fff; /* Ensure links are white */
+  text-decoration: none; /* No underline */
+  margin: 5px 10px; /* Margin for spacing */
+  font-size: 24px;
 }
 
 .footer-bottom {
@@ -579,29 +572,16 @@ button[type="submit"]:hover {
 }
 
 /* Responsive adjustments */
-@media (max-width: 768px) {
+@media (min-width: 768px) {
   .footer-top {
-    flex-direction: column;
-    align-items: center;
+    flex-direction: row;
+    align-items: flex-start;
+    text-align: left;
+    justify-content: space-between;
   }
 
-  .footer-links, .footer-address, .footer-contact, .footer-social {
-    align-items: center;
+  .footer-address, .footer-contact, .footer-social {
+    align-items: flex-start;
+    text-align: left;
   }
-}
-
-
-/* Navbar.css */
-.homenavbar {
-  width: 100%;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 1000;
-  transition: background-color 0.3s ease;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding:  0px 0px;
 }

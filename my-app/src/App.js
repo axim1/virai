@@ -7,6 +7,7 @@ import Home from "./Components/Home/Home";
 
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { useEffect, useState } from "react";
+import TermsOfService from "./Components/TermsOfService/TermsOfService";
 
 function App() {
   const [userstate, setUserState] = useState({});
@@ -45,6 +46,7 @@ function App() {
             element={<Login setLoggedIn={setLoggedIn} setUserState={setUserState} />}
           ></Route> */}
           <Route path="/signup" element={<Register />}></Route>
+          <Route path="/terms-of-service" element={<TermsOfService />}></Route>
 
         </Routes>
       </Router>

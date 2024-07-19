@@ -4,12 +4,12 @@
   align-items: center;
   padding: 20px;
   width: 100%;
-  /* background-color: #1e1e1e; */
   color: white;
 }
 
 .inputRow {
   display: flex;
+  flex-wrap: wrap;
   width: 100%;
   justify-content: space-between;
   margin-bottom: 20px;
@@ -19,7 +19,7 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  margin: 0 10px;
+  margin: 10px 10px; /* Adjust margin for better spacing */
 }
 
 .inputField {
@@ -28,7 +28,8 @@
   background-color: #2e2e2e;
   border: 1px solid #555;
   border-radius: 5px;
-  /* color: white; */
+  color: white;
+  width: 100%; /* Ensure full width */
 }
 
 .select {
@@ -38,6 +39,7 @@
   border: 1px solid #555;
   border-radius: 5px;
   color: white;
+  width: 100%; /* Ensure full width */
 }
 
 .label {
@@ -52,6 +54,7 @@
   border-radius: 5px;
   cursor: pointer;
   margin-top: 10px;
+  width: 100%; /* Ensure full width */
 }
 
 .advancedOptions {
@@ -62,6 +65,7 @@
   padding: 10px;
   display: flex;
   flex-direction: column;
+  width: 100%; /* Ensure full width */
 }
 
 .advancedLabel {
@@ -75,6 +79,7 @@
   border: 1px solid #555;
   border-radius: 5px;
   color: white;
+  width: 100%; /* Ensure full width */
 }
 
 .checkboxLabel {
@@ -84,6 +89,8 @@
 .sizeInputRow {
   display: flex;
   align-items: center;
+  justify-content: space-between; /* Ensures equal spacing */
+  width: 100%; /* Ensure full width */
 }
 
 .sizeSeparator {
@@ -93,6 +100,7 @@
 
 .tagContainer {
   display: flex;
+  flex-wrap: wrap;
   gap: 10px;
   margin: 20px 0;
 }
@@ -122,6 +130,7 @@
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  width: 100%; /* Ensure full width */
 }
 
 .magicButton {
@@ -132,6 +141,7 @@
   cursor: pointer;
   padding: 10px;
   margin-top: 10px;
+  width: 100%; /* Ensure full width */
 }
 
 .spinner {
@@ -142,10 +152,12 @@
   font-size: 0.8em;
   color: #666;
   margin-top: 10px;
+  text-align: center;
 }
 
 .generatedImagesContainer {
   margin-top: 20px;
+  width: 100%; /* Ensure full width */
 }
 
 .generatedImage {
@@ -170,6 +182,7 @@
 
 .imageItem {
   position: relative;
+  width: 100%; /* Ensure full width */
 }
 
 .imageOverlay {
@@ -225,4 +238,56 @@
   right: 10px;
   font-size: 1.5em;
   cursor: pointer;
+}
+
+/* Media Queries */
+@media (max-width: 1024px) {
+  .inputRow {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .inputColumn {
+    margin: 10px 0;
+    width: 100%;
+  }
+
+  .sizeInputRow {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .sizeSeparator {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .inputRow {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .inputColumn {
+    margin: 10px 0;
+    width: 100%;
+  }
+
+  .sizeInputRow {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .sizeSeparator {
+    display: none;
+  }
+
+  .buttonRow {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .limitInfo {
+    text-align: center;
+  }
 }

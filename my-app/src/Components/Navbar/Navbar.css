@@ -1,4 +1,3 @@
-/* Navbar.css */
 .navbar {
   width: 100%;
   position: fixed;
@@ -75,25 +74,57 @@
   border-radius: 20px;
 }
 
+.mobile-menu-icon {
+  display: none;
+  font-size: 24px;
+  color: white;
+  cursor: pointer;
+  margin-right: 20px; /* Adjust margin to position the icon */
+}
+
 @media (max-width: 768px) {
   .navbar {
-    flex-direction: column;
-    padding: 20px;
+    width: 100%;
+    /* max-width: 768px; */
+    padding: 10px 40px;
   }
 
-  .navbar-left,
-  .navbar-right {
+  .navbar-left {
+    justify-content: space-between;
     width: 100%;
-    justify-content: center;
+  }
+
+  .navbar-logo {
+    padding-left: 0;
   }
 
   .navbar-links {
+    display: none;
     flex-direction: column;
-    margin-left: 0;
+    width: 100%;
+    margin: 0;
+    padding: 10px 0;
+    background-color: #000;
+    position: absolute;
+    top: 60px;
+    left: 0;
+    z-index: 999;
+  }
+
+  .navbar-links.open {
+    display: flex;
   }
 
   .nav-item {
     margin: 10px 0; /* More space between links on smaller screens */
+  }
+
+  .mobile-menu-icon {
+    display: block;
+  }
+
+  .navbar-right {
+    display: none;
   }
 
   .login-signup {

@@ -6,6 +6,7 @@ import './Navbar.css';
 const Navbar = () => {
   const [navBackground, setNavBackground] = useState(false);
   const [user, setUser] = useState(null);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const handleScroll = () => {
     if (window.scrollY >= 50) {
@@ -29,15 +30,22 @@ const Navbar = () => {
     };
   }, []);
 
+  const toggleMenu = () => {
+    setMenuOpen(!menuOpen);
+  };
+
   return (
     <nav className={`navbar ${navBackground ? 'navbarSolid' : 'navbarTransparent'}`}>
       <div className="navbar-left">
         <div className="navbar-logo">VirtuartAI</div>
-        <div className="navbar-links">
+        <div className={`navbar-links ${menuOpen ? 'open' : ''}`}>
           <ScrollLink to="home-section" smooth={true} duration={500} className="nav-item">Home</ScrollLink>
           <ScrollLink to="gallery-section" smooth={true} duration={500} className="nav-item">Gallery</ScrollLink>
           <ScrollLink to="pricing-section" smooth={true} duration={500} className="nav-item">Pricing</ScrollLink>
           <ScrollLink to="faq-section" smooth={true} duration={500} className="nav-item">FAQ</ScrollLink>
+        </div>
+        <div className="mobile-menu-icon" onClick={toggleMenu}>
+          &#9776;
         </div>
       </div>
       <div className="navbar-right">
