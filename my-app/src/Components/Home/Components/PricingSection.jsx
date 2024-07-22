@@ -21,17 +21,19 @@ const PricingSection = () => {
       <div className="pricing-cards">
         <div className="pricing-card">
           <div className="card-icon"> {/* Add your icon here */}</div>
-          <h2 className="card-title">Silver Pack</h2>
-          <p className="card-subtitle">Great for private individuals</p>
+          <h2 className="card-title">Free</h2>
+          <p className="card-subtitle">0€/month</p>
           <div className="card-price">
-            <span className="price-currency">$</span>
-            <span className="price-amount">4</span>
+            <span className="price-currency">€</span>
+            <span className="price-amount">0</span>
             <span className="price-duration">/Mo</span>
           </div>
           <ul className="card-features">
-            <li>1 User</li>
-            <li>Unlimited Projects</li>
-            <li>Download prototypes</li>
+            <li>200 Generated images</li>
+            <li>Slow generations</li>
+            <li>10 Video generations</li>
+            <li>Personal use only</li>
+            <li>Images are open to public</li>
           </ul>
           <Link to="/signup">
             <button className="card-button">Get Now</button>
@@ -39,17 +41,59 @@ const PricingSection = () => {
         </div>
         <div className="pricing-card">
           <div className="card-icon"> {/* Add your icon here */}</div>
-          <h2 className="card-title">Gold Pack</h2>
-          <p className="card-subtitle">Perfect for small business</p>
+          <h2 className="card-title">Starter</h2>
+          <p className="card-subtitle">8€/month or 80€/year</p>
           <div className="card-price">
-            <span className="price-currency">$</span>
-            <span className="price-amount">10</span>
+            <span className="price-currency">€</span>
+            <span className="price-amount">8</span>
             <span className="price-duration">/Mo</span>
           </div>
           <ul className="card-features">
-            <li>3 Users</li>
-            <li>Unlimited Projects</li>
-            <li>Download prototypes</li>
+            <li>1200 Generated images</li>
+            <li>Slow generations</li>
+            <li>40 Video generations</li>
+            <li>Personal use only</li>
+            <li>Images are open to public</li>
+          </ul>
+          <Link to="/signup">
+            <button className="card-button">Get Now</button>
+          </Link>
+        </div>
+        <div className="pricing-card">
+          <div className="card-icon"> {/* Add your icon here */}</div>
+          <h2 className="card-title">Business</h2>
+          <p className="card-subtitle">24€/month or 240€/year</p>
+          <div className="card-price">
+            <span className="price-currency">€</span>
+            <span className="price-amount">24</span>
+            <span className="price-duration">/Mo</span>
+          </div>
+          <ul className="card-features">
+            <li>4800 Generated images</li>
+            <li>Fast generations</li>
+            <li>160 Video generations</li>
+            <li>Commercial license</li>
+            <li>Images are kept private</li>
+          </ul>
+          <Link to="/signup">
+            <button className="card-button">Get Now</button>
+          </Link>
+        </div>
+        <div className="pricing-card">
+          <div className="card-icon"> {/* Add your icon here */}</div>
+          <h2 className="card-title">Premium</h2>
+          <p className="card-subtitle">48€/month or 480€/year</p>
+          <div className="card-price">
+            <span className="price-currency">€</span>
+            <span className="price-amount">48</span>
+            <span className="price-duration">/Mo</span>
+          </div>
+          <ul className="card-features">
+            <li>9600 Generated images</li>
+            <li>Fast generations</li>
+            <li>320 Video generations</li>
+            <li>Commercial license</li>
+            <li>Images are kept private</li>
           </ul>
           <Link to="/signup">
             <button className="card-button">Get Now</button>

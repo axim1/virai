@@ -25,6 +25,22 @@ p{
   font-size: 16px;
 
 }
+
+
+.navbar {
+  width: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  /* transition: background-color 0.3s ease;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 50px; */
+}
+
 .herosection{
     /* background-image: url('../../assets/bg-image.jpg'); Replace 'path_to_your_image.jpg' with the actual path to your image */
     display: flex;

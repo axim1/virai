@@ -85,7 +85,6 @@
 @media (max-width: 768px) {
   .navbar {
     width: 100%;
-    /* max-width: 768px; */
     padding: 10px 40px;
   }
 
