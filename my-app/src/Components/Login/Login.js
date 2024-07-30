@@ -36,19 +36,16 @@ const Login = ({ setLoggedIn, setUserState }) => {
     }
     return error;
   };
-
   const loginHandler = async () => {
     try {
-      console.log("env var:", apiUrl)
+      console.log("env var:", apiUrl);
       const response = await axios.post(`${apiUrl}login`, user);
-      setUserState(response.data.user);
-      setLoggedIn((prevState) => !prevState);
-      navigate("/", { replace: true });
       localStorage.setItem("user", JSON.stringify(response.data.user));
-
+      setUserState(response.data.user);
+      setLoggedIn(true); // Trigger a state update in Navbar component
+      navigate("/", { replace: true });
     } catch (error) {
       console.error("Login failed:", error);
-
       if (error.response && error.response.status === 401) {
         setFormErrors({
           email: "Invalid email or password",
@@ -59,6 +56,7 @@ const Login = ({ setLoggedIn, setUserState }) => {
       }
     }
   };
+  
 
   // useEffect(() => {
   //   if (Object.keys(formErrors).length === 0) {

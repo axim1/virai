@@ -24,7 +24,7 @@ import PricingSection from './Components/PricingSection';
 import FAQ from '../FAQ/faq'
 const username = JSON.parse(localStorage.getItem('user')) || {};
 const userId = username._id;
-function Home() {
+function Home({user}) {
 
     const [generatedImages, setGeneratedImages] = useState([]); // State to store generated images
 
@@ -48,7 +48,7 @@ function Home() {
 
     return (
         <div style={{ backgroundColor: "#13181d" }} id='home-section'>
-        <div className='homenavbar'>              <Navbar />
+        <div className='homenavbar'>              <Navbar user={user}/>
         </div>
             <div className="herosection" >
                 <div className='content-herosection'>
@@ -252,22 +252,25 @@ function Home() {
   </div>
 </footer> */}
 
-
-<FAQ />
-
+<div  id="faq-section" >
+<FAQ/>
+</div>
 <footer className="footer">
       <div className="footer-top">
-        <h1 className="footer-title">We develop & create digital future.</h1>
+        <h1 className="footer-title">FYM Architecture, s.r.o.</h1>
         <div className="footer-address">
           <h1>Address</h1>
-          <p>Germany —</p>
-          <p>785 15h Street, Office 478</p>
-          <p>Berlin, De 81566</p>
+          <p>Bullova 17</p>
+          <p>Bratislava - 841 01,</p>
+          <p>Slovakia</p>
         </div>
         <div className="footer-contact">
           <h1>Say Hello</h1>
-          <p>info@email.com</p>
-          <p>+1 800 555 25 65</p>
+          <p>support@virtuartai.com</p>
+          <br/>
+          <p>VAT: SK2024089199</p>
+     
+          <p>Registration ID: 47 683 341</p>
         </div>
         <div className="footer-social">
           <a href="#"><i className="fa fa-facebook"></i></a>
@@ -276,7 +279,7 @@ function Home() {
         </div>
       </div>
       <div className="footer-bottom">
-        <p>AxiomThemes © 2024. All Rights Reserved. <Link to="/terms-of-service">Terms of Service</Link></p>
+        <p>VirtuartAI © 2024. All Rights Reserved. <Link to="/terms-of-service">Terms of Service</Link></p>
       </div>
     </footer>
 

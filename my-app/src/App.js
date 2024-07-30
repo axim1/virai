@@ -9,49 +9,37 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { useEffect, useState } from "react";
 import TermsOfService from "./Components/TermsOfService/TermsOfService";
 
+// import { useEffect, useState } from "react";
+
 function App() {
-  const [userstate, setUserState] = useState({});
+  const [userState, setUserState] = useState({});
   const [loggedIn, setLoggedIn] = useState(false);
 
   useEffect(() => {
-    if (userstate && userstate._id) {
-      console.log('User State:', userstate, userstate._id);
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      setUserState(JSON.parse(storedUser));
+      setLoggedIn(true);
     }
-  }, [userstate]);
-  
-  
+  }, []);
+
   return (
     <div className="App">
       <Router>
         <Routes>
-        <Route path="/" element={<Home/>}></Route>
-        {/* <Route path="/home" element={<NewHome/>}></Route> */}
-
+          <Route path="/" element={<Home />} />
           <Route
             path="/login"
-            element={
-              loggedIn ? (
-                <Profile
-                setLoggedIn={setLoggedIn}  
-                  setUserState={setUserState}
-                  username={userstate}
-                />
-              ) : (
-                <Login setLoggedIn={setLoggedIn}  setUserState={setUserState} />
-              )
-            }
-          ></Route>
-          {/* <Route
-            path="/login"
             element={<Login setLoggedIn={setLoggedIn} setUserState={setUserState} />}
-          ></Route> */}
-          <Route path="/signup" element={<Register />}></Route>
-          <Route path="/terms-of-service" element={<TermsOfService />}></Route>
-
+          />
+          <Route path="/signup" element={<Register />} />
+          <Route path="/terms-of-service" element={<TermsOfService />} />
         </Routes>
       </Router>
     </div>
   );
 }
+
+
 
 export default App;

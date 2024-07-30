@@ -573,6 +573,7 @@ button[type="submit"]:hover {
 
 .footer-address, .footer-contact, .footer-social {
   margin-bottom: 20px;
+  margin-right: 10px;
 }
 
 .footer-social a {
