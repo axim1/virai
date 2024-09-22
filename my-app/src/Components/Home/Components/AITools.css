@@ -26,12 +26,16 @@
 .ai-tool-label {
     width: 100%;
     padding: 10px;
-    height: 70px;
+    /* padding-top: 30px;
+    padding-bottom: 30px; */
+    height: 80px;
+    display: flex;
     justify-content: center;
     align-items: center;
     background-color: #353535;
     color: #fff;
     text-align: center;
+    align-self: center;
     font-weight: bold;
     border-radius: 15px;
     margin-bottom: 15px;
