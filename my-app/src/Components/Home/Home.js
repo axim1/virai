@@ -118,9 +118,9 @@ function Home({ triggerShrink }) {
       </div>
 
       {/* AI Tools Header */}
-      <div className='mouseIcon' style={toolsHeaderStyle}>
+      <div style={toolsHeaderStyle}>
         <p style={{ fontSize: "25px", fontWeight: "lighter" }}>AI TOOLS</p>
-        <FontAwesomeIcon icon={faComputerMouse} style={mouseIconStyle} size="2x" />
+        <FontAwesomeIcon className='mouseIcon' icon={faComputerMouse} style={mouseIconStyle} size="2x" />
       </div>
 
       {/* AI Tools Section */}

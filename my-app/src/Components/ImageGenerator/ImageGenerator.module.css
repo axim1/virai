@@ -618,6 +618,7 @@ body {
   .topInputContainer {
     width: 100%;
     height: auto;
+    min-width: 100%;
 
     padding: 20px; /* Reduced padding for mobile */
   }

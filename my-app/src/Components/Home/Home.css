@@ -96,31 +96,33 @@ color: #959595;
       }
 @media (max-width:768px ) {
 .herosection{
-  padding: 0%;
+  padding: 0px !important;
+  /* margin-top: 50px; */
 }
   .content-herosection{
 
     /* max-width: 100%; */
-    padding: 0px;
+    padding: 20px;
+    padding-top: 0px;
 
 }
 
-  .mouseIcon {
-    display: none !important; /* Ensures the section is completely hidden */
-  }
+  /* .mouseIcon {
+    display: none !important; 
+  } */
 
-/* .firstheading{
-font-size: 20px;
+.firstheading{
+font-size: 30px;
 
 }
 .secheading{
-  font-size: 30px;
+  font-size: 40px;
   
   }
   .thirdheading{
-    font-size: 15px;
+    font-size: 18px;
     
-    } */
+    }
 }
 .sc_switcher_controls{
   display: flex;

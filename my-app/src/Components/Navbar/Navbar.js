@@ -84,6 +84,32 @@ const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
           >
             Home
           </ScrollLink> */}
+
+
+
+<div className={`navbar-right `}>
+        {user ? (
+          <>
+            <div className="username-container" onClick={toggleDropdown}>
+              <div className="username">Hello, {user.fname}</div>
+              {dropdownOpen && (
+                <div className="user-dropdown">
+                  <div><strong>{user.fname} {user.lname}</strong></div>
+                  <div><strong>Email:</strong> {user.email}</div>
+                  <div><strong>Images Left:</strong> {user.no_of_images_left}</div>
+                </div>
+              )}
+            </div>
+            <button onClick={handleLogout} className="nav-item logout-button">Logout</button>
+          </>
+        ) : (
+          <RouterLink to="/login" className="nav-item login-signup">Log in / Sign up</RouterLink>
+        )}
+      </div>
+
+
+
+      
                     <RouterLink to="/" onClick={handleHomeClick}
                                 className={`nav-item ${activeLink === 'home' ? 'active' : ''}`} // Add active class if the link is active
                     >
@@ -144,30 +170,14 @@ const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
           >
             FAQ
           </ScrollLink>
+
         </div>
+
         <div className="mobile-menu-icon" onClick={toggleMenu}>
           &#9776;
         </div>
       </div>
-      <div className="navbar-right">
-        {user ? (
-          <>
-            <div className="username-container" onClick={toggleDropdown}>
-              <div className="username">Hello, {user.fname}</div>
-              {dropdownOpen && (
-                <div className="user-dropdown">
-                  <div><strong>{user.fname} {user.lname}</strong></div>
-                  <div><strong>Email:</strong> {user.email}</div>
-                  <div><strong>Images Left:</strong> {user.no_of_images_left}</div>
-                </div>
-              )}
-            </div>
-            <button onClick={handleLogout} className="nav-item logout-button">Logout</button>
-          </>
-        ) : (
-          <RouterLink to="/login" className="nav-item login-signup">Log in / Sign up</RouterLink>
-        )}
-      </div>
+
     </nav>
   );
 };
