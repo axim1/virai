@@ -891,6 +891,11 @@ app.get('*', (req, res) => {
 
 // ... (existing code)
 
-app.listen(8000, () => {
-  console.log("Server starting at 8000");
+// app.listen(8000, () => {
+//   console.log("Server starting at 8000");
+// });
+
+app.listen(8000, '92.240.254.103', () => {
+  console.log("Server starting at 192.168.1.100 on port 8000");
 });
+

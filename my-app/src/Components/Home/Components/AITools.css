@@ -1,0 +1,78 @@
+.ai-tools-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    gap: 20px;
+    row-gap: 150px;
+    padding: 20px;
+}
+
+.ai-tool-card {
+    position: relative;
+    width: 180px;
+    height: 250px;
+    border-radius: 15px;
+    overflow: visible;
+    cursor: pointer;
+    z-index: 1;
+    transition: opacity 0.3s ease-in-out; /* Smooth fading transition */
+    opacity: 1; /* Default state where all cards are fully visible */
+}
+
+.ai-tool-card:hover {
+    z-index: 9999; /* Bring the hovered card to the front */
+}
+
+.ai-tool-label {
+    width: 100%;
+    padding: 10px;
+    height: 70px;
+    justify-content: center;
+    align-items: center;
+    background-color: #353535;
+    color: #fff;
+    text-align: center;
+    font-weight: bold;
+    border-radius: 15px;
+    margin-bottom: 15px;
+    font-size: 14px;
+    font: 1em Arial;
+    position: relative;
+    z-index: 2;
+}
+
+.ai-tool-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* transition: width 0.2s; */
+    position: relative;
+    z-index: 1;
+}
+
+.ai-tool-card:hover .ai-tool-image {
+    /* transform: scaleX(1.7); Expand width-wise using scaleX */
+
+    position: absolute;
+    width: 300px;
+    height: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    /* box-shadow: 0 8px 16px rgba(0, 0, 0, 0.9); */
+}
+
+/* New: Only fade non-hovered cards when one card is being hovered */
+.ai-tools-container:hover .ai-tool-card:not(:hover) {
+    opacity: 0.3; /* Dim non-hovered cards */
+    transition: opacity 0.7s ease-in-out;
+}
+
+/* Ensure full opacity for the hovered card */
+.ai-tool-card:hover {
+    opacity: 1; /* Full opacity for the hovered card */
+}
+
+@media (max-width:768px){
+
+}

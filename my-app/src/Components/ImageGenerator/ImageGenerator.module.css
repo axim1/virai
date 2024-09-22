@@ -1,0 +1,658 @@
+body {
+  background-color: #0e0e0e;
+  /* margin: 0; */
+  /* height: 100vh; */
+  /* display: flex; */
+  /* justify-content: center; */
+  /* align-items: center; */
+}
+.generatorContainer {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 100%;
+  color: white;
+  margin-top: 80px; /* Ensure no extra margin as the navbar is fixed */
+  height: calc(100vh - 80px); 
+/* overflow-y: auto; */
+  }
+.topInputContainer{
+  /* width: 25%; */
+  min-width: 500px;
+  padding: 50px;
+  /* height: 100vh; */
+  background-color: #2e2e2e;
+  /* position: relative; Ensures absolute children can be positioned within */
+  overflow: visible; /* Allow dropdowns to escape the container */
+  position: relative; /* Keep elements within bounds but still allow overflow */
+
+  border-top-right-radius: 40px;
+  border-bottom-right-radius: 40px;
+  /* margin-top: 60px; Ensure no extra margin as the navbar is fixed */
+  height: calc(100vh - 80px); 
+}
+
+.inputContainer {
+  /* width: 25%;
+  padding: 50px; */
+  /* height: 100vh; */
+  /* background-color: #2e2e2e; */
+  margin-top: 50px;
+  margin-bottom: 50px;
+  overflow-y: scroll;
+  overflow-x:visible; 
+  height: calc(100vh - 400px); 
+  /* position: relative; Keep elements within bounds but still allow overflow */
+
+  /* border-top-right-radius: 40px;
+  border-bottom-right-radius: 40px;
+  height: calc(100vh - 80px);  */
+}
+/* WebKit scrollbar styling for Chrome, Safari, and Edge */
+.inputContainer::-webkit-scrollbar {
+  width: 0px; /* Very narrow scrollbar */
+}
+
+.inputContainer::-webkit-scrollbar-track {
+  background: #2e2e2e; /* Match the container background for minimal visibility */
+  border-radius: 40px;
+}
+
+.inputField:focus {
+  outline: none; /* Removes the black border on focus */
+  border-color: #4CAF50; /* Optional: Change border color on focus to match your theme */
+}
+
+.inputField::-webkit-scrollbar {
+  width: 0px; /* Very narrow scrollbar */
+}
+
+.inputField::-webkit-scrollbar-track {
+  background: #2e2e2e; /* Match the container background for minimal visibility */
+  border-radius: 40px;
+}
+
+
+.inputRow {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.inputColumn {
+  display: flex;
+  flex-direction: column;
+  margin: 10px 0;
+}
+
+.sizeInputColumn, .strengthInputColumn{
+  display: flex;
+  justify-content: space-between; /* Center buttons horizontally */
+  align-items: center; /* Center buttons vertically (if needed) */
+  /* gap: 5px; Space between buttons */
+  flex-wrap: wrap;
+  width: 400px;
+  margin: 15px;
+}
+
+.select {
+  padding: 10px;
+  margin-top: 10px;
+  background-color: rgb(31, 164, 31);
+  border: 1px solid #555;
+  border-radius: 5px;
+  color: white;
+  width: 100%;
+}
+
+.inputField {
+  padding: 10px;
+  margin-top: 10px;
+  background-color: rgb(240, 246, 240);
+  /* border: 1px solid #555; */
+  border-radius: 20px;
+  color: rgb(6, 5, 5);
+  width: 100%;
+  box-sizing: border-box; /* Ensure padding is included in the height */
+  overflow: hidden; /* Prevent scrollbars */
+}
+.inputWidthHeight{
+  padding: 10px;
+  margin-top: 10px;
+  background-color: rgb(240, 246, 240);
+  border: 1px solid #555;
+  border-radius: 8px;
+  color: rgb(6, 5, 5);
+  width: 100px;
+}
+.label {
+  font-family: Arial, Helvetica, sans-serif;
+  margin-bottom: 5px;
+  margin-left:15px;
+  color: white;
+}
+.promptLabel{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin-left: 15px;
+  margin-right: 15px;
+}
+.magicButton {
+  background-color: transparent;
+  color: rgb(134, 134, 255);
+  border: blue;
+  border-radius: 5px;
+  cursor: pointer;
+  /* padding: 10px; */
+  /* margin-top: 10px; */
+  /* width: 100%; */
+}
+
+.numButtonCont{
+  display: flex;
+  justify-content: space-between; /* Center buttons horizontally */
+  align-items: center; /* Center buttons vertically (if needed) */
+  gap: 5px; /* Space between buttons */
+  flex-wrap: wrap;
+  width: 100%;
+  margin: 15px;
+}
+
+.numberButtons {
+  display: flex;
+  justify-content: center; /* Center buttons horizontally */
+  align-items: center; /* Center buttons vertically (if needed) */
+  gap: 5px; /* Space between buttons */
+  flex-wrap: wrap; /* Allow wrapping if the screen is small */
+}
+
+
+.numButton {
+  background-color: #2e2e2e;
+  border: 1px solid #555;
+  border-radius: 5px;
+  color: white;
+  cursor: pointer;
+  text-align: center;
+  height: 50px;
+
+  /* line-height: 1; Ensures text stays vertically centered */
+  width: 50px; /* Fixed width for all buttons */
+}
+/* aspect ratio buttons */
+.aspectRatioButtons {
+  display: flex;
+  justify-content: space-between; /* Center buttons horizontally */
+  align-items: center; /* Center buttons vertically (if needed) */
+  gap: 5px; /* Space between buttons */
+  flex-wrap: wrap; /* Allow wrapping if the screen is small */
+}
+
+.aspectButton {
+  background-color: #2e2e2e;
+  border: 1px solid #555;
+  border-radius: 5px;
+  color: white;
+  cursor: pointer;
+  text-align: center;
+  line-height: 1; /* Ensures text stays vertically centered */
+  width: 70px; /* Fixed width for all buttons */
+}
+
+.activeButton {
+  border: 2px solid #4CAF50;
+}
+
+/* More button with dropdown */
+.moreButton {
+  position: relative;
+  background-color: #2e2e2e;
+  border: 1px solid #555;
+  border-radius: 5px;
+  color: white;
+  padding: 10px;
+  cursor: pointer;
+  width: 100px;
+}
+
+.moreButton:hover .dropdown  {
+  display: block; /* Show the dropdown when hovering */
+}
+
+.dropdown {
+  display: none;
+  position: absolute; /* Use fixed position to make sure it's not hidden */
+  top: 100%; /* Position it directly below the button */
+  left: 0;
+  background-color: #2e2e2e;
+  border-radius: 5px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  margin-top: 5px;
+  z-index: 9999; /* Ensure it appears above other content */
+  overflow: visible; /* Ensure dropdown items are fully visible */
+  width: 150px; /* Adjust width as per your design */
+}
+
+.dropdown .aspectButton {
+  display: block;
+  margin-bottom: 5px;
+  width: 100%; /* Ensure the buttons take the full width of the dropdown */
+}
+
+
+/* end aspect ration buttons */
+.sizeInputRow {
+  display: flex;
+  align-items: center;
+  /* justify-content: space-between; */
+}
+
+.sizeSeparator {
+  margin: 0 10px;
+  color: white;
+}
+
+
+
+
+/* .generatedImagesContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  
+}
+
+.generatedImage {
+  max-width: 100%;
+  margin-bottom: 10px;
+  width: 100%;
+  border-radius: 10px;
+} */
+
+@media (max-width: 1024px) {
+  .generatorContainer {
+    flex-direction: column;
+  }
+
+  .inputContainer, .imageContainer {
+    width: 100%;
+  }
+}
+
+
+
+/* api type */
+.apiTypeContainer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  margin-bottom: 20px;
+  
+}
+
+/* .apiTypeDropdown {
+  display: flex;
+  align-items: center;
+  background-color: #4CAF50; 
+  border-radius: 5px;
+  padding: 10px;
+  color: white;
+  font-size: 1.2em;
+  position: relative;
+  width: 600px;
+} */
+
+.apiTypeContainer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  margin-bottom: 20px;
+}
+
+.apiTypeDropdown {
+  display: flex;
+  align-items: center;
+  background-color: #4CAF50; /* Green background */
+  border-radius: 5px;
+  padding: 10px;
+  color: white;
+  font-size: 1.2em;
+  position: relative;
+  width: 100%; /* Full width to accommodate centered text */
+}
+
+.apiTypeSelect {
+  background-color: transparent;
+  border: none;
+  color: white;
+  font-size: 1em;
+  text-align: center; /* Center text inside the select */
+  padding-left: 10px;
+  padding-right: 10px;
+  width: 100%; /* Full width to keep text centered */
+  appearance: none;
+  outline: none;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.apiTypeSelect option {
+  background-color: #2e2e2e; /* Dark background for the options card */
+  color: white;
+  padding: 10px; /* Add padding to make options larger */
+  border-bottom: 1px solid #555; /* Option separator */
+}
+
+.icon {
+  margin-right: 10px;
+}
+
+.icon svg {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: white;
+  stroke-width: 2;
+}
+
+/* Hide the default select arrow on the right */
+.apiTypeSelect {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background: transparent;
+  padding-right: 30px; /* Add extra padding to the right for the space */
+}
+
+/* Add a custom arrow icon or caret */
+.apiTypeDropdown::after {
+  content: '▼'; /* Unicode for a down arrow */
+  font-size: 0.8em;
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: white;
+}
+/* upload image */
+
+.uploadLabel {
+  display: block;
+  width: 100%;
+  height: 200px; /* Set the height to match the image */
+  border: 1px solid #555;
+  border-radius: 15px; /* Rounded corners */
+  background-color: white;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  /* font-family: Arial, Helvetica, sans-serif; */
+}
+
+.uploadInput {
+  display: none; /* Hide the actual file input */
+}
+
+.uploadPlaceholder {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  font-size: 1.2em;
+  color: #aaa;
+  font-family: Arial, sans-serif;
+}
+
+.uploadLabel:hover .uploadPlaceholder {
+  color: #888; /* Slightly darker color on hover */
+}
+/* ================== */
+
+
+.apiTypeSelect option {
+  background-color: #2e2e2e; /* Dark dropdown background */
+  color: white;
+}
+
+.icon {
+  margin-right: 10px;
+}
+
+.icon svg {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: white;
+  stroke-width: 2;
+}
+
+@media (max-width: 768px) {
+  .apiTypeDropdown {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .apiTypeSelect {
+    width: 100%;
+  }
+}
+/* enddd */
+
+
+
+
+
+/* new dropdwon */
+.customDropdown {
+  /* position: relative; */
+  position: sticky;
+  top: 0;
+
+  /* width:   ; */
+}
+
+.dropdownHeader {
+  background-color: #4CAF50;
+  color: white;
+  padding: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1.2em;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.dropdownIcon {
+  font-size: 0.8em;
+}
+
+.dropdownList {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: #2e2e2e;
+  border-radius: 5px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  margin-top: 5px;
+  width: 100%;
+  z-index: 9999;
+}
+
+.dropdownItem {
+  padding: 10px;
+  color: white;
+  cursor: pointer;
+  border-bottom: 1px solid #555;
+}
+
+.dropdownItem:hover {
+  background-color: #555;
+}
+
+.activeItem {
+  background-color: #4CAF50;
+}
+
+.dropdownItem:last-child {
+  border-bottom: none;
+}
+
+/* ================ */
+/* Container for generated images */
+.imageContainer {
+  /* width: 70%;
+   */
+   flex-grow: 1;
+   margin-left: 100px; /* Adjust the gap between the two containers */
+  height: calc(100vh - 80px); 
+  border-top-left-radius: 40px;
+  border-bottom-left-radius: 40px;
+  /* display: flex;
+  flex-wrap: wrap;
+ */
+
+  
+  justify-content: center;
+  align-items: center;
+  background-color: #2e2e2e;
+
+}
+.generatedImagesContainer {
+  display: flex;
+  /* grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); Dynamically create columns */
+  gap: 20px; /* Space between images */
+  flex-wrap: wrap;
+  justify-content: center; /* Center the grid items */
+  padding: 100px;
+  max-height: calc(100vh - 120px); /* Adjust height based on the screen height */
+  overflow-y: auto; /* Enable vertical scroll when there are more images */
+  scrollbar-width: thin; /* Makes the scrollbar thinner */
+}
+
+.generatedImage {
+  height: auto; /* Maintain aspect ratio */
+  /* object-fit: cover; Ensures the image covers the area without distortion */
+  width: 600px; /* Restricts the image to the grid cell's width */
+  border-radius: 0px; /* Adds rounded corners */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Adds a subtle shadow */
+}
+
+/* WebKit scrollbars for Chrome/Safari */
+.generatedImagesContainer::-webkit-scrollbar {
+  width: 8px;
+}
+
+.generatedImagesContainer::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.3); /* Scrollbar color */
+  border-radius: 5px;
+}
+
+/* Responsive for small screens */
+@media (max-width: 768px) {
+  .generatedImagesContainer {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Smaller columns for mobile */
+    grid-gap: 10px; /* Reduce gap on smaller screens */
+  }
+}
+
+/* Responsive for tablets */
+@media (max-width: 1024px) {
+  .generatedImagesContainer {
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); /* Adjust grid for tablets */
+  }
+}
+
+/* Adjust for larger screens */
+@media (min-width: 1400px) {
+  .generatedImagesContainer {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* More columns on larger screens */
+    grid-gap: 25px; /* Increase gap on larger screens */
+  }
+}
+
+
+
+/*  */
+
+
+
+.generateButton {
+  position: sticky;
+  bottom: 0;
+
+  padding: 10px 20px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  width: 100%;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+@media (max-width: 1024px) {
+  .generatorContainer {
+    flex-direction: column; /* Stack the containers vertically */
+  }
+
+  .topInputContainer {
+    width: 100%; /* Full width on tablets */
+    border-radius: 0px; /* Remove border-radius for better mobile view */
+  }
+
+  .imageContainer {
+    width: 100%; /* Full width on tablets */
+    margin-left: 0;
+    height: auto;
+    border-radius: 0px; /* Remove border-radius for better mobile view */
+  }
+}
+
+/* Responsive for Mobile (max-width: 768px) */
+@media (max-width: 768px) {
+  .topInputContainer {
+    width: 100%;
+    height: auto;
+
+    padding: 20px; /* Reduced padding for mobile */
+  }
+
+  .inputContainer {
+    height: auto;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    overflow-y: auto; /* Keep scroll for overflow */
+  }
+
+  .imageContainer {
+    width: 100%;
+    height: auto; /* Allow height to auto-adjust */
+    margin-left: 0; /* Remove margin between containers */
+    margin-top: 20px; /* Add spacing between input and image containers */
+  }
+
+  .dropdownHeader {
+    font-size: 1em; /* Reduce size for dropdown header */
+    padding: 8px; /* Reduce padding for dropdown */
+  }
+
+  .numButton {
+    height: 40px; /* Reduce size of number buttons */
+    width: 40px; /* Reduce size of number buttons */
+  }
+
+  .aspectButton {
+    width: 50px; /* Reduce aspect ratio button size */
+    height: auto;
+  }
+
+  .generateButton {
+    font-size: 1em;
+    padding: 10px; /* Adjust padding for mobile */
+  }
+}

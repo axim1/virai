@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 // import "bootstrap/dist/css/bootstrap.min.css"; // Import Bootstrap CSS
 import "./Profile.css"
-import GeneratorSelection from "../ImageGenComp/GeneratorSelection.js";
-import TextBar from "../ImageGenComp/TextBar.js";
-import StyleSelection from "../ImageGenComp/StyleSelection.js";
-import ImageGenerationForm from "../ImageGenComp/ImageGenerationForm.js";
-import ImageLibrary from "../ImageGenComp/ImageLibrary.js";
+import GeneratorSelection from "../ImageGenComp-legacy/GeneratorSelection.js";
+import TextBar from "../ImageGenComp-legacy/TextBar.js";
+import StyleSelection from "../ImageGenComp-legacy/StyleSelection.js";
+import ImageGenerationForm from "../ImageGenComp-legacy/ImageGenerationForm.js";
+import ImageLibrary from "../ImageGenComp-legacy/ImageLibrary.js";
 import Navbar from '../Navbar/Navbar';
 
-import ProfileTab from "../ImageGenComp/ProfileTab";
+import ProfileTab from "../ImageGenComp-legacy/ProfileTab.js";
 
 const Profile = ({setLoggedIn, setUserState, username }) => {
   const [generatedImages, setGeneratedImages] = useState([]); // State to store generated images

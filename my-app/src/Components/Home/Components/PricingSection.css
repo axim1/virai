@@ -1,7 +1,7 @@
 .pricing-section {
-  display: flex;
+  /* display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: center; */
   padding: 50px;
   background-color: #13181d;
   color: white;
@@ -42,7 +42,11 @@
 .pricing-cards {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  align-items: center;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  row-gap: 40px;
+  /* gap: 20px; */
 }
 
 .pricing-card {

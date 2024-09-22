@@ -6,7 +6,7 @@ import './PricingSection.css';
 const PricingSection = () => {
   return (
     <div className="pricing-section">
-      <div className="pricing-content">
+      {/* <div className="pricing-content">
         <h3 className="subtitle">FLEXIBLE & AFFORDABLE</h3>
         <h1 className="title">Our Pricing Plans</h1>
         <p className="description">
@@ -17,7 +17,7 @@ const PricingSection = () => {
           <li>✔ Nullam efficitur nunc</li>
           <li>✔ Etiam eu lectus at lectus</li>
         </ul>
-      </div>
+      </div> */}
       <div className="pricing-cards">
         <div className="pricing-card">
           <div className="card-icon"> {/* Add your icon here */}</div>
