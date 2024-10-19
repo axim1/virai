@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect,useRef } from 'react';
 import axios from 'axios';
 import styles from './ImageGenerator.module.css';
-import { useNavigate } from "react-router-dom";
+import { useNavigate,useLocation } from "react-router-dom";
 import wsImage1 from '../../assets/House_sketch-to-image_web.jpg'; // Replace with your image path
-import DropdownPortal from './DropdownPortal';
+import DropdownPortal from './DropdownPortal.js';
 
 const apiUrl = process.env.REACT_APP_API_URL;
 const username = JSON.parse(localStorage.getItem('user')) || {};
@@ -11,10 +11,12 @@ const userId = username._id;
 
 function ImageGenerator({ onGenerateImage }) {
   const navigate = useNavigate();
+  const location = useLocation(); // Use useLocation to retrieve passed state
+
   const [isLoading, setIsLoading] = useState(false);
   const [images, setImages] = useState([]);
   const [generatedImages, setGeneratedImages] = useState([]);
-  const [apiType, setApiType] = useState('sketch-to-image');
+  const [apiType, setApiType] = useState(location.state?.apiType || 'sketch-to-image'); 
   const [generatorType, setGeneratorType] = useState('');
   const [promptText, setPromptText] = useState('');
   const [negativePromptText, setNegativePromptText] = useState('');
@@ -33,6 +35,37 @@ function ImageGenerator({ onGenerateImage }) {
   const toggleDropdown = () => {
     setDropdownOpen(!dropdownOpen);
   };
+  const [dropdownTop, setDropdownTop] = useState(0);
+const [dropdownLeft, setDropdownLeft] = useState(0);
+
+const dropdownRef = useRef(null);
+useEffect(() => {
+  if (moreDropdownOpen && dropdownRef.current) {
+    const buttonRect = dropdownRef.current.getBoundingClientRect();
+    const dropdownHeight = 210; // Approximate height of the dropdown
+    const dropdownWidth = 150; // Width of dropdown
+    const viewportHeight = window.innerHeight;
+    const viewportWidth = window.innerWidth;
+
+    // Calculate position: default to the right of the button
+    let topPosition = buttonRect.top-80;
+    let leftPosition = buttonRect.right;
+
+    // Adjust if the dropdown goes beyond the viewport
+    if (buttonRect.bottom + dropdownHeight > viewportHeight) {
+      topPosition = buttonRect.top - dropdownHeight; // Adjust to fit within the bottom edge
+    }
+    if (buttonRect.right + dropdownWidth > viewportWidth) {
+      leftPosition = buttonRect.left - dropdownWidth; // Adjust to fit within the right edge
+    }
+
+    setDropdownTop(topPosition);
+    setDropdownLeft(leftPosition);
+  }
+}, [moreDropdownOpen]);
+
+
+
 
   // const handleApiTypeChange = (type) => {
   //   setApiType(type);
@@ -290,7 +323,7 @@ function ImageGenerator({ onGenerateImage }) {
                     onClick={() => setAspectRatio('3:2')}
                     style={{ height: 'calc(70px / (3 / 2))' }} /* Keep width fixed and adjust height for 16:9 */
                   >
-                    16:9
+                    3:2
                   </button>
                   <button
                     className={`${styles.aspectButton} ${aspectRatio === '4:3' ? styles.activeButton : ''}`}
@@ -313,36 +346,88 @@ function ImageGenerator({ onGenerateImage }) {
                   >
                     2:3
                   </button>
-    <div className={styles.moreButtonContainer}>
-      <button className={styles.moreButton} onClick={() => setmoreDropdownOpen(!dropdownOpen)}>
-        More
-      </button>
+                  <div className={styles.moreButtonContainer} ref={dropdownRef}
+                        onMouseEnter={() => setmoreDropdownOpen(true)}  // Open dropdown on hover
+                        onMouseLeave={() => setmoreDropdownOpen(false)} // Close dropdown when mouse leaves
+                   
+                  >
+  <button className={styles.moreButton} 
+  // onClick={() => setmoreDropdownOpen(!moreDropdownOpen)}
+  >
+    More
+  </button>
 
-      {moreDropdownOpen && (
-        <DropdownPortal>
-          <div className={styles.dropdown} style={{ position: 'absolute', top: '100px', left: '50px' }}>
-            <button
-              className={`${styles.aspectButton} ${aspectRatio === '3:4' ? styles.activeButton : ''}`}
-              onClick={() => setAspectRatio('3:4')}
-            >
-              3:4
-            </button>
-            <button
-              className={`${styles.aspectButton} ${aspectRatio === '4:5' ? styles.activeButton : ''}`}
-              onClick={() => setAspectRatio('4:5')}
-            >
-              4:5
-            </button>
-            <button
-              className={`${styles.aspectButton} ${aspectRatio === '9:16' ? styles.activeButton : ''}`}
-              onClick={() => setAspectRatio('9:16')}
-            >
-              9:16
-            </button>
-          </div>
-        </DropdownPortal>
-      )}
+  {moreDropdownOpen && (
+    <div className={styles.dropdown} style={{ top: dropdownTop, left: dropdownLeft, position: 'fixed' }}>
+                <button
+        className={`${styles.aspectButton} ${aspectRatio === '4:5' ? styles.activeButton : ''}`}
+        onClick={() => {
+          setAspectRatio('4:5');
+          // setmoreDropdownOpen(false);
+        }}
+        style={{ height: 'calc(70px / (4 / 5))' }} 
+      >
+        4:5
+      </button>
+           <button
+        className={`${styles.aspectButton} ${aspectRatio === '9:16' ? styles.activeButton : ''}`}
+        onClick={() => {
+          setAspectRatio('9:16');
+          // setmoreDropdownOpen(false);
+        }}
+        style={{ height: 'calc(70px / (9 / 16))' }} 
+      >
+        9:16
+      </button>
+      <button
+        className={`${styles.aspectButton} ${aspectRatio === '3:4' ? styles.activeButton : ''}`}
+        onClick={() => {
+          setAspectRatio('3:4');
+          // setmoreDropdownOpen(false);
+        }}
+        style={{ height: 'calc(70px / (3 / 4))' }} 
+      >
+        3:4
+      </button>
+      
+
+
     </div>
+  )}
+</div>
+
+
+
+                  {/* <div className={styles.moreButtonContainer}>
+                    <button className={styles.moreButton} onClick={() => setmoreDropdownOpen(!dropdownOpen)}>
+                      More
+                    </button>
+
+                    {moreDropdownOpen && (
+                      <DropdownPortal>
+                        <div className={styles.dropdown} style={{ position: 'absolute', top: '100px', left: '50px' }}>
+                          <button
+                            className={`${styles.aspectButton} ${aspectRatio === '3:4' ? styles.activeButton : ''}`}
+                            onClick={() => setAspectRatio('3:4')}
+                          >
+                            3:4
+                          </button>
+                          <button
+                            className={`${styles.aspectButton} ${aspectRatio === '4:5' ? styles.activeButton : ''}`}
+                            onClick={() => setAspectRatio('4:5')}
+                          >
+                            4:5
+                          </button>
+                          <button
+                            className={`${styles.aspectButton} ${aspectRatio === '9:16' ? styles.activeButton : ''}`}
+                            onClick={() => setAspectRatio('9:16')}
+                          >
+                            9:16
+                          </button>
+                        </div>
+                      </DropdownPortal>
+                    )}
+                  </div> */}
                   {/* <button className={styles.moreButton}>
                     More
                     <div className={styles.dropdown}>
@@ -378,7 +463,7 @@ function ImageGenerator({ onGenerateImage }) {
             {/* Image Size */}
             {/* <div className={styles.inputRow}> */}
             <div className={styles.sizeInputColumn}>
-              <p className={styles.label} style={{ margin: '0px' }}>Image Size (px)</p>
+                <p className={styles.label} style={{ margin: '0px', alignItems: 'center', justifyContent: 'center' }}>Image Size (px)</p>
               <div className={styles.sizeInputRow}>
                 <input
                   type="number"
@@ -417,14 +502,15 @@ function ImageGenerator({ onGenerateImage }) {
 
           </div>
 
-
-          <button
-            className={styles.generateButton}
-            onClick={handleGenerateClick}
-            disabled={isLoading}
-          >
-            {isLoading ? 'Generating...' : 'Generate'}
-          </button>
+          <div className={styles.generateButtonCont}>
+            <button
+              className={styles.generateButton}
+              onClick={handleGenerateClick}
+              disabled={isLoading}
+            >
+              {isLoading ? 'Generating...' : 'Generate'}
+            </button>
+          </div>
         </div>
 
         {/* Generated images */}

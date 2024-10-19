@@ -17,6 +17,8 @@
     z-index: 1;
     transition: opacity 0.3s ease-in-out; /* Smooth fading transition */
     opacity: 1; /* Default state where all cards are fully visible */
+    text-decoration: none; /* Remove the underline */
+    color: inherit; /* Ensure the text color remains as intended */
 }
 
 .ai-tool-card:hover {
