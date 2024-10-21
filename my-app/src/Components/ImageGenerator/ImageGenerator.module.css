@@ -145,8 +145,8 @@ body {
 }
 .magicButton {
   background-color: transparent;
-  color: rgb(134, 134, 255);
-  border: blue;
+  color: #1ba8d9;
+  border: 2px solid #1ba8d9;
   border-radius: 5px;
   cursor: pointer;
   /* padding: 10px; */
