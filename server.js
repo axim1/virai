@@ -274,10 +274,10 @@ app.get("/confirm_payment", async (req, res) => {
         requestedSubscription: null,
       });
 
-      return res.redirect(`http://92.240.254.103:3000/?status=success&user=${user._id}`);
+      return res.redirect(`http://92.240.254.103:8000/?status=success&user=${user._id}`);
     } else {
       await User.findOneAndUpdate({ paymentId }, { paymentStatus: 'FAILED' });
-      return res.redirect(`http://92.240.254.103:3000/?status=failed&authorizationStatus=${authorizationStatus}`);
+      return res.redirect(`http://92.240.254.103:8000/?status=failed&authorizationStatus=${authorizationStatus}`);
     }
   } catch (error) {
     console.error("Error in confirm_payment:", error.message);
