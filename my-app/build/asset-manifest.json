@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/static/css/main.46e46b3a.css",
-    "main.js": "/static/js/main.2b1e237c.js",
+    "main.css": "/static/css/main.cf1ba0dc.css",
+    "main.js": "/static/js/main.3abc154f.js",
     "static/js/787.cfd8f164.chunk.js": "/static/js/787.cfd8f164.chunk.js",
     "static/media/Organic shapes mansion on a cliff.jpg": "/static/media/Organic shapes mansion on a cliff.35562c8d278054637b6b.jpg",
     "static/media/House_sketch to image.jpg": "/static/media/House_sketch to image.86acd992eb85bb872358.jpg",
@@ -13,12 +13,12 @@
     "static/media/slick.ttf": "/static/media/slick.c94f7671dcc99dce43e2.ttf",
     "static/media/slick.woff": "/static/media/slick.295183786cd8a1389865.woff",
     "index.html": "/index.html",
-    "main.46e46b3a.css.map": "/static/css/main.46e46b3a.css.map",
-    "main.2b1e237c.js.map": "/static/js/main.2b1e237c.js.map",
+    "main.cf1ba0dc.css.map": "/static/css/main.cf1ba0dc.css.map",
+    "main.3abc154f.js.map": "/static/js/main.3abc154f.js.map",
     "787.cfd8f164.chunk.js.map": "/static/js/787.cfd8f164.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.46e46b3a.css",
-    "static/js/main.2b1e237c.js"
+    "static/css/main.cf1ba0dc.css",
+    "static/js/main.3abc154f.js"
   ]
 }
