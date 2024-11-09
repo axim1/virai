@@ -10,6 +10,10 @@ const app = express();
 const FormData = require('form-data');
 require('dotenv').config();
 const callbackUrl = process.env.CALLBACK_URL;
+const { v4: uuidv4 } = require('uuid'); // Import UUID
+// const multer = require("multer");
+// const path = require("path");
+
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -19,13 +23,24 @@ const fs = require('fs');
 const uri = "mongodb+srv://asim6832475:1234@cluster0.ukza83p.mongodb.net/?retryWrites=true&w=majority";
 
 const clientOptions = { serverApi: { version: '1', strict: true, deprecationErrors: true } };
-
+    // First API call to get the access token
+const clientId = 'l77443c07411ca4cfbbaf5498a11dfadde';
+const clientSecret = 'daeb8027bc5e4e61a890550c10cf4cb7';
 
 mongoose.connect(uri, clientOptions)
   .then(() => console.log("Connected to MongoDB"))
   .catch(error => console.error("Error connecting to MongoDB:", error));
 
-
+  const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+      cb(null, "uploads/"); // Directory to store uploaded files
+    },
+    filename: (req, file, cb) => {
+      cb(null, `${Date.now()}-${file.originalname}`);
+    },
+  });
+  
+// const upload = multer({ storage });
 
 app.get("/subscriptions", async (req, res) => {
   try {
@@ -60,37 +75,218 @@ app.post("/login", async (req, res) => {
 });
 
 
-// Example of updating a route to use Mongoose syntax
-app.post("/api/signup", async (req, res) => {
-  const { fname, lname, email, password, subscriptionName } = req.body;
-  try {
-    const existingUser = await User.findOne({ email: email });
-    if (existingUser) {
-      res.send({ message: "User is already registered" });
-    } else {
-      const subscription = await Subscription.findOne({ name: subscriptionName });
-      if (!subscription) {
-        res.send({ message: "Invalid subscription package" });
-      } else {
-        const newUser = await User.create({
-          fname,
-          lname,
-          email,
-          password,
-          no_of_images_left: subscription.generatedImages,
-          subscribed_monthly: subscriptionName === "STARTER" || subscriptionName === "BUSINESS" || subscriptionName === "PREMIUM",
-          subscribed_yearly: subscriptionName === "BUSINESS" || subscriptionName === "PREMIUM",
-          subscriptionId: subscription.id,
-        });
 
-        res.send({ message: "Account has been created!! Please Login", user: newUser });
-      }
+
+app.post("/api/signup", upload.single("profilePic"), async (req, res) => {
+  const { fname, lname, email, password, phone, subscriptionName } = req.body;
+  try {
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.send({ message: "User is already registered" });
     }
+
+    const subscription = await Subscription.findOne({ name: subscriptionName });
+    if (!subscription) {
+      return res.send({ message: "Invalid subscription package" });
+    }
+
+    const profilePicPath = req.file ? req.file.path : null;
+
+    const newUser = await User.create({
+      fname,
+      lname,
+      email,
+      password,
+      phone,
+      no_of_images_left: subscription.generatedImages,
+      subscribed_monthly: ["STARTER", "BUSINESS", "PREMIUM"].includes(subscriptionName),
+      subscribed_yearly: ["BUSINESS", "PREMIUM"].includes(subscriptionName),
+      subscription: subscription._id,
+      profilePic: profilePicPath,
+    });
+
+    res.send({ message: "Account created! Please login.", user: newUser });
   } catch (error) {
     console.error("Error during signup:", error);
-    res.status(500).send({ message: "Internal server error", error: error.message });
+    res.status(500).send({ message: "Internal server error" });
   }
 });
+
+
+// const { v4: uuidv4 } = require('uuid');
+
+app.post('/api/getPaymentUrl', async (req, res) => {
+  try {
+    const { email, amount, subscriptionName } = req.body;
+    console.log(email, amount, subscriptionName)
+    // Find the user and requested subscription
+    const user = await User.findOne({ email: email });
+    const subscription = await Subscription.findOne({ name: subscriptionName.toUpperCase() });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    if (!subscription) {
+      return res.status(404).json({ message: "Requested subscription not found." });
+    }
+
+    // Get access token
+    const tokenResponse = await axios.post(
+      'https://api.tatrabanka.sk/tatrapayplus/sandbox/auth/oauth/v2/token',
+      new URLSearchParams({
+        client_id: clientId,
+        client_secret: clientSecret,
+        grant_type: 'client_credentials',
+        scope: 'TATRAPAYPLUS',
+      }),
+      { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
+    );
+
+    const accessToken = tokenResponse.data.access_token;
+
+    // Initiate payment
+    const paymentResponse = await axios.post(
+      'https://api.tatrabanka.sk/tatrapayplus/sandbox/v1/payments',
+      {
+        basePayment: {
+          instructedAmount: {
+            amountValue: amount,
+            currency: 'EUR',
+          },
+          endToEnd: {
+            variableSymbol: '1',
+            specificSymbol: '2',
+            constantSymbol: '3',
+          },
+        },
+        userData: {
+          firstName: user.fname,
+          lastName: user.lname,
+          email: user.email,
+          externalApplicantId: '1111',
+          phone: '+421901123456',
+        },
+        bankTransfer: {
+          remittanceInformationUnstructured: 'the message',
+        },
+        cardDetail: {
+
+          cardHolder: `${user.fname} ${user.lname}`,
+          isPreAuthorization: false,
+
+        },
+     
+      },
+      {
+        headers: {
+          'X-Request-ID': uuidv4(),
+          'IP-Address': '136.226.198.81',
+          'Redirect-URI': 'http://92.240.254.103:8000/confirm_payment',
+          'Preferred-Method': 'CARD_PAY',
+          'Accept-Language': 'en',
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
+
+    const { tatraPayPlusUrl, paymentId } = paymentResponse.data;
+
+     console.log(tatraPayPlusUrl)
+   // Update user with paymentId, requested subscription, and pending status
+    await User.findByIdAndUpdate(user._id, {
+      paymentId: paymentId,
+      paymentStatus: 'PENDING',
+      requestedSubscription: subscription._id,
+    });
+    res.json({ tatraPayPlusUrl });
+  } catch (error) {
+    console.error('Error in getPaymentUrl:', error);
+    res.status(500).json({ error: 'An error occurred while processing your request.' });
+  }
+});
+
+
+
+app.get("/confirm_payment", async (req, res) => {
+  try {
+    const { paymentId, paymentMethod, error, errorId } = req.query;
+
+    if (!paymentId) {
+      return res.status(400).json({ message: "Missing paymentId query parameter." });
+    }
+
+    if (error && errorId) {
+      console.error(`Technical error occurred: ${error} (Error ID: ${errorId})`);
+      await User.findOneAndUpdate({ paymentId }, { paymentStatus: 'FAILED' });
+      return res.status(500).json({
+        message: "Payment processing encountered a technical error.",
+        error,
+        errorId,
+      });
+    }
+
+    // Get access token
+    const tokenResponse = await axios.post(
+      'https://api.tatrabanka.sk/tatrapayplus/sandbox/auth/oauth/v2/token',
+      new URLSearchParams({
+        client_id: clientId,
+        client_secret: clientSecret,
+        grant_type: 'client_credentials',
+        scope: 'TATRAPAYPLUS',
+      }),
+      { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
+    );
+
+    const accessToken = tokenResponse.data.access_token;
+
+    // Check payment status
+    const paymentStatusResponse = await axios.get(
+      `https://api.tatrabanka.sk/tatrapayplus/sandbox/v1/payments/${paymentId}/status`,
+      {
+        headers: {
+          'X-Request-ID': uuidv4(),
+          'IP-Address': '136.226.198.81',
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${accessToken}`,
+        },
+      }
+    );
+
+    const { authorizationStatus } = paymentStatusResponse.data;
+
+    if (authorizationStatus === "PAY_METHOD_SELECTED") {
+      const user = await User.findOne({ paymentId }).populate('requestedSubscription');
+
+      if (!user || !user.requestedSubscription) {
+        return res.status(404).json({ message: "User or requested subscription not found." });
+      }
+      const subscription = await Subscription.findOne({ _id: user.requestedSubscription._id });
+      console.log(subscription)
+      // Update user subscription
+      await User.findByIdAndUpdate(user._id, {
+        no_of_images_left:user.no_of_images_left + subscription.generatedImages,
+        subscription: subscription._id,
+        paymentStatus: 'COMPLETED',
+        subscription_date: new Date(),
+        requestedSubscription: null,
+      });
+
+      return res.redirect(`http://92.240.254.103:3000/?status=success&user=${user._id}`);
+    } else {
+      await User.findOneAndUpdate({ paymentId }, { paymentStatus: 'FAILED' });
+      return res.redirect(`http://92.240.254.103:3000/?status=failed&authorizationStatus=${authorizationStatus}`);
+    }
+  } catch (error) {
+    console.error("Error in confirm_payment:", error.message);
+    res.status(500).json({ message: "Internal server error.", error: error.message });
+  }
+});
+
+
+
 
 
 
@@ -896,6 +1092,6 @@ app.get('*', (req, res) => {
 // });
 
 app.listen(8000, '92.240.254.103', () => {
-  console.log("Server starting at 192.168.1.100 on port 8000");
+  console.log("Server starting at 92.240.254.103 on port 8000");
 });
 

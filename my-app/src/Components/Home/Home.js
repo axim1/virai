@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from "react-router-dom";
+
 import './Home.css'; // Your CSS file for styling
 import { Link } from 'react-router-dom'; // Ensure you are using react-router-dom for navigation
 
@@ -28,6 +30,31 @@ function Home({ triggerShrink }) {
   const [generatedImages, setGeneratedImages] = useState([]); // State to store generated images
   const [scrollY, setScrollY] = useState(0);
 //   const [triggerShrink, setLocalTriggerShrink] = useState(triggerShrink);
+const location = useLocation();
+
+useEffect(() => {
+  const queryParams = new URLSearchParams(location.search);
+  const status = queryParams.get("status");
+  const userId = queryParams.get("user");
+
+  if (status === "success" && userId) {
+    // Fetch updated user data from the backend
+    fetch(`http://localhost:8000/api/user/${userId}`)
+      .then((response) => response.json())
+      .then((data) => {
+        // Update localStorage with the new user data
+        localStorage.setItem("user", JSON.stringify(data.user));
+        window.alert("User updated successfully!");
+      })
+      .catch((error) => {
+        console.error("Error fetching user data:", error);
+      });
+  } else if (status === "failed") {
+    window.alert("Payment failed. Please try again.");
+  }
+}, [location.search]);
+
+
 
   useEffect(() => {
     const handleScroll = () => {

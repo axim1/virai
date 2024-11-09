@@ -1,23 +1,39 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import axios from "axios";
 
 import './PricingSection.css';
 
 const PricingSection = () => {
+  const apiUrl = process.env.REACT_APP_API_URL;
+
+  const submitForm = async (event, amount, subcription) => {
+    event.preventDefault();
+    const user = JSON.parse(localStorage.getItem('user')) || null;
+
+    if (user) {
+      try {
+        // Make the API call to your Express server
+        console.log(user)
+        console.log(user.email)
+        const response = await axios.post(`${apiUrl}api/getPaymentUrl`, {email:user.email ,amount: amount, subscriptionName: subcription });
+        const tatraPayPlusUrl = response.data.tatraPayPlusUrl;
+
+        if (tatraPayPlusUrl) {
+          // Redirect to the URL received
+          window.location.href = tatraPayPlusUrl;
+        }
+      } catch (error) {
+        console.error('Error fetching payment URL:', error);
+        alert('There was an error processing your request.');
+      }
+    } else {
+      window.location.href = 'http://localhost:3000/login';
+    }
+  };
+
   return (
     <div className="pricing-section">
-      {/* <div className="pricing-content">
-        <h3 className="subtitle">FLEXIBLE & AFFORDABLE</h3>
-        <h1 className="title">Our Pricing Plans</h1>
-        <p className="description">
-          Adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis.
-        </p>
-        <ul className="features-list">
-          <li>✔ Suspendisse dignissim</li>
-          <li>✔ Nullam efficitur nunc</li>
-          <li>✔ Etiam eu lectus at lectus</li>
-        </ul>
-      </div> */}
       <div className="pricing-cards">
         <div className="pricing-card">
           <div className="card-icon"> {/* Add your icon here */}</div>
@@ -39,6 +55,7 @@ const PricingSection = () => {
             <button className="card-button">Get Now</button>
           </Link>
         </div>
+
         <div className="pricing-card">
           <div className="card-icon"> {/* Add your icon here */}</div>
           <h2 className="card-title">Starter</h2>
@@ -55,10 +72,9 @@ const PricingSection = () => {
             <li>Personal use only</li>
             <li>Images are open to public</li>
           </ul>
-          <Link to="/signup">
-            <button className="card-button">Get Now</button>
-          </Link>
+          <button className="card-button" onClick={(event) => submitForm(event, 8, 'starter')}>Get Now</button>
         </div>
+
         <div className="pricing-card">
           <div className="card-icon"> {/* Add your icon here */}</div>
           <h2 className="card-title">Business</h2>
@@ -75,10 +91,9 @@ const PricingSection = () => {
             <li>Commercial license</li>
             <li>Images are kept private</li>
           </ul>
-          <Link to="/signup">
-            <button className="card-button">Get Now</button>
-          </Link>
+          <button className="card-button" onClick={(event) => submitForm(event, 24,'business')}>Get Now</button>
         </div>
+
         <div className="pricing-card">
           <div className="card-icon"> {/* Add your icon here */}</div>
           <h2 className="card-title">Premium</h2>
@@ -95,9 +110,7 @@ const PricingSection = () => {
             <li>Commercial license</li>
             <li>Images are kept private</li>
           </ul>
-          <Link to="/signup">
-            <button className="card-button">Get Now</button>
-          </Link>
+          <button className="card-button" onClick={(event) => submitForm(event, 48, 'premium')}>Get Now</button>
         </div>
       </div>
     </div>

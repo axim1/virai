@@ -2,6 +2,8 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
 // User model
+
+// User model
 const userSchema = new Schema({
   fname: {
     type: String,
@@ -19,6 +21,14 @@ const userSchema = new Schema({
   password: {
     type: String,
     required: true,
+  },
+  phone: {
+    type: String,
+    required: true,
+  },
+  profilePic: {
+    type: String, // Store the file path or URL
+    default: null,
   },
   no_of_images_left: {
     type: Number,
@@ -39,11 +49,27 @@ const userSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: 'Subscription',
   },
+  requestedSubscription: {
+    type: Schema.Types.ObjectId,
+    ref: 'Subscription', // Points to the requested subscription
+    default: null,
+  },
   subscription_date: {
     type: Date,
     default: null,
   },
+  paymentId: {
+    type: String,
+    default: null,
+  },
+  paymentStatus: {
+    type: String,
+    default: 'PENDING',
+    enum: ['PENDING', 'PAY_METHOD_SELECTED', 'COMPLETED', 'FAILED'],
+  },
 });
+
+
 
 const User = mongoose.model('User', userSchema);
 
