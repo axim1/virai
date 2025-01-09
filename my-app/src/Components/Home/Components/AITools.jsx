@@ -51,18 +51,28 @@ const tools = [
 const AITools = () => {
   return (
     <div className="ai-tools-container">
-      {tools.map((tool, index) => (
+      {      tools.map((tool, index) => (
         <Link
-          key={index}
-          to={{
-            pathname: "/gen",
-            state: { apiType: tool.apiType }, // Pass the apiType as state
-          }}
-          className="ai-tool-card"
-        >
-          <div className="ai-tool-label">{tool.name}</div>
-          <img src={tool.image} alt={tool.name} className="ai-tool-image" />
-        </Link>
+  key={index}
+  to={`/gen?apiType=${tool.apiType}`} // Pass apiType as a query parameter
+  className="ai-tool-card"
+>
+  <div className="ai-tool-label">{tool.name}</div>
+  <img src={tool.image} alt={tool.name} className="ai-tool-image" />
+</Link>
+
+        // <Link
+        
+        //   key={index}
+        //   to={{
+        //     pathname: "/gen",
+        //     state: { apiType: tool.apiType }, // Pass the apiType as state
+        //   }}
+        //   className="ai-tool-card"
+        // >
+        //   <div className="ai-tool-label">{tool.name}</div>
+        //   <img src={tool.image} alt={tool.name} className="ai-tool-image" />
+        // </Link>
       ))}
     </div>
   );

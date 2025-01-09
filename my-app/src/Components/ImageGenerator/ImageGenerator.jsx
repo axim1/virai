@@ -11,12 +11,22 @@ const userId = username._id;
 
 function ImageGenerator({ onGenerateImage }) {
   const navigate = useNavigate();
-  const location = useLocation(); // Use useLocation to retrieve passed state
+   const location = useLocation(); // Use useLocation to retrieve passed state
+
+  const queryParams = new URLSearchParams(location.search);
+  const initialApiType = queryParams.get("apiType") || "sketch-to-image"; // Default to "sketch-to-image"
+  const [apiType, setApiType] = useState(initialApiType);
+
+  useEffect(() => {
+    console.log("Current API Type:", apiType); // Debugging
+  }, [apiType]);
+
+  // const location = useLocation(); // Use useLocation to retrieve passed state
 
   const [isLoading, setIsLoading] = useState(false);
   const [images, setImages] = useState([]);
   const [generatedImages, setGeneratedImages] = useState([]);
-  const [apiType, setApiType] = useState(location.state?.apiType || 'sketch-to-image'); 
+  // const [apiType, setApiType] = useState(location.state?.apiType || 'text-to-image'); 
   const [generatorType, setGeneratorType] = useState('');
   const [promptText, setPromptText] = useState('');
   const [negativePromptText, setNegativePromptText] = useState('');
@@ -104,6 +114,9 @@ useEffect(() => {
   //   fetchDummyImages();
   // }, []);
   const handleGenerateClick = async () => {
+
+    // console.log(`Generating image using API type: ${location.state.apiType}`);
+
     setIsLoading(true);
     if (!userId) {
       navigate('/login');
@@ -147,7 +160,12 @@ useEffect(() => {
     setDropdownOpen(false); // Close the dropdown after selection
 
   };
-
+  // useEffect(() => {
+  //   if (location.state?.apiType) {
+  //     console.log('the api statee ::: ',location.state.apiType)
+  //     // setApiType(location.state.apiType); // Update apiType if passed through state
+  //   }
+  // }, [location.state]);
   const handleStyleTypeChange = (style) => {
     setStyleType(style);
   };
@@ -159,6 +177,15 @@ useEffect(() => {
   const handleImageUpload = (event) => {
     setUploadedImage(event.target.files[0]);
   };
+  const formatApiType=(apiType)=> {
+    return apiType
+      .split('-') // Split the string by hyphens
+      .map((word, index) => 
+        index === 0 ? word.charAt(0).toUpperCase() + word.slice(1) : word
+      ) // Capitalize the first letter of the first word
+      .join(' '); // Join the words back with spaces
+  }
+  
 
   return (
     <>
@@ -179,7 +206,8 @@ useEffect(() => {
                   <line x1="3" y1="18" x2="21" y2="18"></line>
                 </svg>
               </div>
-              {apiType} <span className={styles.dropdownIcon}>▼</span>
+              {formatApiType(apiType)} 
+              <span className={styles.dropdownIcon}>   </span>
             </div>
             {dropdownOpen && (
               <div className={styles.dropdownList}>
@@ -233,13 +261,13 @@ useEffect(() => {
                   className={styles.inputField}
                   value={promptText}
                   style={{
-                    height: "auto", // Set the height to auto initially
-                    minHeight: "150px", // Minimum height for initial state
+                    height: "50px", 
+                    // minHeight: "10px", 
                     resize: "none", // Prevent manual resizing
                   }}
                   onChange={(e) => setPromptText(e.target.value)}
                   onInput={(e) => {
-                    e.target.style.height = "auto"; // Reset the height to auto to recalculate
+                    e.target.style.height = "auto"; 
                     e.target.style.height = `${e.target.scrollHeight}px`; // Adjust height based on content
                   }}
                   placeholder="Describe your image or hit the Magic button..."
@@ -260,8 +288,8 @@ useEffect(() => {
 
                   value={negativePromptText}
                   style={{
-                    height: "auto", // Set the height to auto initially
-                    minHeight: "10px", // Minimum height for initial state
+                    height: "50px", 
+                    // minHeight: "10px", 
                     resize: "none", // Prevent manual resizing
                   }}
                   onInput={(e) => {
@@ -269,7 +297,7 @@ useEffect(() => {
                     e.target.style.height = `${e.target.scrollHeight}px`; // Adjust height based on content
                   }}
                   onChange={(e) => setNegativePromptText(e.target.value)}
-                  placeholder="Add negative prompts..."
+                  placeholder='Add negative prompts, e.g. "blurry image"'
                 />
               </div>
             </div>
