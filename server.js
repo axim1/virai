@@ -361,6 +361,149 @@ app.get('/check-image-status/:userId/:uuid', async (req, res) => {
 });
 
 
+app.post('/inpainting',upload.single('image'),async (req,res)=>{
+
+  try{
+  const maskImagePath = req.file.path
+
+  if (!req.file) {
+      return res.status(400).send({ message: 'No sketch image provided' });
+    }
+    // const sketchImagePath = req.file.path; // Path to the uploaded sketch image
+
+    const sketchImagePath = req.file.path; // Path to the uploaded sketch image
+    const form = new FormData();
+
+    // Append parameters to form data
+    if (!req.file) {
+      return res.status(400).send({ message: 'No sketch image provided' });
+    }
+    const userId = req.body.userId; // Assuming the userId is sent in the body of the request
+    const user = await User.findById(userId);
+
+    // Check if the user exists
+    if (!user) {
+      console.log("User not found. UserId:", userId);
+      return res.status(404).send({ message: "User not found" });
+    }
+
+    // Check if the user has any image generation limits left
+    if (user.no_of_images_left <= 0) {
+      return res.status(400).send({ message: "You have reached the image generation limit" });
+    }
+
+    // Decrement the user's image generation limit
+    const updatedUser = await User.findByIdAndUpdate(userId, { $inc: { no_of_images_left: -1 } }, { new: true });
+    if (!updatedUser) {
+      console.log("Error updating user:", updatedUser);
+      return res.status(500).send({ message: "Error updating user" });
+    }
+
+
+    // Append text fields
+    form.append('denoise', req.body.strength || 0.8);
+    form.append('prompt', req.body.prompt); // Use the prompt from the request or a default value
+    form.append('revert_extra', ''); // Empty string or any specific value if needed
+    form.append('callback_url', ''); // Empty string or any specific value if needed
+    form.append('mask_image', fs.createReadStream(maskImagePath), {
+      filename: req.file.originalname,
+      contentType: 'image/png' // or appropriate mime type
+    });
+    // Assuming your application's host and port are configured correctly
+    const callbackUrlImg = `${callbackUrl}/image-callback`; // Replace with your actual callback endpoint URL
+    // form.append('callback_url', callbackUrlImg);
+    try {
+      inpaintingResponse = await axios.post('https://ot66p3l4lqhh77-8000.proxy.runpod.net/inpainting', form, {
+        headers: {
+          ...form.getHeaders(),
+        },
+      });
+      console.log(inpaintingResponse)
+      imageUuid = inpaintingResponse.data.images[0].image_uuid;
+      console.log("image uuid", imageUuid);
+
+    } catch (error) {
+      console.error('Error during inpainting API call:', error);
+      if (error.response) {
+        console.error('Error details:', error.response.data);
+      }
+      return res.status(500).send({ message: 'Error during image generation request.' });
+    }
+    // console.log("image uuid", imageUuid)
+
+    fs.unlink(sketchImagePath, (err) => {
+      if (err) {
+        console.error('Failed to delete the uploaded sketch image:', err);
+      } else {
+        console.log(`Uploaded sketch image ${sketchImagePath} was deleted.`);
+      }
+    });
+    
+    const endTime = Date.now() + 100000;
+
+    const intervalId = setInterval(async () => {
+      if (Date.now() >= endTime) {
+        clearInterval(intervalId);
+        return res.status(408).send({ message: 'Request Timeout: Image could not be retrieved in time.' });
+      }
+
+      try {
+        const response = await axios.get(`https://ot66p3l4lqhh77-8000.proxy.runpod.net/getimage/${imageUuid}`, {
+          params: {
+            delete: false,
+            type: 'PNG',
+            base64_c: false,
+            quality_level: 90,
+          },
+          headers: {
+            'accept': 'application/json'
+          },
+          responseType: 'arraybuffer'
+        });
+
+        if (response.data) {
+          const dataStr = response.data.toString();
+          if (dataStr.includes("Image not found")) {
+            console.log("Image not found in response, retrying...");
+          } else {
+            const imageBase64 = Buffer.from(response.data, 'binary').toString('base64');
+            const imageDataUrl = `data:image/png;base64,${imageBase64}`;
+
+            const generatedImage = new GeneratedImage({
+              userId: userId,
+              image: response.data
+            });
+            await generatedImage.save();
+
+            clearInterval(intervalId);
+            return res.status(200).send({ imageUrls: imageDataUrl, message: 'Image processed successfully' });
+          }
+        }
+      } catch (error) {
+        if (error.response && (error.response.status === 404 || error.response.data.includes("Image not found"))) {
+          console.log("Image not found, retrying...");
+        } else {
+          console.error('Error during image retrieval:', error);
+          clearInterval(intervalId);
+          return res.status(500).send({ message: 'Internal server error during image retrieval.' });
+        }
+      }
+    }, 3000);
+    // res.send({ uuid: imageUuid });
+    // res.status(200).send({ message: 'Image processed successfully' });
+
+  } catch (error) {
+    // console.error('Error during sketch to image process:', error);
+    if (error.response) {
+      console.error('Error details:', error.response.data.detail);
+    }
+
+    res.status(500).send({ message: 'Internal server error' });
+  }
+
+
+})
+
 app.post('/sketch-to-image', upload.single('sketch_image'), async (req, res) => {
   try {
     if (!req.file) {
@@ -579,7 +722,7 @@ app.post('/text-to-image',upload.none(), async (req, res) => {
     form.append('maintain_aspect_ratio', req.body.maintainAspectRatio || 'false');
     form.append('scheduler', 'Default');    
     try {
-      sketch2imageResponse = await axios.post('https://ek6vmxx07wvmnf-8000.proxy.runpod.net/text2image', form, {
+      sketch2imageResponse = await axios.post('https://ot66p3l4lqhh77-8000.proxy.runpod.net/text2image', form, {
         headers: {
           ...form.getHeaders(),
         },
@@ -607,7 +750,7 @@ app.post('/text-to-image',upload.none(), async (req, res) => {
       }
 
       try {
-        const response = await axios.get(`https://ek6vmxx07wvmnf-8000.proxy.runpod.net/getimage/${imageUuid}`, {
+        const response = await axios.get(`https://ot66p3l4lqhh77-8000.proxy.runpod.net/getimage/${imageUuid}`, {
           params: {
             delete: true,
             type: 'PNG',
@@ -1038,6 +1181,10 @@ app.use(express.static(path.join(__dirname, 'my-app/build')));
 
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'my-app/build', 'index.html'));
+  console.log("Headers:", req.headers);
+  console.log("Body:", req.body);
+  console.log("Query Params:", req.query);
+  res.send('Request logged');
 });
 // app.listen(8000, () => {
 //   console.log(`Server is running on port `);
@@ -1087,11 +1234,11 @@ app.get('*', (req, res) => {
 
 // ... (existing code)
 
-// app.listen(8000, () => {
-//   console.log("Server starting at 8000");
-// });
-
-app.listen(8000, '92.240.254.103', () => {
-  console.log("Server starting at 92.240.254.103 on port 8000");
+app.listen(8000, () => {
+  console.log("Server starting at 8000");
 });
+
+// app.listen(8000, '92.240.254.103', () => {
+//   console.log("Server starting at 92.240.254.103 on port 8000");
+// });
 

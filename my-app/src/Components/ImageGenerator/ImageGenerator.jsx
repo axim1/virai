@@ -1,32 +1,26 @@
-import React, { useState, useEffect,useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import styles from './ImageGenerator.module.css';
-import { useNavigate,useLocation } from "react-router-dom";
-import wsImage1 from '../../assets/House_sketch-to-image_web.jpg'; // Replace with your image path
+import { useNavigate, useLocation } from "react-router-dom";
 import DropdownPortal from './DropdownPortal.js';
-
+import CanvasInpainting from './canvas.js';
+  
 const apiUrl = process.env.REACT_APP_API_URL;
 const username = JSON.parse(localStorage.getItem('user')) || {};
 const userId = username._id;
 
 function ImageGenerator({ onGenerateImage }) {
   const navigate = useNavigate();
-   const location = useLocation(); // Use useLocation to retrieve passed state
+  const location = useLocation();
 
   const queryParams = new URLSearchParams(location.search);
-  const initialApiType = queryParams.get("apiType") || "sketch-to-image"; // Default to "sketch-to-image"
+  const initialApiType = queryParams.get("apiType") || "sketch-to-image"; 
   const [apiType, setApiType] = useState(initialApiType);
-
-  useEffect(() => {
-    console.log("Current API Type:", apiType); // Debugging
-  }, [apiType]);
-
-  // const location = useLocation(); // Use useLocation to retrieve passed state
+  const canvasRef = useRef(null); // Ref to access canvas methods
 
   const [isLoading, setIsLoading] = useState(false);
   const [images, setImages] = useState([]);
   const [generatedImages, setGeneratedImages] = useState([]);
-  // const [apiType, setApiType] = useState(location.state?.apiType || 'text-to-image'); 
   const [generatorType, setGeneratorType] = useState('');
   const [promptText, setPromptText] = useState('');
   const [negativePromptText, setNegativePromptText] = useState('');
@@ -45,43 +39,33 @@ function ImageGenerator({ onGenerateImage }) {
   const toggleDropdown = () => {
     setDropdownOpen(!dropdownOpen);
   };
+  
   const [dropdownTop, setDropdownTop] = useState(0);
-const [dropdownLeft, setDropdownLeft] = useState(0);
+  const [dropdownLeft, setDropdownLeft] = useState(0);
 
-const dropdownRef = useRef(null);
-useEffect(() => {
-  if (moreDropdownOpen && dropdownRef.current) {
-    const buttonRect = dropdownRef.current.getBoundingClientRect();
-    const dropdownHeight = 210; // Approximate height of the dropdown
-    const dropdownWidth = 150; // Width of dropdown
-    const viewportHeight = window.innerHeight;
-    const viewportWidth = window.innerWidth;
+  const dropdownRef = useRef(null);
+  useEffect(() => {
+    if (moreDropdownOpen && dropdownRef.current) {
+      const buttonRect = dropdownRef.current.getBoundingClientRect();
+      const dropdownHeight = 210;
+      const dropdownWidth = 150;
+      const viewportHeight = window.innerHeight;
+      const viewportWidth = window.innerWidth;
 
-    // Calculate position: default to the right of the button
-    let topPosition = buttonRect.top-80;
-    let leftPosition = buttonRect.right;
+      let topPosition = buttonRect.top-80;
+      let leftPosition = buttonRect.right;
 
-    // Adjust if the dropdown goes beyond the viewport
-    if (buttonRect.bottom + dropdownHeight > viewportHeight) {
-      topPosition = buttonRect.top - dropdownHeight; // Adjust to fit within the bottom edge
+      if (buttonRect.bottom + dropdownHeight > viewportHeight) {
+        topPosition = buttonRect.top - dropdownHeight;
+      }
+      if (buttonRect.right + dropdownWidth > viewportWidth) {
+        leftPosition = buttonRect.left - dropdownWidth;
+      }
+
+      setDropdownTop(topPosition);
+      setDropdownLeft(leftPosition);
     }
-    if (buttonRect.right + dropdownWidth > viewportWidth) {
-      leftPosition = buttonRect.left - dropdownWidth; // Adjust to fit within the right edge
-    }
-
-    setDropdownTop(topPosition);
-    setDropdownLeft(leftPosition);
-  }
-}, [moreDropdownOpen]);
-
-
-
-
-  // const handleApiTypeChange = (type) => {
-  //   setApiType(type);
-  //   setDropdownOpen(false); // Close the dropdown after selection
-  // };
-
+  }, [moreDropdownOpen]);
 
   useEffect(() => {
     if (!userId) return;
@@ -98,30 +82,13 @@ useEffect(() => {
     fetchImages();
   }, [userId]);
 
-  // useEffect(() => {
-  //   const fetchDummyImages = async () => {
-  //     try {
-  //       // Fetching 6 random images from Lorem Picsum
-  //       const imageUrls = Array.from({ length: 4 }).map(
-  //         (_, index) => `https://picsum.photos/300?random=${index}`
-  //       );
-  //       setGeneratedImages(imageUrls);
-  //     } catch (error) {
-  //       console.error('Error fetching dummy images:', error);
-  //     }
-  //   };
-
-  //   fetchDummyImages();
-  // }, []);
   const handleGenerateClick = async () => {
-
-    // console.log(`Generating image using API type: ${location.state.apiType}`);
-
     setIsLoading(true);
     if (!userId) {
       navigate('/login');
       return;
     }
+    
     try {
       const formData = new FormData();
       formData.append('generatorType', generatorType);
@@ -135,7 +102,20 @@ useEffect(() => {
       formData.append('height', imageHeight);
       formData.append('strength', strength);
 
-      if (apiType === 'sketch-to-image' && uploadedImage) {
+      // Handle different image sources based on API type
+      if (apiType === 'inpainting' && canvasRef.current) {
+        try {
+          // Get the masked image blob from the canvas component
+          const maskedImageBlob = await canvasRef.current.getMaskedImageBlob();
+          
+          // Add the masked image to formData with the correct field name
+          formData.append('image', maskedImageBlob, 'masked_image.png');
+        } catch (error) {
+          console.error('Error getting masked image:', error);
+          setIsLoading(false);
+          return;
+        }
+      } else if (apiType === 'sketch-to-image' && uploadedImage) {
         formData.append('sketch_image', uploadedImage);
       } else if (uploadedImage) {
         formData.append('image', uploadedImage);
@@ -151,21 +131,16 @@ useEffect(() => {
     } catch (error) {
       console.error('Error generating image:', error);
     }
+    
     setIsLoading(false);
   };
 
   const handleApiTypeChange = (value) => {
     setApiType(value);
     setUploadedImage(null);
-    setDropdownOpen(false); // Close the dropdown after selection
-
+    setDropdownOpen(false);
   };
-  // useEffect(() => {
-  //   if (location.state?.apiType) {
-  //     console.log('the api statee ::: ',location.state.apiType)
-  //     // setApiType(location.state.apiType); // Update apiType if passed through state
-  //   }
-  // }, [location.state]);
+
   const handleStyleTypeChange = (style) => {
     setStyleType(style);
   };
@@ -175,28 +150,33 @@ useEffect(() => {
   };
 
   const handleImageUpload = (event) => {
-    setUploadedImage(event.target.files[0]);
+    if (apiType === 'inpainting') {
+      const file = event.target.files[0];
+      if (file) {
+        const img = new Image();
+        img.onload = () => {
+          setUploadedImage(img); // Set the fully loaded image
+        };
+        img.src = URL.createObjectURL(file); // Convert to a URL
+      }
+    } else {
+      setUploadedImage(event.target.files[0]);
+    }
   };
-  const formatApiType=(apiType)=> {
+  
+  const formatApiType = (apiType) => {
     return apiType
-      .split('-') // Split the string by hyphens
+      .split('-')
       .map((word, index) => 
         index === 0 ? word.charAt(0).toUpperCase() + word.slice(1) : word
-      ) // Capitalize the first letter of the first word
-      .join(' '); // Join the words back with spaces
+      )
+      .join(' ');
   }
-  
 
   return (
     <>
-      {/* <Navbar user={user}  /> */}
-
       <div className={styles.generatorContainer}>
         <div className={styles.topInputContainer}>
-
-
-
-
           <div className={styles.customDropdown}>
             <div className={styles.dropdownHeader} onClick={toggleDropdown}>
               <div className={styles.icon}>
@@ -218,6 +198,12 @@ useEffect(() => {
                   Text to Image
                 </div>
                 <div
+                  className={`${styles.dropdownItem} ${apiType === 'inpainting' ? styles.activeItem : ''}`}
+                  onClick={() => handleApiTypeChange('inpainting')}
+                >
+                  Inpainting
+                </div>
+                <div
                   className={`${styles.dropdownItem} ${apiType === 'sketch-to-image' ? styles.activeItem : ''}`}
                   onClick={() => handleApiTypeChange('sketch-to-image')}
                 >
@@ -229,11 +215,7 @@ useEffect(() => {
 
 
           <div className={styles.inputContainer}>
-
-
-
-            {/* Upload Image */}
-            {apiType == 'sketch-to-image' &&
+            {apiType === 'sketch-to-image' &&
               <div className={styles.inputRow}>
                 <div className={styles.inputColumn}>
                   <p className={styles.label}>Upload Image</p>
@@ -248,10 +230,28 @@ useEffect(() => {
                 </div>
               </div>
             }
+
+            {apiType === 'inpainting' &&
+              <div className={styles.inputRow}>
+                <div className={styles.inputColumn}>
+                  <p className={styles.label}>Upload Image</p>
+                  <label className={styles.uploadLabel}>
+                    <input
+                      type="file"
+                      className={styles.uploadInput}
+                      onChange={handleImageUpload}
+                    />
+                    <span className={styles.uploadPlaceholder}>UPLOAD INPAINTING IMAGE</span>
+                  </label>
+                </div>
+              </div>
+            }
+
             {/* Prompt input */}
             <div className={styles.inputRow}>
               <div className={styles.inputColumn}>
-                <div className={styles.promptLabel}>              <p className={styles.label} style={{ margin: '0px' }}>Prompt</p>
+                <div className={styles.promptLabel}>              
+                  <p className={styles.label} style={{ margin: '0px' }}>Prompt</p>
                   <button className={styles.magicButton}>
                     Magic Prompt
                   </button>
@@ -262,19 +262,15 @@ useEffect(() => {
                   value={promptText}
                   style={{
                     height: "50px", 
-                    // minHeight: "10px", 
-                    resize: "none", // Prevent manual resizing
+                    resize: "none",
                   }}
                   onChange={(e) => setPromptText(e.target.value)}
                   onInput={(e) => {
                     e.target.style.height = "auto"; 
-                    e.target.style.height = `${e.target.scrollHeight}px`; // Adjust height based on content
+                    e.target.style.height = `${e.target.scrollHeight}px`;
                   }}
                   placeholder="Describe your image or hit the Magic button..."
                 />
-
-
-
               </div>
             </div>
 
@@ -283,18 +279,15 @@ useEffect(() => {
               <div className={styles.inputColumn}>
                 <p className={styles.label}>Negative Prompt</p>
                 <textarea
-                  // type="text"
                   className={styles.inputField}
-
                   value={negativePromptText}
                   style={{
                     height: "50px", 
-                    // minHeight: "10px", 
-                    resize: "none", // Prevent manual resizing
+                    resize: "none",
                   }}
                   onInput={(e) => {
-                    e.target.style.height = "auto"; // Reset the height to auto to recalculate
-                    e.target.style.height = `${e.target.scrollHeight}px`; // Adjust height based on content
+                    e.target.style.height = "auto";
+                    e.target.style.height = `${e.target.scrollHeight}px`;
                   }}
                   onChange={(e) => setNegativePromptText(e.target.value)}
                   placeholder='Add negative prompts, e.g. "blurry image"'
@@ -302,13 +295,9 @@ useEffect(() => {
               </div>
             </div>
 
-
-            {/* image number  */}
-            {/* <div className={styles.inputRow}> */}
+            {/* image number */}
             <div className={styles.numButtonCont}>
-
               <p className={styles.label} style={{ margin: '0px' }}>Images Number</p>
-
               <div className={styles.numberButtons}>
                 {numberOfImages.map((number) => (
                   <button
@@ -320,21 +309,10 @@ useEffect(() => {
                   </button>
                 ))}
               </div>
-
-              {/* <div className={styles.numberButtons}>
-                <button className={`${styles.numButton} ${images === '1' ? styles.activeButton : ''}` }
-                                    onClick={() => setImages(1)}
-
->1</button>
-                <button className={`${styles.numButton} `} >2</button>
-                <button className={`${styles.numButton} `} >3</button>
-                <button className={`${styles.numButton}`} >4</button>
-                <button className={`${styles.numButton} `} >5</button>
-                <button className={`${styles.numButton}`} >6</button>
-              </div> */}
-              {/* </div> */}
             </div>
+            
             {/* Aspect Ratio */}
+            {apiType !== 'inpainting' &&
             <div className={styles.inputRow}>
               <div className={styles.inputColumn}>
                 <p className={styles.label}>Aspect Ratio</p>
@@ -342,156 +320,87 @@ useEffect(() => {
                   <button
                     className={`${styles.aspectButton} ${aspectRatio === '16:9' ? styles.activeButton : ''}`}
                     onClick={() => setAspectRatio('16:9')}
-                    style={{ height: 'calc(70px / (16 / 9))' }} /* Keep width fixed and adjust height for 16:9 */
+                    style={{ height: 'calc(70px / (16 / 9))' }}
                   >
                     16:9
                   </button>
                   <button
                     className={`${styles.aspectButton} ${aspectRatio === '3:2' ? styles.activeButton : ''}`}
                     onClick={() => setAspectRatio('3:2')}
-                    style={{ height: 'calc(70px / (3 / 2))' }} /* Keep width fixed and adjust height for 16:9 */
+                    style={{ height: 'calc(70px / (3 / 2))' }}
                   >
                     3:2
                   </button>
                   <button
                     className={`${styles.aspectButton} ${aspectRatio === '4:3' ? styles.activeButton : ''}`}
                     onClick={() => setAspectRatio('4:3')}
-                    style={{ height: 'calc(70px / (4 / 3))' }} /* Keep width fixed and adjust height for 4:3 */
+                    style={{ height: 'calc(70px / (4 / 3))' }}
                   >
                     4:3
                   </button>
                   <button
                     className={`${styles.aspectButton} ${aspectRatio === '1:1' ? styles.activeButton : ''}`}
                     onClick={() => setAspectRatio('1:1')}
-                    style={{ height: '70px' }} /* 1:1 aspect ratio */
+                    style={{ height: '70px' }}
                   >
                     1:1
                   </button>
                   <button
                     className={`${styles.aspectButton} ${aspectRatio === '2:3' ? styles.activeButton : ''}`}
                     onClick={() => setAspectRatio('2:3')}
-                    style={{ height: 'calc(70px / (2 / 3))' }} /* Keep width fixed and adjust height for 2:3 */
+                    style={{ height: 'calc(70px / (2 / 3))' }}
                   >
                     2:3
                   </button>
                   <div className={styles.moreButtonContainer} ref={dropdownRef}
-                        onMouseEnter={() => setmoreDropdownOpen(true)}  // Open dropdown on hover
-                        onMouseLeave={() => setmoreDropdownOpen(false)} // Close dropdown when mouse leaves
-                   
+                        onMouseEnter={() => setmoreDropdownOpen(true)}
+                        onMouseLeave={() => setmoreDropdownOpen(false)}
                   >
-  <button className={styles.moreButton} 
-  // onClick={() => setmoreDropdownOpen(!moreDropdownOpen)}
-  >
-    More
-  </button>
-
-  {moreDropdownOpen && (
-    <div className={styles.dropdown} style={{ top: dropdownTop, left: dropdownLeft, position: 'fixed' }}>
-                <button
-        className={`${styles.aspectButton} ${aspectRatio === '4:5' ? styles.activeButton : ''}`}
-        onClick={() => {
-          setAspectRatio('4:5');
-          // setmoreDropdownOpen(false);
-        }}
-        style={{ height: 'calc(70px / (4 / 5))' }} 
-      >
-        4:5
-      </button>
-           <button
-        className={`${styles.aspectButton} ${aspectRatio === '9:16' ? styles.activeButton : ''}`}
-        onClick={() => {
-          setAspectRatio('9:16');
-          // setmoreDropdownOpen(false);
-        }}
-        style={{ height: 'calc(70px / (9 / 16))' }} 
-      >
-        9:16
-      </button>
-      <button
-        className={`${styles.aspectButton} ${aspectRatio === '3:4' ? styles.activeButton : ''}`}
-        onClick={() => {
-          setAspectRatio('3:4');
-          // setmoreDropdownOpen(false);
-        }}
-        style={{ height: 'calc(70px / (3 / 4))' }} 
-      >
-        3:4
-      </button>
-      
-
-
-    </div>
-  )}
-</div>
-
-
-
-                  {/* <div className={styles.moreButtonContainer}>
-                    <button className={styles.moreButton} onClick={() => setmoreDropdownOpen(!dropdownOpen)}>
+                    <button className={styles.moreButton}>
                       More
                     </button>
 
                     {moreDropdownOpen && (
-                      <DropdownPortal>
-                        <div className={styles.dropdown} style={{ position: 'absolute', top: '100px', left: '50px' }}>
-                          <button
-                            className={`${styles.aspectButton} ${aspectRatio === '3:4' ? styles.activeButton : ''}`}
-                            onClick={() => setAspectRatio('3:4')}
-                          >
-                            3:4
-                          </button>
-                          <button
-                            className={`${styles.aspectButton} ${aspectRatio === '4:5' ? styles.activeButton : ''}`}
-                            onClick={() => setAspectRatio('4:5')}
-                          >
-                            4:5
-                          </button>
-                          <button
-                            className={`${styles.aspectButton} ${aspectRatio === '9:16' ? styles.activeButton : ''}`}
-                            onClick={() => setAspectRatio('9:16')}
-                          >
-                            9:16
-                          </button>
-                        </div>
-                      </DropdownPortal>
+                      <div className={styles.dropdown} style={{ top: dropdownTop, left: dropdownLeft, position: 'fixed' }}>
+                        <button
+                          className={`${styles.aspectButton} ${aspectRatio === '4:5' ? styles.activeButton : ''}`}
+                          onClick={() => {
+                            setAspectRatio('4:5');
+                          }}
+                          style={{ height: 'calc(70px / (4 / 5))' }} 
+                        >
+                          4:5
+                        </button>
+                        <button
+                          className={`${styles.aspectButton} ${aspectRatio === '9:16' ? styles.activeButton : ''}`}
+                          onClick={() => {
+                            setAspectRatio('9:16');
+                          }}
+                          style={{ height: 'calc(70px / (9 / 16))' }} 
+                        >
+                          9:16
+                        </button>
+                        <button
+                          className={`${styles.aspectButton} ${aspectRatio === '3:4' ? styles.activeButton : ''}`}
+                          onClick={() => {
+                            setAspectRatio('3:4');
+                          }}
+                          style={{ height: 'calc(70px / (3 / 4))' }} 
+                        >
+                          3:4
+                        </button>
+                      </div>
                     )}
-                  </div> */}
-                  {/* <button className={styles.moreButton}>
-                    More
-                    <div className={styles.dropdown}>
-                      <button
-                        className={`${styles.aspectButton} ${aspectRatio === '3:4' ? styles.activeButton : ''}`}
-                        onClick={() => setAspectRatio('3:4')}
-                        style={{ height: 'calc(70px / (3 / 4))' }} 
-                      >
-                        3:4
-                      </button>
-                      <button
-                        className={`${styles.aspectButton} ${aspectRatio === '4:5' ? styles.activeButton : ''}`}
-                        onClick={() => setAspectRatio('4:5')}
-                        style={{ height: 'calc(70px / (4 / 5))' }} 
-                      >
-                        4:5
-                      </button>
-                      <button
-                        className={`${styles.aspectButton} ${aspectRatio === '9:16' ? styles.activeButton : ''}`}
-                        onClick={() => setAspectRatio('9:16')}
-                        style={{ height: 'calc(70px / (9 / 16))' }} 
-                      >
-                        9:16
-                      </button>
-                    </div>
-                  </button> */}
+                  </div>
                 </div>
               </div>
             </div>
-
-
+            }
 
             {/* Image Size */}
-            {/* <div className={styles.inputRow}> */}
+            {apiType !== 'inpainting' && 
             <div className={styles.sizeInputColumn}>
-                <p className={styles.label} style={{ margin: '0px', alignItems: 'center', justifyContent: 'center' }}>Image Size (px)</p>
+              <p className={styles.label} style={{ margin: '0px', alignItems: 'center', justifyContent: 'center' }}>Image Size (px)</p>
               <div className={styles.sizeInputRow}>
                 <input
                   type="number"
@@ -509,11 +418,10 @@ useEffect(() => {
                   onChange={(e) => setImageHeight(e.target.value)}
                 />
               </div>
-              {/* </div> */}
             </div>
+            }
 
             {/* Strength */}
-            {/* <div className={styles.inputRow}> */}
             <div className={styles.strengthInputColumn} style={{ width: '272px' }}>
               <p className={styles.label} style={{ margin: '0px' }}>Strength</p>
               <input
@@ -525,9 +433,7 @@ useEffect(() => {
                 value={strength}
                 onChange={(e) => setStrength(e.target.value)}
               />
-              {/* </div> */}
             </div>
-
           </div>
 
           <div className={styles.generateButtonCont}>
@@ -541,24 +447,9 @@ useEffect(() => {
           </div>
         </div>
 
-        {/* Generated images */}
-        {/* <div className={styles.imageContainer}>
-          {generatedImages.length > 0 && (
-            <div className={styles.generatedImagesContainer}>
-              {generatedImages.map((imageUrl, index) => (
-                <img
-                  key={index}
-                  className={styles.generatedImage}
-                  src={imageUrl}
-                  alt={`Generated Image ${index + 1}`}
-                />
-              ))}
-
-            </div>
-          )}
-        </div> */}
         <div className={styles.imageContainer}>
-          {generatedImages.length > 0 && (
+        {apiType !== 'inpainting' ? (
+          generatedImages.length > 0 && (
             <div className={styles.generatedImagesContainer}>
               {generatedImages.map((imageUrl, index) => (
                 <img
@@ -569,9 +460,15 @@ useEffect(() => {
                 />
               ))}
             </div>
-          )}
+          )
+        ) : (
+          <CanvasInpainting
+            className={styles.generatedImage}
+            uploadedImage={uploadedImage}
+            canvasRef={canvasRef}  // Pass the ref to access canvas methods
+          />
+        )}
         </div>
-
       </div>
     </>
   );
