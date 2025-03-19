@@ -1,0 +1,190 @@
+.footer {
+    background-color: #000;
+    color: white;
+    padding-bottom: 32px;
+  }
+.divider{
+    max-width: 95%;
+    height: 1px;
+    background: #333;
+   margin: 0px auto; 
+}
+.divider_sml{
+    max-width: 40%;
+    height: 1px;
+    background: #7b7b7b;
+   margin: 10px 0px; 
+}
+.container {
+    padding: 32px;
+
+    display: flex;
+    flex-direction: row;
+    /* gap:91px; */
+    justify-content: space-between;
+    flex-wrap: wrap;
+    /* width: 1440px; */
+    height: 186px;
+    background-color: #000;
+    /* display: grid;
+    grid-template-columns: repeat(4, 1fr);
+ */
+  }
+  
+.branding {
+    display: flex;
+    flex-direction: column;
+  }
+  
+.logo {
+  font-size: 1.5rem;
+    font-weight: bold;
+    color: #4ade80;
+  }
+  
+.appLinks {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 1rem;
+    width: 357px;
+height: 36px;
+flex-shrink: 0;
+aspect-ratio: 119/12;
+  }
+  
+.appIcon {
+    width: 357px;
+    height: 36px;
+    flex-shrink: 0;
+    aspect-ratio: 119/12;
+  }
+.virai_logo{
+    width: 225.332px;
+height: 26px;
+flex-shrink: 0;
+aspect-ratio: 225.33/26.00;
+}
+.copyright {
+    font-size: 0.85rem;
+    margin-top: 1rem;
+    opacity: 0.7;
+  }
+  
+.heading {
+    color: #2E8B57;
+    font-family: Poppins;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    letter-spacing: 1.6px;
+    text-transform: capitalize;
+    margin-bottom: 1rem;
+  }
+  
+.linkList {
+    list-style: none;
+    padding: 0;
+  }
+  
+.link {
+    color: #999;
+    font-family: Poppins;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    letter-spacing: 1.4px;
+    text-transform: capitalize;
+    text-decoration: none;
+  }
+  
+.link:hover {
+    opacity: 1;
+    /* text-decoration: underline; */
+    color: #2E8B57;
+
+  }
+  
+  /* Responsive Design */
+  /* @media (max-width: 1024px) {
+    .container {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+   */
+  @media (max-width: 600px) {
+    .container {
+      gap: 32px;
+      flex-direction: column;
+      align-items: center;
+
+      /* grid-template-columns: 1fr; */
+    }
+    
+    .links{
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+    .divider_sml {
+      width: 20%; /* Adjust width to control how long the line is */
+      height: 1px;
+      background: #7b7b7b;
+      margin: 10px auto; /* Centers the divider */
+  }
+  
+
+  }
+
+  @media (max-width: 1024px) { 
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: flex-start; /* Keeps everything aligned properly */
+      text-align: left;
+      height: auto;
+      padding: 24px;
+    }
+  
+    .branding {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      order: 1; /* Moves it to the bottom */
+      margin-top: 20px;
+    }
+  
+    .appLinks {
+      display: flex;
+      flex-direction: row; /* Keep app icons in a row */
+      justify-content: center;
+      gap: 10px;
+    }
+  
+    .appIcon {
+      width: auto;
+      /* max-width: 150px; */
+    }
+  
+    .virai_logo {
+      /* width: 200px; Adjusted size */
+    }
+  
+    .copyright {
+      margin-top: 10px;
+    }
+  
+    /* Keep other sections in a row */
+    .container > div:not(.branding) {
+      flex: 1;
+      /* min-width: 200px; */
+    }
+  }
+  

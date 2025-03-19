@@ -1,0 +1,264 @@
+.navbar {
+  width: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  transition: background-color 0.3s ease;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 40px 50px;
+
+height: 70;
+
+}
+
+.navbarSolid {
+  background-color: #000000; /* Dark background for solid navbar */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.navbarTransparent {
+  background-color: transparent;
+}
+
+.navbar-left {
+  display: flex;
+  align-items: center;
+}
+
+.navbar-logo {
+  width: 225.33230590820312;
+  height: 26;
+  top: 22px;
+  left: 32px;
+  /* margin-left: 60px;
+  margin-right: 60px; */
+}
+
+.navbar-links {
+  display: flex;
+  align-items: center;
+  margin-left: 50px;
+}
+
+.nav-item {
+  text-decoration: none;
+  color: white;
+  background-color: transparent;
+  border: none;
+  padding: 5px 10px;
+  font-size: 16px;
+  margin: 0 10px;
+  transition: color 0.3s, border-bottom 0.3s;
+}
+
+.nav-item:hover,
+.active {
+  color: #ddd;
+  border-bottom: 2px solid #fff;
+}
+
+.navbar-right {
+  display: flex;
+  align-items: center;
+  position: fixed;
+  right: 0;
+  margin-right: 60px;
+}
+
+.login-signup {
+  background-color: #333;
+  padding: 10px 20px;
+  border-radius: 20px;
+}
+
+.username {
+  color: white;
+  background-color: #333;
+  padding: 10px 20px;
+  border-radius: 20px;
+}
+
+.mobile-menu-icon {
+  display: none;
+  font-size: 24px;
+  color: white;
+  cursor: pointer;
+  margin-right: 20px; /* Adjust margin to position the icon */
+}
+
+/* Responsive styling */
+@media (max-width: 1024px) {
+  .navbar {
+    padding: 20px 40px;
+  }
+
+  .navbar-logo {
+    margin-left: 30px;
+    margin-right: 30px;
+    font-size: 20px;
+  }
+
+  .navbar-right {
+    margin-right: 30px;
+  }
+
+  .nav-item {
+    font-size: 14px;
+    margin: 0 8px;
+  }
+}
+
+@media (max-width: 768px) {
+  .navbar {
+    width: 100%;
+    padding: 50px 30px;
+  }
+
+  .navbar-left {
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .navbar-logo {
+    padding: 10px;
+    margin-left: 10px;
+    margin-right: 0;
+  }
+
+  .navbar-links {
+    display: none;
+    flex-direction: column;
+    width: 100%;
+    margin: 0;
+    padding: 10px 0;
+    background-color: #000;
+    /* align-items: flex-end; */
+    /* padding-right: 20px; */
+    position: absolute;
+    top: 60px;
+    left: 0;
+    z-index: 999;
+  }
+
+  .navbar-links.open {
+    display: flex;
+  }
+
+  .nav-item {
+    margin: 10px 0;
+    padding: 10px;
+    font-size: 18px;
+  }
+
+  .mobile-menu-icon {
+    display: block;
+  }
+  .navbar-right {
+    display: flex;
+    align-items: center;
+    position: relative;
+    /* right: 0; */
+    margin-right: 0px;
+  }
+/* 
+  .navbar-right {
+    display: none;
+  }
+
+  .navbar-links.open {
+    display: flex;
+  }
+
+
+
+  .login-signup {
+    margin-top: 10px;
+    padding: 8px 15px;
+    font-size: 14px;
+  } */
+}
+
+@media (max-width: 480px) {
+  .navbar {
+    padding: 10px 20px;
+  }
+
+  .navbar-logo {
+    font-size: 18px;
+  }
+
+  .nav-item {
+    font-size: 14px;
+  }
+
+  .navbar-links {
+    top: 50px;
+    padding: 5px 0;
+  }
+
+  .login-signup {
+    padding: 7px 12px;
+  }
+
+  .username {
+    font-size: 14px;
+    padding: 8px 15px;
+  }
+}
+
+/* Dropdown styling */
+.username-container {
+  position: relative;
+  cursor: pointer;
+}
+
+.user-dropdown {
+  position: absolute;
+  top: 120%;
+  right: 0;
+  background-color: #333;
+  padding: 10px;
+  z-index: 1000;
+  border-radius: 8px;
+  min-width: 200px;
+  color: white;
+}
+
+.user-dropdown div {
+  margin-bottom: 10px;
+  padding: 5px 0;
+  font-size: 14px;
+}
+
+.user-dropdown div:last-child {
+  margin-bottom: 0;
+}
+
+.user-dropdown .logout-button {
+  width: 100%;
+  padding: 10px 15px;
+  background-color: #ff4b5c;
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+  text-align: center;
+  margin-top: 10px;
+  transition: background-color 0.3s ease;
+}
+
+.user-dropdown .logout-button:hover {
+  background-color: #ff1e2b;
+}
+
+@media (max-width: 768px) {
+  .user-dropdown {
+    top: 100%;
+    right: 10px;
+    width: 90vw;
+  }
+}

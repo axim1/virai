@@ -1,0 +1,143 @@
+/* Navbar.module.css */
+
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: fixed;
+  width: 100%;
+  top: 0;
+  left: 0;
+  background: #181818;
+  z-index: 1000;
+  height: 70px;
+  padding: 0px 32px;
+}
+
+.navbarSolid {
+  background: #181818;
+}
+
+.navbarTransparent {
+  background: transparent;
+}
+
+/* Left Section (Logo) */
+.navbarLeft {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.navbarLeft img {
+  width: 225.332px;
+  height: 26px;
+  /* margin-left: 32px; */
+  cursor: pointer;
+}
+
+/* Center Links */
+.navbarLinks {
+  flex: 2;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 40px;
+  max-width: 562px;
+}
+
+/* Navbar Items */
+.navItem {
+  font-family: 'Poppins';
+  font-weight: 400;
+  font-size: 16px;
+  text-transform: uppercase;
+  /* letter-spacing: 0.1em; */
+  color: #999999;
+  text-decoration: none;
+}
+
+.navItem:hover,
+.navItem.active {
+  color: #2E8B57;
+}
+
+/* Right Section (User/Login) */
+.navbarRight {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+/* Mobile Menu */
+.mobileMenuIcon {
+  display: none;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .navbarLinks {
+    display: none;
+    flex-direction: column;
+    position: absolute;
+    top: 70px;
+    left: 0;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    padding: 20px;
+    text-align: center;
+  }
+
+  .navbarLinks.open {
+    display: flex;
+  }
+
+  .mobileMenuIcon {
+    display: block;
+  }
+}
+.loginButton{
+  color: #2E8B57;
+  justify-content: center;
+  align-items: center;
+text-align: center;
+font-family: Poppins;
+font-size: 16px;
+font-style: normal;
+font-weight: 400;
+line-height: normal;
+letter-spacing: 1.6px;
+text-transform: uppercase;
+width: 100px;
+height: 70px;
+flex-shrink: 0;
+background: #000;
+padding: 24px 0px;
+}
+.loginButton:hover{
+  color: #999;
+
+}
+.registerButton{
+  color: #2E8B57;
+  justify-content: center;
+  align-items: center;
+  color: #999;
+  text-align: center;
+  font-family: Poppins;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+width: 100px;
+height: 70px;
+flex-shrink: 0;
+
+/* background:; */
+padding: 24px 20px;
+}

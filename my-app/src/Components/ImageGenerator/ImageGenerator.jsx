@@ -1,9 +1,34 @@
-import React, { useState, useEffect,useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import styles from './ImageGenerator.module.css';
-import { useNavigate,useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import wsImage1 from '../../assets/House_sketch-to-image_web.jpg'; // Replace with your image path
 import DropdownPortal from './DropdownPortal.js';
+
+
+import genIcon from '../../assets/vector_icons/AI Replacement-01.svg';
+
+
+import icon1 from '../../assets/vector_icons/Text to image generation-01.svg';
+import icon2 from '../../assets/vector_icons/Image to sketch-01.svg';
+import icon3 from '../../assets/vector_icons/Sketch to image-01.svg';
+import icon4 from '../../assets/vector_icons/Image enhancement-01.svg';
+import icon5 from '../../assets/vector_icons/Video generation-01.svg';
+import icon6 from '../../assets/vector_icons/3D object generation-01.svg';
+
+import icon7 from '../../assets/vector_icons/pricing-01.svg';
+import icon8 from '../../assets/vector_icons/faq-01.svg';
+import icon9 from '../../assets/vector_icons/support-01.svg';
+
+import tticon1 from '../../assets/vector_icons/crop-01 1.svg'
+import tticon2 from '../../assets/vector_icons/edit-01 1.svg'
+import tticon3 from '../../assets/vector_icons/resize-01 1.svg'
+import tticon4 from '../../assets/vector_icons/share-01 1.svg'
+import tticon5 from '../../assets/vector_icons/download-01 1.svg'
+import tticon6 from '../../assets/vector_icons/delete-01 1.svg'
+import resetIcon from '../../assets/vector_icons/reset-01 1.svg'
+import AiRepIcon from'../../assets/vector_icons/AI Replacement-01 1.svg'
+import Dropdown from './Dropdown.js';
 
 const apiUrl = process.env.REACT_APP_API_URL;
 const username = JSON.parse(localStorage.getItem('user')) || {};
@@ -11,7 +36,7 @@ const userId = username._id;
 
 function ImageGenerator({ onGenerateImage }) {
   const navigate = useNavigate();
-   const location = useLocation(); // Use useLocation to retrieve passed state
+  const location = useLocation(); // Use useLocation to retrieve passed state
 
   const queryParams = new URLSearchParams(location.search);
   const initialApiType = queryParams.get("apiType") || "sketch-to-image"; // Default to "sketch-to-image"
@@ -37,50 +62,11 @@ function ImageGenerator({ onGenerateImage }) {
   const [imageWidth, setImageWidth] = useState(512);
   const [imageHeight, setImageHeight] = useState(512);
   const [strength, setStrength] = useState(0.75);
-  const [moreDropdownOpen, setmoreDropdownOpen] = useState(false);
 
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const numberOfImages = [1, 2, 3, 4, 5, 6]; // Array of numbers
-
-  const toggleDropdown = () => {
-    setDropdownOpen(!dropdownOpen);
-  };
-  const [dropdownTop, setDropdownTop] = useState(0);
-const [dropdownLeft, setDropdownLeft] = useState(0);
-
-const dropdownRef = useRef(null);
-useEffect(() => {
-  if (moreDropdownOpen && dropdownRef.current) {
-    const buttonRect = dropdownRef.current.getBoundingClientRect();
-    const dropdownHeight = 210; // Approximate height of the dropdown
-    const dropdownWidth = 150; // Width of dropdown
-    const viewportHeight = window.innerHeight;
-    const viewportWidth = window.innerWidth;
-
-    // Calculate position: default to the right of the button
-    let topPosition = buttonRect.top-80;
-    let leftPosition = buttonRect.right;
-
-    // Adjust if the dropdown goes beyond the viewport
-    if (buttonRect.bottom + dropdownHeight > viewportHeight) {
-      topPosition = buttonRect.top - dropdownHeight; // Adjust to fit within the bottom edge
-    }
-    if (buttonRect.right + dropdownWidth > viewportWidth) {
-      leftPosition = buttonRect.left - dropdownWidth; // Adjust to fit within the right edge
-    }
-
-    setDropdownTop(topPosition);
-    setDropdownLeft(leftPosition);
-  }
-}, [moreDropdownOpen]);
+  const numberOfImages = [1, 2, 4, 6, 12]; // Array of numbers
 
 
 
-
-  // const handleApiTypeChange = (type) => {
-  //   setApiType(type);
-  //   setDropdownOpen(false); // Close the dropdown after selection
-  // };
 
 
   useEffect(() => {
@@ -98,21 +84,7 @@ useEffect(() => {
     fetchImages();
   }, [userId]);
 
-  // useEffect(() => {
-  //   const fetchDummyImages = async () => {
-  //     try {
-  //       // Fetching 6 random images from Lorem Picsum
-  //       const imageUrls = Array.from({ length: 4 }).map(
-  //         (_, index) => `https://picsum.photos/300?random=${index}`
-  //       );
-  //       setGeneratedImages(imageUrls);
-  //     } catch (error) {
-  //       console.error('Error fetching dummy images:', error);
-  //     }
-  //   };
 
-  //   fetchDummyImages();
-  // }, []);
   const handleGenerateClick = async () => {
 
     // console.log(`Generating image using API type: ${location.state.apiType}`);
@@ -157,15 +129,9 @@ useEffect(() => {
   const handleApiTypeChange = (value) => {
     setApiType(value);
     setUploadedImage(null);
-    setDropdownOpen(false); // Close the dropdown after selection
 
   };
-  // useEffect(() => {
-  //   if (location.state?.apiType) {
-  //     console.log('the api statee ::: ',location.state.apiType)
-  //     // setApiType(location.state.apiType); // Update apiType if passed through state
-  //   }
-  // }, [location.state]);
+
   const handleStyleTypeChange = (style) => {
     setStyleType(style);
   };
@@ -173,59 +139,167 @@ useEffect(() => {
   const handleAspectRatioChange = (event) => {
     setAspectRatio(event.target.value);
   };
+  const handleImageSizeChange = (value) => {
+    if (value == 'small') {
+      setImageHeight('512')
+      setImageHeight('512')
+    }
+    if (value == 'medium') {
+      setImageHeight('1024')
+      setImageHeight('1024')
+    }
+    if (value == 'large') {
+      setImageHeight('1444')
+      setImageHeight('1444')
+    }
 
+  }
   const handleImageUpload = (event) => {
     setUploadedImage(event.target.files[0]);
   };
-  const formatApiType=(apiType)=> {
+  const formatApiType = (apiType) => {
     return apiType
       .split('-') // Split the string by hyphens
-      .map((word, index) => 
+      .map((word, index) =>
         index === 0 ? word.charAt(0).toUpperCase() + word.slice(1) : word
       ) // Capitalize the first letter of the first word
       .join(' '); // Join the words back with spaces
   }
-  
+  const icons = [icon1, icon2, icon3, icon4, icon5, icon6];
+  const iconsbottom = [icon7, icon8, icon9];
+  const tticons = [tticon1, tticon2, tticon3, tticon4, tticon5, tticon6];
+
+  const apiTypes = [
+    "text-to-image",
+    "image-to-sketch",
+    "sketch-to-image",
+    "image-enhancement",
+    "image-expansion",
+    "inpainting",
+  ];
 
   return (
     <>
       {/* <Navbar user={user}  /> */}
 
       <div className={styles.generatorContainer}>
+
+        <div className={styles.leftToolBar}>
+          <div className={styles.leftToolBarTop}>
+            {icons.map((iconUrl, index) => (
+              <div key={index} style={{ width: "100%" }}>
+                <button
+                  onClick={() => handleApiTypeChange(apiTypes[index])} // Set API Type
+                  style={{
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    padding: "10px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    width: "100%",
+                  }}
+                >
+                  <img
+                    src={iconUrl}
+                    alt={`icon-${index}`}
+                    className={styles.toolBarIcon}
+                    style={{
+                      filter: apiType === apiTypes[index] ? "brightness(0) saturate(100%) invert(32%) sepia(49%) saturate(433%) hue-rotate(97deg) brightness(95%) contrast(92%)" : "brightness(0) saturate(100%) invert(60%)", // Highlight active icon
+                    }}
+                  />
+                </button>
+                {index !== icons.length - 1 && <div className={styles.divider} />}
+              </div>
+            ))}
+          </div>
+
+
+          <div className={styles.leftToolBarBottom}>
+            {iconsbottom.map((iconUrl, index) => (
+              <div key={index} style={{ width: '100%' }}>
+                <button
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    padding: '10px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '100%',
+                  }}
+                >
+                  <img src={iconUrl} alt={`icon-bottom-${index}`} className={styles.toolBarIcon} />
+                </button>
+                {index !== iconsbottom.length - 1 && <div className={styles.divider} />} {/* Divider */}
+              </div>
+            ))}
+          </div>
+        </div>
+
+
+
+        {/* <div className={styles.leftToolBar}>
+          <div className={styles.leftToolBarTop}>
+
+            {icons.map((iconUrl, index) => (
+              <div style={{
+                // display: 'flex', 
+                // gap: '10px', 
+                // paddingBottom: '10px', 
+                borderBottom: '1px solid #ccc'
+              }}>
+                <button
+                  key={index}
+                  // onClick={() => handleIconClick(index)} 
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    // padding: '5px'
+                  }}
+                >
+                  <img key={index} src={iconUrl} alt={`icon-${index}`} className={styles.toolBarIcon} />
+
+                </button> </div>
+            ))}
+
+
+
+  
+          </div>
+          <div className={styles.leftToolBarBottom}>
+            {iconsbottom.map((iconUrl, index) => (
+              <div style={{
+                // display: 'flex', 
+                // gap: '10px', 
+                // paddingBottom: '10px',
+                height:'40px', 
+                borderBottom: '1px solid #ccc'
+              }}>
+                <button
+                  key={index}
+                  // onClick={() => handleIconClick(index)} 
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    // padding: '5px'
+                  }}
+                >
+                  <img key={index} src={iconUrl} alt={`icon-${index}`} className={styles.toolBarIcon} />
+
+                </button> </div>
+            ))}
+          </div>
+        </div> */}
         <div className={styles.topInputContainer}>
 
 
 
 
-          <div className={styles.customDropdown}>
-            <div className={styles.dropdownHeader} onClick={toggleDropdown}>
-              <div className={styles.icon}>
-                <svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="3" y1="12" x2="21" y2="12"></line>
-                  <line x1="3" y1="6" x2="21" y2="6"></line>
-                  <line x1="3" y1="18" x2="21" y2="18"></line>
-                </svg>
-              </div>
-              {formatApiType(apiType)} 
-              <span className={styles.dropdownIcon}>   </span>
-            </div>
-            {dropdownOpen && (
-              <div className={styles.dropdownList}>
-                <div
-                  className={`${styles.dropdownItem} ${apiType === 'text-to-image' ? styles.activeItem : ''}`}
-                  onClick={() => handleApiTypeChange('text-to-image')}
-                >
-                  Text to Image
-                </div>
-                <div
-                  className={`${styles.dropdownItem} ${apiType === 'sketch-to-image' ? styles.activeItem : ''}`}
-                  onClick={() => handleApiTypeChange('sketch-to-image')}
-                >
-                  Sketch to Image
-                </div>
-              </div>
-            )}
-          </div>
 
 
           <div className={styles.inputContainer}>
@@ -236,7 +310,7 @@ useEffect(() => {
             {apiType == 'sketch-to-image' &&
               <div className={styles.inputRow}>
                 <div className={styles.inputColumn}>
-                  <p className={styles.label}>Upload Image</p>
+                  <p className={styles.label_l}>Upload Image</p>
                   <label className={styles.uploadLabel}>
                     <input
                       type="file"
@@ -248,66 +322,82 @@ useEffect(() => {
                 </div>
               </div>
             }
+
+
+
             {/* Prompt input */}
             <div className={styles.inputRow}>
-              <div className={styles.inputColumn}>
-                <div className={styles.promptLabel}>              <p className={styles.label} style={{ margin: '0px' }}>Prompt</p>
-                  <button className={styles.magicButton}>
+              <div className={styles.inputColumn} style={{ margin: '0px' }}>
+
+                <div className={styles.promptLabel}>            
+                    <p className={styles.label_l} style={{ margin: '0px' }}>Describe Your Image</p>
+                  {/* <button className={styles.magicButton}>
                     Magic Prompt
-                  </button>
+                  </button> */}
+                    <img 
+    src={resetIcon}
+    alt="Rest Button"
+    className={styles.resetButton} 
+    onClick={(e) => setPromptText('')}
+  />
                 </div>
 
+                <div className={styles.promptInputContainer}>
+  <textarea
+    className={styles.inputField}
+    value={promptText}
+    onChange={(e) => setPromptText(e.target.value)}
+    placeholder="Describe your image or hit the Magic button..."
+  />
+  <img 
+    src={AiRepIcon}
+    alt="Magic Button"
+    className={styles.iconButton} 
+    // onClick={handleMagicClick} 
+  />
+</div>
+
+{/* 
                 <textarea
                   className={styles.inputField}
                   value={promptText}
-                  style={{
-                    height: "50px", 
-                    // minHeight: "10px", 
-                    resize: "none", // Prevent manual resizing
-                  }}
+                  // style={{
+                  //   height: "50px", 
+                  //   // minHeight: "10px", 
+                  //   resize: "none", // Prevent manual resizing
+                  // }}
                   onChange={(e) => setPromptText(e.target.value)}
-                  onInput={(e) => {
-                    e.target.style.height = "auto"; 
-                    e.target.style.height = `${e.target.scrollHeight}px`; // Adjust height based on content
-                  }}
+                  // onInput={(e) => {
+                  //   e.target.style.height = "auto"; 
+                  //   e.target.style.height = `${e.target.scrollHeight}px`; // Adjust height based on content
+                  // }}
                   placeholder="Describe your image or hit the Magic button..."
-                />
+                /> */}
 
 
 
               </div>
             </div>
 
-            {/* Negative prompt */}
-            <div className={styles.inputRow}>
-              <div className={styles.inputColumn}>
-                <p className={styles.label}>Negative Prompt</p>
-                <textarea
-                  // type="text"
-                  className={styles.inputField}
+            <br />
 
-                  value={negativePromptText}
-                  style={{
-                    height: "50px", 
-                    // minHeight: "10px", 
-                    resize: "none", // Prevent manual resizing
-                  }}
-                  onInput={(e) => {
-                    e.target.style.height = "auto"; // Reset the height to auto to recalculate
-                    e.target.style.height = `${e.target.scrollHeight}px`; // Adjust height based on content
-                  }}
-                  onChange={(e) => setNegativePromptText(e.target.value)}
-                  placeholder='Add negative prompts, e.g. "blurry image"'
-                />
-              </div>
-            </div>
+
+
+
+            <p className={styles.label_l} style={{ margin: '0px' }}>Advanced Settings</p>
+
+            <br />
+
+
+
+
 
 
             {/* image number  */}
             {/* <div className={styles.inputRow}> */}
             <div className={styles.numButtonCont}>
 
-              <p className={styles.label} style={{ margin: '0px' }}>Images Number</p>
+              <p className={styles.label} >Images Number</p>
 
               <div className={styles.numberButtons}>
                 {numberOfImages.map((number) => (
@@ -320,201 +410,150 @@ useEffect(() => {
                   </button>
                 ))}
               </div>
-
-              {/* <div className={styles.numberButtons}>
-                <button className={`${styles.numButton} ${images === '1' ? styles.activeButton : ''}` }
-                                    onClick={() => setImages(1)}
-
->1</button>
-                <button className={`${styles.numButton} `} >2</button>
-                <button className={`${styles.numButton} `} >3</button>
-                <button className={`${styles.numButton}`} >4</button>
-                <button className={`${styles.numButton} `} >5</button>
-                <button className={`${styles.numButton}`} >6</button>
-              </div> */}
-              {/* </div> */}
             </div>
+
+
+
+
+
             {/* Aspect Ratio */}
-            <div className={styles.inputRow}>
-              <div className={styles.inputColumn}>
-                <p className={styles.label}>Aspect Ratio</p>
-                <div className={styles.aspectRatioButtons}>
-                  <button
-                    className={`${styles.aspectButton} ${aspectRatio === '16:9' ? styles.activeButton : ''}`}
-                    onClick={() => setAspectRatio('16:9')}
-                    style={{ height: 'calc(70px / (16 / 9))' }} /* Keep width fixed and adjust height for 16:9 */
-                  >
-                    16:9
-                  </button>
-                  <button
-                    className={`${styles.aspectButton} ${aspectRatio === '3:2' ? styles.activeButton : ''}`}
-                    onClick={() => setAspectRatio('3:2')}
-                    style={{ height: 'calc(70px / (3 / 2))' }} /* Keep width fixed and adjust height for 16:9 */
-                  >
-                    3:2
-                  </button>
-                  <button
-                    className={`${styles.aspectButton} ${aspectRatio === '4:3' ? styles.activeButton : ''}`}
-                    onClick={() => setAspectRatio('4:3')}
-                    style={{ height: 'calc(70px / (4 / 3))' }} /* Keep width fixed and adjust height for 4:3 */
-                  >
-                    4:3
-                  </button>
-                  <button
-                    className={`${styles.aspectButton} ${aspectRatio === '1:1' ? styles.activeButton : ''}`}
-                    onClick={() => setAspectRatio('1:1')}
-                    style={{ height: '70px' }} /* 1:1 aspect ratio */
-                  >
-                    1:1
-                  </button>
-                  <button
-                    className={`${styles.aspectButton} ${aspectRatio === '2:3' ? styles.activeButton : ''}`}
-                    onClick={() => setAspectRatio('2:3')}
-                    style={{ height: 'calc(70px / (2 / 3))' }} /* Keep width fixed and adjust height for 2:3 */
-                  >
-                    2:3
-                  </button>
-                  <div className={styles.moreButtonContainer} ref={dropdownRef}
-                        onMouseEnter={() => setmoreDropdownOpen(true)}  // Open dropdown on hover
-                        onMouseLeave={() => setmoreDropdownOpen(false)} // Close dropdown when mouse leaves
-                   
-                  >
-  <button className={styles.moreButton} 
-  // onClick={() => setmoreDropdownOpen(!moreDropdownOpen)}
-  >
-    More
-  </button>
-
-  {moreDropdownOpen && (
-    <div className={styles.dropdown} style={{ top: dropdownTop, left: dropdownLeft, position: 'fixed' }}>
+            {/* <div className={styles.inputRow}> */}
+            <div className={styles.inputColumn}>
+              <p className={styles.label}>Aspect Ratio</p>
+              <div className={styles.aspectRatioButtons}>
                 <button
-        className={`${styles.aspectButton} ${aspectRatio === '4:5' ? styles.activeButton : ''}`}
-        onClick={() => {
-          setAspectRatio('4:5');
-          // setmoreDropdownOpen(false);
-        }}
-        style={{ height: 'calc(70px / (4 / 5))' }} 
-      >
-        4:5
-      </button>
-           <button
-        className={`${styles.aspectButton} ${aspectRatio === '9:16' ? styles.activeButton : ''}`}
-        onClick={() => {
-          setAspectRatio('9:16');
-          // setmoreDropdownOpen(false);
-        }}
-        style={{ height: 'calc(70px / (9 / 16))' }} 
-      >
-        9:16
-      </button>
-      <button
-        className={`${styles.aspectButton} ${aspectRatio === '3:4' ? styles.activeButton : ''}`}
-        onClick={() => {
-          setAspectRatio('3:4');
-          // setmoreDropdownOpen(false);
-        }}
-        style={{ height: 'calc(70px / (3 / 4))' }} 
-      >
-        3:4
-      </button>
-      
+                  className={`${styles.aspectButton} ${aspectRatio === '16:9' ? styles.activeButton : ''}`}
+                  onClick={() => setAspectRatio('16:9')}
+                // style={{ height: 'calc(70px / (16 / 9))' }} 
+                >
+                  16:9
+                </button>
+                <button
+                  className={`${styles.aspectButton} ${aspectRatio === '3:2' ? styles.activeButton : ''}`}
+                  onClick={() => setAspectRatio('3:2')}
+                // style={{ height: 'calc(70px / (3 / 2))' }} 
+                >
+                  3:2
+                </button>
+                <button
+                  className={`${styles.aspectButton} ${aspectRatio === '4:3' ? styles.activeButton : ''}`}
+                  onClick={() => setAspectRatio('4:3')}
+                // style={{ height: 'calc(70px / (4 / 3))' }} 
+                >
+                  4:3
+                </button>
+                <button
+                  className={`${styles.aspectButton} ${aspectRatio === '1:1' ? styles.activeButton : ''}`}
+                  onClick={() => setAspectRatio('1:1')}
+                // style={{ height: '70px' }} 
+                >
+                  1:1
+                </button>
+                <button
+                  className={`${styles.aspectButton} ${aspectRatio === '2:3' ? styles.activeButton : ''}`}
+                  onClick={() => setAspectRatio('2:3')}
+                // style={{ height: 'calc(70px / (2 / 3))' }} 
+                >
+                  2:3
+                </button>
 
 
-    </div>
-  )}
-</div>
 
 
-
-                  {/* <div className={styles.moreButtonContainer}>
-                    <button className={styles.moreButton} onClick={() => setmoreDropdownOpen(!dropdownOpen)}>
-                      More
-                    </button>
-
-                    {moreDropdownOpen && (
-                      <DropdownPortal>
-                        <div className={styles.dropdown} style={{ position: 'absolute', top: '100px', left: '50px' }}>
-                          <button
-                            className={`${styles.aspectButton} ${aspectRatio === '3:4' ? styles.activeButton : ''}`}
-                            onClick={() => setAspectRatio('3:4')}
-                          >
-                            3:4
-                          </button>
-                          <button
-                            className={`${styles.aspectButton} ${aspectRatio === '4:5' ? styles.activeButton : ''}`}
-                            onClick={() => setAspectRatio('4:5')}
-                          >
-                            4:5
-                          </button>
-                          <button
-                            className={`${styles.aspectButton} ${aspectRatio === '9:16' ? styles.activeButton : ''}`}
-                            onClick={() => setAspectRatio('9:16')}
-                          >
-                            9:16
-                          </button>
-                        </div>
-                      </DropdownPortal>
-                    )}
-                  </div> */}
-                  {/* <button className={styles.moreButton}>
-                    More
-                    <div className={styles.dropdown}>
-                      <button
-                        className={`${styles.aspectButton} ${aspectRatio === '3:4' ? styles.activeButton : ''}`}
-                        onClick={() => setAspectRatio('3:4')}
-                        style={{ height: 'calc(70px / (3 / 4))' }} 
-                      >
-                        3:4
-                      </button>
-                      <button
-                        className={`${styles.aspectButton} ${aspectRatio === '4:5' ? styles.activeButton : ''}`}
-                        onClick={() => setAspectRatio('4:5')}
-                        style={{ height: 'calc(70px / (4 / 5))' }} 
-                      >
-                        4:5
-                      </button>
-                      <button
-                        className={`${styles.aspectButton} ${aspectRatio === '9:16' ? styles.activeButton : ''}`}
-                        onClick={() => setAspectRatio('9:16')}
-                        style={{ height: 'calc(70px / (9 / 16))' }} 
-                      >
-                        9:16
-                      </button>
-                    </div>
-                  </button> */}
-                </div>
               </div>
             </div>
+            {/* </div> */}
+
 
 
 
             {/* Image Size */}
-            {/* <div className={styles.inputRow}> */}
-            <div className={styles.sizeInputColumn}>
-                <p className={styles.label} style={{ margin: '0px', alignItems: 'center', justifyContent: 'center' }}>Image Size (px)</p>
-              <div className={styles.sizeInputRow}>
-                <input
+            <div className={styles.inputColumn}>
+              <p className={styles.label} style={{ margin: '0px', alignItems: 'center', justifyContent: 'center' }}>Image Size (px)</p>
+              <div className={styles.sizeButtons}>
+
+                <button
+                  className={`${styles.aspectButton} ${imageHeight === '512' ? styles.activeButton : ''}`}
+                  onClick={() => handleImageSizeChange('small')}
+                // style={{ height: 'calc(70px / (2 / 3))' }} 
+                >
+                  Small
+                </button>
+                <button
+                  className={`${styles.aspectButton} ${imageHeight === '1024' ? styles.activeButton : ''}`}
+                  onClick={() => handleImageSizeChange('medium')}
+                // style={{ height: 'calc(70px / (2 / 3))' }} 
+                >
+                  Normal
+                </button>
+                <button
+                  className={`${styles.aspectButton} ${imageHeight === '1444' ? styles.activeButton : ''}`}
+                  onClick={() => handleImageSizeChange('large')}
+                // style={{ height: 'calc(70px / (2 / 3))' }} 
+                >
+                  Large
+                </button>
+
+                {/* <input
                   type="number"
                   className={styles.inputWidthHeight}
                   placeholder="Width"
                   value={imageWidth}
                   onChange={(e) => setImageWidth(e.target.value)}
-                />
-                <span className={styles.sizeSeparator}>x</span>
-                <input
+                /> */}
+                {/* <input
                   type="number"
                   className={styles.inputWidthHeight}
                   placeholder="Height"
                   value={imageHeight}
                   onChange={(e) => setImageHeight(e.target.value)}
-                />
+                /> */}
               </div>
-              {/* </div> */}
+
             </div>
 
+
+
+
+
+            {/* Negative prompt */}
+            <div className={styles.inputRow}>
+              <div className={styles.inputColumn}>
+                <p className={styles.label}>Negative Prompt</p>
+                <textarea
+                  // type="text"
+                  className={styles.inputField}
+
+                  value={negativePromptText}
+                  // style={{
+                  //   height: "50px", 
+                  //   // minHeight: "10px", 
+                  //   resize: "none", // Prevent manual resizing
+                  // }}
+                  // onInput={(e) => {
+                  //   e.target.style.height = "auto"; // Reset the height to auto to recalculate
+                  //   e.target.style.height = `${e.target.scrollHeight}px`; // Adjust height based on content
+                  // }}
+                  onChange={(e) => setNegativePromptText(e.target.value)}
+                  placeholder='Add negative prompts, e.g. "blurry image"'
+                />
+              </div>
+            </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
             {/* Strength */}
-            {/* <div className={styles.inputRow}> */}
-            <div className={styles.strengthInputColumn} style={{ width: '272px' }}>
+            {/* <div className={styles.strengthInputColumn} style={{ width: '272px' }}>
               <p className={styles.label} style={{ margin: '0px' }}>Strength</p>
               <input
                 type="number"
@@ -525,8 +564,7 @@ useEffect(() => {
                 value={strength}
                 onChange={(e) => setStrength(e.target.value)}
               />
-              {/* </div> */}
-            </div>
+            </div> */}
 
           </div>
 
@@ -536,42 +574,75 @@ useEffect(() => {
               onClick={handleGenerateClick}
               disabled={isLoading}
             >
+              <img src={genIcon} alt="" className={styles.genIcon} />
+
               {isLoading ? 'Generating...' : 'Generate'}
             </button>
           </div>
         </div>
 
-        {/* Generated images */}
-        {/* <div className={styles.imageContainer}>
-          {generatedImages.length > 0 && (
-            <div className={styles.generatedImagesContainer}>
-              {generatedImages.map((imageUrl, index) => (
-                <img
-                  key={index}
-                  className={styles.generatedImage}
-                  src={imageUrl}
-                  alt={`Generated Image ${index + 1}`}
-                />
-              ))}
+        <div className={styles.rightSection}>
+        {/* <div className='dropdown-mobile'> */}
+            <Dropdown 
+        apiType={formatApiType(apiType)}
+        apiTypes={apiTypes} 
+        icons={icons} 
+        iconsbottom={iconsbottom} 
+        handleApiTypeChange={handleApiTypeChange} 
+        
+      />
+        {/* </div> */}
+          <div className={styles.topToolBar}>
+            <div style={{}}>{formatApiType(apiType)}</div>
 
+            <div>
+              <div className={styles.topToolBarIcons}>
+                {tticons.map((iconUrl, index) => (
+                  <div key={index} style={{ width: "100%" }}>
+                    <button
+                      // onClick={() => handleApiTypeChange(apiTypes[index])} // Set API Type
+                      style={{
+                        background: "none",
+                        border: "none",
+                        cursor: "pointer",
+                        padding: "10px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        width: "100%",
+                      }}
+                    >
+                      <img
+                        src={iconUrl}
+                        alt={`icon-${index}`}
+                        className={styles.toolBarIcon}
+                        style={{
+                          // filter: "brightness(0) saturate(100%) invert(32%) sepia(49%) saturate(433%) hue-rotate(97deg) brightness(95%) contrast(92%)" : "brightness(0) saturate(100%) invert(60%)", // Highlight active icon
+                        }}
+                      />
+                    </button>
+                    {/* {index !== icons.length - 1 && <div className={styles.dividerHorizontal} />} */}
+                  </div>
+                ))}
+              </div>
             </div>
-          )}
-        </div> */}
-        <div className={styles.imageContainer}>
-          {generatedImages.length > 0 && (
-            <div className={styles.generatedImagesContainer}>
-              {generatedImages.map((imageUrl, index) => (
-                <img
-                  key={index}
-                  className={styles.generatedImage}
-                  src={imageUrl}
-                  alt={`Generated Image ${index + 1}`}
-                />
-              ))}
-            </div>
-          )}
+          </div>
+
+          <div className={styles.imageContainer}>
+            {generatedImages.length > 0 && (
+              <div className={styles.generatedImagesContainer}>
+                {generatedImages.map((imageUrl, index) => (
+                  <img
+                    key={index}
+                    className={styles.generatedImage}
+                    src={imageUrl}
+                    alt={`Generated Image ${index + 1}`}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
         </div>
-
       </div>
     </>
   );

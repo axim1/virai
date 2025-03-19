@@ -22,6 +22,7 @@ import FAQ from '../FAQ/faq';
 import AITools from './Components/AITools';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faComputerMouse } from '@fortawesome/free-solid-svg-icons';
+import Footer from './Components/Footer';
 
 const username = JSON.parse(localStorage.getItem('user')) || {};
 const userId = username._id;
@@ -235,16 +236,17 @@ useEffect(() => {
       <div id="faq-section" style={{ marginTop: "100px",marginBottom: "100px" }}>
         <FAQ />
       </div>
+      {/* <Footer/> */}
 
       {/* Footer Section */}
-      <footer className="footer">
+      {/* <footer className="footer">
         <div className="footer-top">
           <h1 className="footer-title">VirtuartAI s.r.o.</h1>
           <div className="footer-address">
             <h1>Address</h1>
             <p>Bagarova 1 17</p>
             <p>Bratislava - 841 01,</p>
-            {/* <p>Slovakia</p> */}
+     
           </div>
           <div className="footer-contact">
             <h1>Say Hello</h1>
@@ -262,7 +264,7 @@ useEffect(() => {
         <div className="footer-bottom">
           <p>VirtuartAI © 2024. All Rights Reserved. <Link to="/terms-of-service">Terms of Service</Link></p>
         </div>
-      </footer>
+      </footer> */}
     </div>
   );
 }

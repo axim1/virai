@@ -1,5 +1,5 @@
 import "./App.css";
-import Profile from "./Components/Profile/Profile";
+// import Profile from "./Components/Profile/Profile";
 import Login from "./Components/Login/Login";
 import Register from "./Components/Register/Register";
 import Home from "./Components/Home/Home";
@@ -8,6 +8,7 @@ import ImageGenerator from "./Components/ImageGenerator/ImageGenerator";
 import Navbar from "./Components/Navbar/Navbar"; // Import the Navbar component
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { useEffect, useState } from "react";
+import Footer from "./Components/Home/Components/Footer";
 
 function App() {
   const [userState, setUserState] = useState({});
@@ -66,6 +67,7 @@ function App() {
           {/* Terms of Service Route */}
           <Route path="/terms-of-service" element={<TermsOfService />} />
         </Routes>
+        <Footer/>
       </Router>
     </div>
   );

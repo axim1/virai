@@ -14,15 +14,114 @@ body {
   width: 100%;
   color: white;
   margin-top: 80px; /* Ensure no extra margin as the navbar is fixed */
-  height: calc(100vh - 80px); 
+  /* height: calc(100vh - 80px);  */
+  padding: 32px;
+  gap:32px;
 /* overflow-y: auto; */
-  }
+}
+/* .leftToolBar{
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 50px;
+  height: 634px;
+  flex-shrink: 0;
+}
+.leftToolBarTop{
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  align-items: center;
+  width: 50px;
+  height: 350px;
+  flex-shrink: 0;
+  border-radius: 7px;
+background: #333;
+}
+.leftToolBarBottom{
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  align-items: center;
+  width: 50px;
+  height: 350px;
+  flex-shrink: 0;
+  border-radius: 7px;
+background: #333;
+}
+
+.toolBarIcon{
+  width: 30px;
+height: 30px;
+flex-shrink: 0;
+aspect-ratio: 1/1;
+color:#999999; 
+} */
+.leftToolBar {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 50px;
+  height: 634px;
+  flex-shrink: 0;
+}
+
+.leftToolBarTop,
+.leftToolBarBottom {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 50px;
+  border-radius: 7px;
+  background: #333;
+}
+
+.leftToolBarTop {
+  height: 350px; /* Adjusted for better spacing */
+  justify-content: space-evenly;
+}
+
+.leftToolBarBottom {
+  height: 150px;
+  justify-content: space-evenly;
+}
+
+.toolBarIcon {
+  width: 30px;
+  height: 30px;
+  color: #999;
+  filter: brightness(0) saturate(100%) invert(60%); /* Converts to #333 */
+  /* filter: brightness(0) saturate(100%) invert(32%) sepia(49%) saturate(433%) hue-rotate(97deg) brightness(95%) contrast(92%); */
+
+}
+
+
+
+
+.divider {
+  width: 60%;
+  height: 1px;
+  background: #000;
+ margin: 0px auto; 
+}
+.dividerHorizontal {
+  /* width: 100%; */
+  width: 1px;
+  height: 50px;
+  background: #000;
+ /* margin:  auto 0px;  */
+}
+
+
 .topInputContainer{
   /* width: 25%; */
-  min-width: 500px;
-  padding: 30px;
+  width: 300px;
+  height: 634px;
+  flex-shrink: 0;
+  border-radius: 7px;
+  background: #333;  
+  padding: 20px;
   /* height: 100vh; */
-  background-color: #2e2e2e;
   /* position: relative; Ensures absolute children can be positioned within */
   overflow: visible; /* Allow dropdowns to escape the container */
   position: relative; /* Keep elements within bounds but still allow overflow */
@@ -30,10 +129,8 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  border-top-right-radius: 40px;
-  border-bottom-right-radius: 40px;
   /* margin-top: 60px; Ensure no extra margin as the navbar is fixed */
-  height: calc(100vh - 80px); 
+  /* height: calc(100vh - 80px);  */
 }
 
 .inputContainer {
@@ -41,10 +138,12 @@ body {
   padding: 50px; */
   /* height: 100vh; */
   /* background-color: #2e2e2e; */
-  margin-top: 25px;
-  margin-bottom: 25px;
+  /* margin-top: 25px; */
+  margin-bottom: 10px;
   overflow-y: scroll;
   overflow-x:hidden; 
+  border-radius: 7px;
+
   /* height: calc(100vh - 200px);  */
   /* position: relative; Keep elements within bounds but still allow overflow */
 
@@ -63,20 +162,52 @@ body {
 }
 
 .inputField:focus {
-  outline: none; /* Removes the black border on focus */
+  outline: none; 
   border-color: #4CAF50; /* Optional: Change border color on focus to match your theme */
 }
 
 .inputField::-webkit-scrollbar {
-  width: 0px; /* Very narrow scrollbar */
+  /* width: 2px; Very narrow scrollbar */
+  padding: 10px;
+
 }
 
 .inputField::-webkit-scrollbar-track {
-  background: #2e2e2e; /* Match the container background for minimal visibility */
+  background: #090909; /* Match the container background for minimal visibility */
   border-radius: 40px;
+  width: 20px;
+  padding: 20px;
 }
 
+.promptInputContainer {
+  position: relative;
+  width: 100%;
+  /* max-width: 500px;  */
+}
+.iconButton {
+  position: absolute;
+  bottom: 15px;
+  right: 10px;
+  width: 27px;
+  height: 27px;
+  flex-shrink: 0;
+  background-color: #2E8B57; /* Green background */
+  border-radius: 50%; /* Makes it a circle */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out;
+}
 
+/* Icon image inside the button */
+.iconButton img {
+  width: 25px;
+  height: 25px;
+  flex-shrink: 0;
+  aspect-ratio: 1/1;
+  object-fit: contain;
+}
 .inputRow {
   display: flex;
   flex-direction: column;
@@ -87,7 +218,9 @@ body {
 .inputColumn {
   display: flex;
   flex-direction: column;
-  margin: 10px 0;
+  margin: 20px 0;
+  /* align-items: center; */
+
 }
 
 .sizeInputColumn, .strengthInputColumn{
@@ -96,7 +229,7 @@ body {
   align-items: center; /* Center buttons vertically (if needed) */
   /* gap: 5px; Space between buttons */
   flex-wrap: wrap;
-  width: 400px;
+  /* width: 400px; */
   margin: 15px;
 }
 
@@ -113,13 +246,27 @@ body {
 .inputField {
   padding: 10px;
   margin-top: 10px;
-  background-color: rgb(240, 246, 240);
   /* border: 1px solid #555; */
   border-radius: 10px;
-  color: rgb(6, 5, 5);
+  /* color: rgb(6, 5, 5); */
   width: 100%;
   box-sizing: border-box; /* Ensure padding is included in the height */
   overflow: hidden; /* Prevent scrollbars */
+overflow-y: auto;
+resize: none; /* Prevent manual resizing */
+
+  /* width: 260px; */
+height: 150px;
+/* flex-shrink: 0; */
+border-radius: 7px;
+background: #666;  
+color: #CCC;
+font-family: Poppins;
+font-size: 14px;
+font-style: normal;
+font-weight: 400;
+line-height: normal;
+text-transform: capitalize;
 }
 .inputWidthHeight{
   padding: 10px;
@@ -130,18 +277,34 @@ body {
   color: rgb(6, 5, 5);
   width: 100px;
 }
+.label_l {
+  color: #FFF;
+  font-family: Poppins;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  text-transform: capitalize;
+}
 .label {
-  font-family: Arial, Helvetica, sans-serif;
-  margin-bottom: 5px;
-  margin-left:15px;
-  color: rgb(183, 183, 183);
+  color: #999;
+  font-family: Poppins;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  text-transform: capitalize;
+  margin:0px
 }
 .promptLabel{
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  margin-left: 15px;
-  margin-right: 15px;
+  /* margin-left: 15px;
+  margin-right: 15px; */
+}
+.resetButton:hover{
+cursor: pointer;
 }
 .magicButton {
   background-color: transparent;
@@ -158,52 +321,72 @@ body {
   display: flex;
   justify-content: space-between; /* Center buttons horizontally */
   align-items: center; /* Center buttons vertically (if needed) */
-  gap: 5px; /* Space between buttons */
+  /* gap: 5px;  */
   flex-wrap: wrap;
   width: 100%;
-  padding-left : 15px;
+  /* padding-left : 15px; */
 }
 
-.numberButtons {
+.numberButtons, 
+.aspectRatioButtons,
+.sizeButtons{
   display: flex;
-  justify-content: center; /* Center buttons horizontally */
+  justify-content: space-between; /* Center buttons horizontally */
   align-items: center; /* Center buttons vertically (if needed) */
-  gap: 5px; /* Space between buttons */
-  flex-wrap: wrap; /* Allow wrapping if the screen is small */
+  gap: 8px; 
+  /* flex-wrap: wrap;  */
+  width: 100%;
+
+ 
 }
 
 
-.numButton {
-  background-color: #2e2e2e;
+.numButton,
+.aspectButton,
+.sizeButton{
+  /* background-color: #2e2e2e;
   border: 1px solid #555;
   border-radius: 5px;
   color: rgb(183, 183, 183);
   cursor: pointer;
   text-align: center;
   height: 40px;
-  font-size: large;
+  font-size: large; */
+  color: #2E8B57;
+  font-family: Poppins;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 13px; /* 108.333% */
+  text-transform: capitalize;
+  /* width: 44px;*/
+  height: 22px; 
+  /* flex-shrink: 0; */
+  border-radius: 7px;
+  border: 1px solid #2E8B57;
+  background: rgba(217, 217, 217, 0.00);
   /* line-height: 1; Ensures text stays vertically centered */
-  width: 45px; /* Fixed width for all buttons */
+  /* width: 45px;  */
+  width:100%;
 }
 /* aspect ratio buttons */
-.aspectRatioButtons {
+/* .aspectRatioButtons {
   display: flex;
-  justify-content: space-between; /* Center buttons horizontally */
-  align-items: center; /* Center buttons vertically (if needed) */
-  gap: 5px; /* Space between buttons */
-  flex-wrap: wrap; /* Allow wrapping if the screen is small */
-}
+  justify-content: space-between;
+  align-items: center; 
+  gap: 5px;
+  flex-wrap: wrap; 
+} */
 
-.aspectButton {
+/* .aspectButton {
   background-color: #2e2e2e;
   border: 1px solid #555;
   border-radius: 5px;
   color: white;
   cursor: pointer;
   text-align: center;
-  line-height: 1; /* Ensures text stays vertically centered */
-  width: 70px; /* Fixed width for all buttons */
-}
+  line-height: 1; 
+  width: 70px;} */
 
 .activeButton {
   border: 2px solid #4CAF50;
@@ -325,17 +508,7 @@ body {
   border-radius: 10px;
 } */
 
-@media (max-width: 1024px) {
-  .generatorContainer {
-    flex-direction: column;
-  }
-  .dropdown{
-background-color: #2e2e2e;
-  }
-  .inputContainer, .imageContainer {
-    width: 100%;
-  }
-}
+
 
 
 
@@ -437,10 +610,10 @@ background-color: #2e2e2e;
 .uploadLabel {
   /* display: block; */
   width: 100%;
-  height: 200px; /* Set the height to match the image */
+  height: 150px; /* Set the height to match the image */
   border: 1px solid #555;
-  border-radius: 15px; /* Rounded corners */
-  background-color: white;
+  border-radius: 7px; /* Rounded corners */
+  background-color:#666666;
   /* position: relative; */
   /* overflow: hidden; */
   /* cursor: pointer; */
@@ -565,19 +738,61 @@ background-color: #2e2e2e;
   /* width: 70%;
    */
    flex-grow: 1;
-   margin-left: 100px; /* Adjust the gap between the two containers */
+   /* margin-left: 100px;  */
   height: calc(100vh - 80px); 
-  border-top-left-radius: 40px;
-  border-bottom-left-radius: 40px;
+  border-radius:7px;
   /* display: flex;
   flex-wrap: wrap;
+
  */
 
-  
+
+  width: 962px;
+height: 552px;
+flex-shrink: 0;
   justify-content: center;
   align-items: center;
   background-color: #2e2e2e;
 
+}
+
+.rightSection{
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 634px;
+  gap: 32px;
+
+}
+.topToolBar{
+  /* width: 962px; */
+  width: 100%;
+  height: 50px;
+  flex-shrink: 0;
+  padding: 0px 20px;
+  border-radius: 7px;
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+background: #333;
+color: #FFF;
+font-family: Poppins;
+font-size: 16px;
+font-style: normal;
+font-weight: 400;
+line-height: normal;
+text-transform: capitalize;
+}
+
+
+.topToolBarIcons{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* width: 50px; */
+  border-radius: 7px;
+  /* background: #333; */
 }
 .generatedImagesContainer {
   display: flex;
@@ -637,64 +852,130 @@ background-color: #2e2e2e;
 /*  */
 
 .generateButtonCont {
-  position: sticky;
-  bottom: 0;
+  /* position: sticky; */
+  /* bottom: 0; */
 
   /* padding: 10px 20px;
   background-color: #4CAF50; */
+  display: flex;
   color: white;
   border: none;
   border-radius: 5px;
   cursor: pointer;
   width: 100%;
   margin-bottom: 0px;
+  align-items: center;
+  justify-content: center;
+}
+.genIcon{
+  width: 25px;
+  height: 25px;
+  flex-shrink: 0;
+  aspect-ratio: 1/1;
+border-radius: 100px;
+
+/* background: #2E8B57; */
+filter: brightness(0) saturate(100%) invert(90%); /* Converts to #333 */
+
+}
+.generateButton {
+  width: 259px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 100px;
+background: #2E8B57;
+
+
+color: #FFF;
+font-family: Poppins;
+font-size: 16px;
+font-style: normal;
+font-weight: 500;
+line-height: normal;
+text-transform: capitalize;
+
+border: none;
 }
 
-.generateButton {
-  /* position: sticky; */
-  /* bottom: 0; */
-
-  padding: 10px 20px;
-  background-color: #3b7d23;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  width: 100%;
-  /* margin-top: 20px; */
-  /* margin-bottom: 0px; */
+.generatorContainer > div {
+  flex: 1;
 }
 @media (max-width: 1024px) {
   .generatorContainer {
-    flex-direction: column; /* Stack the containers vertically */
+    /* flex-direction: column; Stack the containers vertically */
+    align-items: flex-start;
+    flex-wrap: wrap;
+    align-self:center;
+    /* width: 100%; */
+
+  }
+  .leftToolBar {
+    max-width: 50px;
   }
 
   .topInputContainer {
     width: 100%; /* Full width on tablets */
-    border-radius: 0px; /* Remove border-radius for better mobile view */
+    border-radius: 7px; /* Remove border-radius for better mobile view */
+    align-self: flex-end;
+    order: 1; 
+
   }
 
   .imageContainer {
     width: 100%; /* Full width on tablets */
-    margin-left: 0;
+    /* margin-left: 0; */
     height: auto;
-    border-radius: 0px; /* Remove border-radius for better mobile view */
+    /* border-radius: 0px;  */
   }
+  .inputContainer, .imageContainer {
+    width: 100%;
+  }
+  .rightSection{
+    width: 100%;
+    /* min-width: 500px; */
+  }
+}
+.dropdown-mobile{
+  /* width: 100%;
+  width: 100%; */
+  width: 100%;
+  height: 50px;
+  flex-shrink: 0;
+  padding: 0px 20px;
+  border-radius: 7px;
+  align-items: center;
+  display: flex;
+  /* justify-content: space-between; */
+background: #333;
+color: #FFF;
+font-family: Poppins;
+font-size: 16px;
+font-style: normal;
+font-weight: 400;
+line-height: normal;
+text-transform: capitalize;
 }
 
 /* Responsive for Mobile (max-width: 768px) */
 @media (max-width: 768px) {
+  .generatorContainer{
+    flex-direction:column ;
+  }
   .topInputContainer {
     width: 100%;
     height: auto;
-    min-width: 100%;
 
     padding: 20px; /* Reduced padding for mobile */
   }
-
+  .topToolBar{
+   display: none; 
+  }
+  .leftToolBar{
+    display: none;
+  }
   .inputContainer {
     height: auto;
-    margin-top: 20px;
+    /* margin-top: 20px; */
     margin-bottom: 20px;
     overflow-y: auto; /* Keep scroll for overflow */
   }
@@ -702,7 +983,7 @@ background-color: #2e2e2e;
   .imageContainer {
     width: 100%;
     height: auto; /* Allow height to auto-adjust */
-    margin-left: 0; /* Remove margin between containers */
+    /* margin-left: 0;  */
     margin-top: 20px; /* Add spacing between input and image containers */
   }
 
@@ -711,15 +992,6 @@ background-color: #2e2e2e;
     padding: 8px; /* Reduce padding for dropdown */
   }
 
-  .numButton {
-    height: 40px; /* Reduce size of number buttons */
-    width: 40px; /* Reduce size of number buttons */
-  }
-
-  .aspectButton {
-    width: 50px; /* Reduce aspect ratio button size */
-    height: auto;
-  }
 
   .generateButton {
     font-size: 1em;
