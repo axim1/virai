@@ -4,6 +4,9 @@ import axios from "axios";
 import checkmark from '../../../assets/vector_icons/checkmark 1.svg';
 import './PricingSection.css';
 import sliderIcon from '../../../assets/vector_icons/Scroll Icon.svg'
+import arrow from '../../../assets/vector_icons/Arrow 2.svg'; // Replace with your image path
+
+
 const PricingSection = () => {
   const apiUrl = process.env.REACT_APP_API_URL;
 
@@ -81,9 +84,9 @@ const PricingSection = () => {
                 ))}
               </ul>
               {plan.price > 0 ? (
-                <button className="card-button" onClick={(event) => submitForm(event, plan.price, plan.subscription)}>Get Now</button>
+                <button className="card-button" onClick={(event) => submitForm(event, plan.price, plan.subscription)}>Get Now  <img src={arrow}  className='arrow'  /></button>
               ) : (
-                <Link to="/signup"><button className="card-button">Get Now</button></Link>
+                <Link to="/signup"><button className="card-button">Get Now  <img src={arrow}  className='arrow'  /></button></Link>
               )}
             </div>
           ))}

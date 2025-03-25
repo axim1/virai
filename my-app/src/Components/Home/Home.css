@@ -92,24 +92,54 @@ color: #959595; */
   color: #CCC;
   text-align: center;
   font-family: Poppins;
-  font-size: 30px;
+  font-size: 50px;
   font-style: normal;
   font-weight: 300;
-  line-height: 50px; /* 166.667% */
+  line-height: 50px; /* 100% */
   text-transform: capitalize;
   text-align: center;
+
+
   }
   .secheading{
     color: #2E8B57;
 font-family: Poppins;
-font-size: 50px;
+font-size: 80px;
 font-style: normal;
 font-weight: 700;
-line-height: 50px;
+line-height: 80px;
 text-transform: uppercase;
 text-align: center;
     
     }
+
+
+
+    .firstheading2{
+      color: #CCC;
+      text-align: center;
+      font-family: Poppins;
+      font-size: 30px;
+      font-style: normal;
+      font-weight: 300;
+      line-height: 50px; /* 166.667% */
+      text-transform: capitalize;
+      text-align: center;
+    
+    
+      }
+      .secheading2{
+        color: #2E8B57;
+        font-family: Poppins;
+        font-size: 50px;
+        font-style: normal;
+        font-weight: 700;
+        line-height: 50px;
+        text-transform: uppercase;
+        text-align: center;
+        
+        }
+
     .thirdheading{
       font-size: 40px;
       
@@ -719,4 +749,41 @@ button[type="submit"]:hover {
 @keyframes animated-text {
   0% { background-position: 0% 50%; }
   100% { background-position: 100% 50%; }
+}
+
+
+.scroll-trigger {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 1s ease, transform 1s ease;
+}
+
+.scroll-trigger.fade-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.scroll-trigger.fade-out {
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+/* Ensure second row of AI tools fades to black */
+.ai-tools-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.ai-tools-container::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 20%;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, black 100%);
+  pointer-events: none;
+}
+#pricing-section{
+  /* max-width: 100%; */
 }

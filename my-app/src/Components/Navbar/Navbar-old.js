@@ -121,8 +121,7 @@ const Navbar = ({ loggedIn, setLoggedIn, onAIToolsClick, onHomeClick }) => {
             duration={50}
             className={`nav-item ${activeLink === 'ai-tools' ? 'active' : ''}`} // Apply active class if "AI Tools" is active
             onClick={handleAIToolsClick} // Trigger the shrinking effect when "AI Tools" is clicked
-            offset={-100} // Adjust this value to scroll higher and show the hero section as well
-
+            offset={-1000} 
           >
             AI Tools
           </ScrollLink>

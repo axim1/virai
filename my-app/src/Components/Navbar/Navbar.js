@@ -65,6 +65,8 @@ const Navbar = ({ loggedIn, setLoggedIn, onAIToolsClick, onHomeClick }) => {
 
         <ScrollLink
           to="tools-section"
+          smooth={true}
+          duration={50}
           className={`${styles.navItem} ${activeLink === 'ai-tools' ? styles.active : ''}`}
           onClick={handleAIToolsClick}
         >

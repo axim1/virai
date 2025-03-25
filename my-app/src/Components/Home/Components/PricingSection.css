@@ -1,6 +1,7 @@
 .pricing-section {
-  padding: 50px;
+  padding: 32px;
   text-align: center;
+  max-width: 100%;
 }
 
 .p1 {
@@ -22,6 +23,15 @@
   text-transform: uppercase;
   margin-bottom: 32px;
   line-height: 50px; /* 100% */
+
+}
+.arrow{
+  width: 25px;
+/* height: 0px; */
+flex-shrink: 0;
+stroke-width: 2px;
+stroke: #2E8B57;
+margin-left: 5px;
 
 }
 
@@ -139,10 +149,10 @@ flex-shrink: 0;
   cursor: pointer;
 }
 
-.card-button:hover {
+/* .card-button:hover {
   background-color: #0056b3;
   color: white;
-}
+} */
 .slider-buttons{
   display: none;
 }

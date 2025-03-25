@@ -15,7 +15,75 @@ import NewsLetter from './Components/NewsLetter';
 function Home({ triggerShrink }) {
   const [scrollY, setScrollY] = useState(0);
   const [showText, setShowText] = useState(false); // Track whether to show text or logo
+  const [toolsVisible, setToolsVisible] = useState(false);
+  const [pricingVisible, setPricingVisible] = useState(false);
+  const [faqVisible, setFaqVisible] = useState(false);
+
   const location = useLocation();
+
+  // useEffect(() => {
+  //   const handleScroll = () => {
+  //     setScrollY(window.scrollY);
+  //     setShowText(window.scrollY > 3);
+  //   };
+
+  //   window.addEventListener('scroll', handleScroll);
+  //   return () => {
+  //     window.removeEventListener('scroll', handleScroll);
+  //   };
+  // }, []);
+
+  // useEffect(() => {
+  //   if (triggerShrink) {
+  //     setScrollY(200);
+  //   }
+  // }, [triggerShrink]);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setToolsVisible(entry.isIntersecting);
+      },
+      { threshold: 0.5 }
+    );
+
+    const toolsSection = document.getElementById('tools-section');
+    if (toolsSection) observer.observe(toolsSection);
+
+    return () => {
+      if (toolsSection) observer.unobserve(toolsSection);
+    };
+  }, []);
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setFaqVisible(entry.isIntersecting);
+      },
+      { threshold: 0.3 }
+    );
+
+    const faqSection = document.getElementById('faq-section');
+    if (faqSection) observer.observe(faqSection);
+
+    return () => {
+      if (faqSection) observer.unobserve(faqSection);
+    };
+  }, []);
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setPricingVisible(entry.isIntersecting);
+      },
+      { threshold: 0.5 }
+    );
+
+    const pricingSection = document.getElementById('pricing-section');
+    if (pricingSection) observer.observe(pricingSection);
+
+    return () => {
+      if (pricingSection) observer.unobserve(pricingSection);
+    };
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -91,8 +159,8 @@ function Home({ triggerShrink }) {
       {/* AI Tools Header */}
       <div style={toolsHeaderStyle} >
       <>
-              <h1 className="firstheading" style={mouseIconStyle} >You Don‘t Need Eyes To See</h1>
-              <h1 className="secheading" style={mouseIconStyle} >YOU NEED VISION</h1>
+              <h1 className="firstheading2" style={mouseIconStyle} >You Don‘t Need Eyes To See</h1>
+              <h1 className="secheading2" style={mouseIconStyle} >YOU NEED VISION</h1>
             </>
         <svg xmlns="http://www.w3.org/2000/svg" width="35" height="35" viewBox="0 0 35 35" fill="none" style={mouseIconStyle} className='mouseIcon'>
           <circle cx="17.5" cy="17.5" r="16.5" stroke="white" strokeWidth="2" />
@@ -100,18 +168,23 @@ function Home({ triggerShrink }) {
         </svg>
       </div>
 
+
       {/* AI Tools Section */}
-      <div className="scroll-trigger" style={{ opacity: triggerShrink || scrollY > 50 ? 1 : 0, transform: `translateY(${triggerShrink || scrollY > 50 ? 0 : 20}px)`, transition: 'opacity 0.5s ease, transform 0.5s ease' }}>
+      <div id="tools-section" className={`scroll-trigger ${toolsVisible ? 'fade-in' : 'fade-out'}`}>
         <AITools />
       </div>
 
       {/* Pricing Section */}
-      <PricingSection id="pricing-section" />
+      <div id="pricing-section" className={` scroll-trigger ${pricingVisible ? 'fade-in' : 'fade-out'}`}>
+        <PricingSection />
+      </div>
 
       {/* FAQ Section */}
-      <div id="faq-section" style={{ marginTop: "100px", marginBottom: "100px" }}>
+      {/* FAQ Section */}
+      <div id="faq-section" className={`scroll-trigger ${faqVisible ? 'fade-in' : 'fade-out'}`} style={{display:'flex', maxWidth:'100%' ,marginTop: "100px", marginBottom: "100px" }}>
         <FAQ />
       </div>
+
 
       {/* Testimonials */}
       <div style={{ width: "100%", padding: "50px 32px" }}>
