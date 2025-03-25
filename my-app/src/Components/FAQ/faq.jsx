@@ -1,19 +1,12 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
+import styles from './faq.module.css'
 
+const topContainer= styled.div`
+
+`;
 const Container = styled.div`
-  background: url('https://source.unsplash.com/random/1920x1080') no-repeat center center fixed;
-  background-size: cover;
-  color: white;
-  font-family: Arial, sans-serif;
-  padding: 40px;
-  max-width: 800px;
-  max-height: 60vh;
   overflow-y: auto;
-  margin: 0 auto;
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 
   &::-webkit-scrollbar {
     width: 12px;
@@ -41,15 +34,15 @@ const Title = styled.h1`
 `;
 
 const Question = styled.div`
-  background-color: rgba(26, 26, 26, 0.9);
-  margin: 10px 0;
-  padding: 15px 25px;
+  // background-color: rgba(26, 26, 26, 0.9);
+  // margin: 10px 0;
+  padding: 8px;
   cursor: pointer;
-  border: 1px solid #333;
+  border-bottom: 1px solid #333;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-radius: 5px;
+  // border-radius: 5px;
   transition: background-color 0.3s ease;
 
   &:hover {
@@ -58,17 +51,55 @@ const Question = styled.div`
 `;
 
 const QuestionText = styled.span`
-  font-weight: bold;
+  // font-weight: bold;
+  color: #999;
+font-family: Poppins;
+font-size: 20px;
+font-style: normal;
+font-weight: 500;
+line-height: normal;
+text-transform: capitalize;
 `;
 
 const Answer = styled.div`
-  background-color: rgba(26, 26, 26, 0.9);
+  // background-color: rgba(26, 26, 26, 0.9);
   padding: 15px 25px;
   border-top: 1px solid #333;
   border-bottom: 1px solid #333;
   border-radius: 0 0 5px 5px;
   margin-top: -10px;
+  color: #CCC;
+font-family: Poppins;
+font-size: 16px;
+font-style: normal;
+font-weight: 400;
+line-height: normal;
+text-transform: capitalize;
 `;
+// const ButtonContact = styled.div`
+// color: #FFF;
+// font-family: Poppins;
+// font-size: 16px;
+// font-style: normal;
+// font-weight: 400;
+// line-height: normal;
+// text-decoration-line: underline;
+// text-decoration-style: solid;
+// text-decoration-skip-ink: auto;
+// text-decoration-thickness: auto;
+// text-underline-offset: auto;
+// text-underline-position: from-font;
+// text-transform: capitalize;
+// color: #FFF;
+// text-align: center;
+// font-family: Poppins;
+// font-size: 16px;
+// font-style: normal;
+// font-weight: 400;
+// line-height: normal;
+// text-transform: capitalize;
+
+// `
 
 const FAQ = () => {
   const [selectedQuestion, setSelectedQuestion] = useState(null);
@@ -129,8 +160,16 @@ const FAQ = () => {
   ];
 
   return (
-    <Container>
-      <Title>FAQ</Title>
+
+    <div className={styles.faqContainer}>
+
+      <p className={styles.p1}>Frequently
+        </p>
+        <p className={styles.p2}>asked Questions</p>
+ 
+
+<div className={styles.topContainer}>
+     <Container>
       {faqData.map((item, index) => (
         <div key={index}>
           <Question onClick={() => toggleQuestion(index)}>
@@ -142,9 +181,16 @@ const FAQ = () => {
               <p>{item.answer}</p>
             </Answer>
           )}
+          <div style={{width:'100%',height:'1px',background:'black'}}></div>
         </div>
       ))}
     </Container>
+    <button className={styles.ButtonContact}> 
+    Still have a question? Contact Us</button>
+
+    </div>
+
+    </div>
   );
 };
 

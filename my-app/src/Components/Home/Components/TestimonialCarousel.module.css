@@ -1,96 +1,192 @@
-.container {
-  width: 80%;
-  margin: auto;
+/* Ensure the container takes full width */
+.carouselContainer {
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  /* padding: 20px 0; */
+}
+
+/* Make sure Swiper takes full width */
+.swiper {
+  width: 100% !important;
+}
+
+/* Ensure each slide is properly aligned */
+.swiper-slide {
+  display: flex !important;
+  justify-content: center;
+  align-items: center;
+  width: auto !important; /* Ensures proper slide width */
+}
+
+/* Styling for testimonial cards */
+.testimonialCard {
+  background: url('../../../assets/images/texture (1).png') lightgray 50% / cover no-repeat;
+  position: relative;
+  color: white;
   padding: 20px;
-  color: #fff; /* Customize color */
-  /* background: #333; Customize background */
+  border-radius: 21px;
+  /* box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); */
+  text-align: left;
+  width: 100%; /* Takes full width of the slide */
+  max-width: 280px; /* Controls max card width */
+  min-width: 336px; /* Ensures it doesn’t shrink too much */
+  /* width: 336px; */
+height: 160px;
+/* flex-shrink: 0; */
 }
 
-.testimonialItem {
-  text-align: center;
-  padding: 20px;
+/* Star ratings */
+.rating {
+  display: flex;
+  margin-bottom: 10px;
 }
 
-.avatar {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  margin: 10px auto;
+.star {
+  color: #A77E01;
+  font-size: 20px;
+  margin-right: 4px;
+}
+.Quotes {
+  position: absolute;
+  top: -25px;
+  left: 15px;
+  background-color: transparent;
+  padding: 5px;
 }
 
-.quote {
-  font-style: italic;
-  font-size: 30px;
-  margin: 20px 0;
+.Quotes svg {
+  width: 40px;
+  height: 40px;
 }
 
-.author {
+/* Text and user styling */
+.text {
+
+  color: #FFF;
+font-family: Poppins;
+font-size: 14px;
+font-style: normal;
+font-weight: 300;
+line-height: 18px; /* 128.571% */
+}
+
+
+.p1{
+  color: #999;
+text-align: center;
+font-family: Poppins;
+font-size: 36px;
+font-style: normal;
+font-weight: 300;
+line-height: 36px; /* 100% */
+text-transform: capitalize;
+}
+
+.p2{
+  color: #2E8B57;
+font-family: Poppins;
+font-size: 50px;
+font-style: normal;
+font-weight: 700;
+line-height: 50px;
+text-transform: uppercase;
+text-align: center;
+margin-bottom: 45px;
+}
+.separator {
+  border: 0;
+  height: 1px;
+  opacity: 0.5;
+  background: #CCC;
+    margin: 10px 0;
+}
+
+.user {
+  color: #3cb371;
   font-weight: bold;
 }
 
-.position {
-  display: block;
-  font-size: 0.8em;
-  font-weight: normal;
+/* Fix Navigation Button Position */
+.swiper-button-prev,
+.swiper-button-next {
+  color: white !important;
+  font-size: 24px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  z-index: 10 !important;
 }
 
-/* Responsive adjustments */
+.swiper-button-prev {
+  left: 10px !important;
+}
+
+.swiper-button-next {
+  right: 10px !important;
+}
+
+/* Responsive Breakpoints */
 @media (max-width: 1024px) {
-  .container {
-    width: 90%;
-    padding: 15px;
-  }
-
-  .quote {
-    font-size: 25px;
-  }
-
-  .avatar {
-    width: 70px;
-    height: 70px;
+  .testimonialCard {
+    max-width: 90%;
   }
 }
 
 @media (max-width: 768px) {
-  .container {
-    width: 95%;
-    padding: 10px;
-  }
-
-  .quote {
-    font-size: 20px;
-  }
-
-  .avatar {
-    width: 60px;
-    height: 60px;
+  .testimonialCard {
+    max-width: 100%;
   }
 }
 
-@media (max-width: 480px) {
-  .container {
-    width: 100%;
-    padding: 5px;
-  }
 
-  .quote {
-    font-size: 18px;
-  }
-
-  .avatar {
-    width: 50px;
-    height: 50px;
-  }
+/* Prevent Swiper from clipping the icon */
+.swiper {
+  overflow: visible !important;
 }
 
-.slick-arrow {
-  z-index: 1; /* Ensure arrows are above other content */
+.swiper-slide {
+  overflow: visible !important;
 }
 
-.slick-prev {
-  left: 20px; /* Adjust based on your design */
+
+/* Custom pagination styles (3 white tiles) */
+/* Pagination Container */
+/* Custom pagination container */
+/* Custom pagination container */
+.customPagination {
+  display: flex !important;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+  gap: 8px; /* Space between tiles */
 }
 
-.slick-next {
-  right: 20px; /* Adjust based on your design */
+/* Custom Pagination Bullets (White Tiles) */
+.swiperPaginationBullet {
+  width: 30px !important;  /* Tile width */
+  height: 10px !important; /* Tile height */
+  background: #ffffff !important; /* White color */
+  opacity: 0.5 !important;
+  border-radius: 5px !important;
+  transition: opacity 0.3s, transform 0.3s;
+  margin: 0 5px !important;
 }
+
+/* Active Pagination Bullet */
+.swiperPaginationBulletActive {
+  opacity: 1 !important;
+  transform: scale(1.2) !important;
+}
+
+
+/* Star ratings */
+/* .rating {
+  display: flex;
+  margin-bottom: 10px;
+}
+
+.star {
+  color: #ffd700;
+  font-size: 20px;
+  margin-right: 4px;
+} */
