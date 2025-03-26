@@ -1087,11 +1087,11 @@ app.get('*', (req, res) => {
 
 // ... (existing code)
 
-app.listen(8000, () => {
-  console.log("Server starting at 8000");
-});
-
-// app.listen(8000, '92.240.254.103', () => {
-//   console.log("Server starting at 92.240.254.103 on port 8000");
+// app.listen(8000, () => {
+//   console.log("Server starting at 8000");
 // });
+
+app.listen(8000, '92.240.254.103', () => {
+  console.log("Server starting at 92.240.254.103 on port 8000");
+});
 
