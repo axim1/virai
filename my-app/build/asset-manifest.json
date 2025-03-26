@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/static/css/main.86dcfb8f.css",
-    "main.js": "/static/js/main.b50cc334.js",
+    "main.css": "/static/css/main.7ca47eaa.css",
+    "main.js": "/static/js/main.9960e182.js",
     "static/js/787.cfd8f164.chunk.js": "/static/js/787.cfd8f164.chunk.js",
     "static/media/Hero BG.png": "/static/media/Hero BG.847286e837c213d66b00.png",
     "static/media/texttoimage (4).png": "/static/media/texttoimage (4).7f76f6057bce6db902d0.png",
@@ -14,6 +14,7 @@
     "static/media/texture.png": "/static/media/texture.2b4866b2ef6200c4a5d9.png",
     "static/media/texttoimage (2).png": "/static/media/texttoimage (2).07f604e30c778e65812c.png",
     "static/media/texture (1).png": "/static/media/texture (1).95dcbe3cb0f747aeb1c8.png",
+    "static/media/pricing-01 1.svg": "/static/media/pricing-01 1.d019a59708ded5cf3629dd013402dc76.svg",
     "static/media/delete-01 1.svg": "/static/media/delete-01 1.a4c4e432e3f01884e04f6a7223b1c664.svg",
     "static/media/instagram 1.svg": "/static/media/instagram 1.0c03cdbd688aeab00e3b705218d0a1fa.svg",
     "static/media/virai-logo.svg": "/static/media/virai-logo.5c99e19f8dadc6ff7daf82c6541f5f5e.svg",
@@ -41,12 +42,12 @@
     "index.html": "/index.html",
     "static/media/Sketch to image-01.svg": "/static/media/Sketch to image-01.41de6ec2776c515fa0e1a14358011467.svg",
     "static/media/Arrow 2.svg": "/static/media/Arrow 2.f5e83f4bbd17542642e6106b480d80f8.svg",
-    "main.86dcfb8f.css.map": "/static/css/main.86dcfb8f.css.map",
-    "main.b50cc334.js.map": "/static/js/main.b50cc334.js.map",
+    "main.7ca47eaa.css.map": "/static/css/main.7ca47eaa.css.map",
+    "main.9960e182.js.map": "/static/js/main.9960e182.js.map",
     "787.cfd8f164.chunk.js.map": "/static/js/787.cfd8f164.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.86dcfb8f.css",
-    "static/js/main.b50cc334.js"
+    "static/css/main.7ca47eaa.css",
+    "static/js/main.9960e182.js"
   ]
 }

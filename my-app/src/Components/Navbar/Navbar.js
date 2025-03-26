@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Link as ScrollLink } from 'react-scroll';
 import { Link as RouterLink } from 'react-router-dom';
+import { useNavigate, NavLink } from "react-router-dom";
+
 import styles from './Navbar.module.css'; // Import the CSS module
 import virlogo from '../../assets/vector_icons/virai-logo.svg';
+import coinIcon from '../../assets/vector_icons/pricing-01 1.svg'
+const Navbar = ({ loggedIn,  setLoggedIn = () => {}, onAIToolsClick, onHomeClick }) => {
+  const navigate = useNavigate();
 
-const Navbar = ({ loggedIn, setLoggedIn, onAIToolsClick, onHomeClick }) => {
   const [navBackground, setNavBackground] = useState(false);
   const [user, setUser] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -17,20 +21,33 @@ const Navbar = ({ loggedIn, setLoggedIn, onAIToolsClick, onHomeClick }) => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // useEffect(() => {
+  //   const storedUser = localStorage.getItem('user');
+  //   if (storedUser && setLoggedIn) {  // ✅ Ensure setLoggedIn is defined
+  //     setUser(JSON.parse(storedUser));
+  //     setLoggedIn(true);
+  //   }
+  // }, [loggedIn]); // ✅ Correct dependency array
+  
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
-    if (storedUser) {
+    if (storedUser) {  
       setUser(JSON.parse(storedUser));
       setLoggedIn(true);
+    } else {
+      setUser(null);
+      setLoggedIn(false);
     }
-  }, [loggedIn]);
-
+  }, [loggedIn,user]); // ✅ Add 'loggedIn' as a dependency
+  
   const toggleMenu = () => setMenuOpen(!menuOpen);
   const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
   const handleLogout = () => {
     localStorage.removeItem('user');
     setUser(null);
     setLoggedIn(false);
+    navigate("/", { replace: true });
+
   };
 
   const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
@@ -98,17 +115,32 @@ const Navbar = ({ loggedIn, setLoggedIn, onAIToolsClick, onHomeClick }) => {
       <div className={styles.navbarRight}>
         {user ? (
           <>
+
             <div className={styles.usernameContainer} onClick={toggleDropdown}>
-              <div className={styles.username}>Hello, {user.fname}</div>
+              {/* <div className={styles.username}>Hello, {user.fname}</div> */}
+              <div  className={`${styles.navItem} ${styles.myAccountButton}`}>MY ACCOUNT
+
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="6" viewBox="0 0 14 6" fill="none">
+<path d="M7 6L13.0622 0.75H0.937822L7 6Z" fill="#2E8B57"/>
+</svg>
+              </div>
+
               {dropdownOpen && (
                 <div className={styles.userDropdown}>
                   <div><strong>{user.fname} {user.lname}</strong></div>
                   <div><strong>Email:</strong> {user.email}</div>
                   <div><strong>Images Left:</strong> {user.no_of_images_left}</div>
+                  <button onClick={handleLogout} className={styles.navItem}>Logout</button>
+
                 </div>
+
               )}
+
+      
             </div>
-            <button onClick={handleLogout} className={`${styles.navItem} ${styles.logoutButton}`}>Logout</button>
+            <div className={styles.coins}>
+                <img src={coinIcon}/>{user.no_of_images_left}
+              </div>
           </>
         ) : (
           <>

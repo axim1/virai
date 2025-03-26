@@ -108,7 +108,7 @@ const Register = () => {
 
   return (
     <>
-      <Navbar />
+      {/* <Navbar /> */}
       <div className="register">
         <form>
           <h1 className="mb-4">Create your account</h1>

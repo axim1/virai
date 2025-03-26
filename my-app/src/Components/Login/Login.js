@@ -43,7 +43,7 @@ const Login = ({ setLoggedIn, setUserState }) => {
       localStorage.setItem("user", JSON.stringify(response.data.user));
       setUserState(response.data.user);
       setLoggedIn(true); // Trigger a state update in Navbar component
-      navigate("/", { replace: true });
+      navigate("/home", { replace: true });
     } catch (error) {
       console.error("Login failed:", error);
       if (error.response && error.response.status === 401) {
@@ -65,7 +65,8 @@ const Login = ({ setLoggedIn, setUserState }) => {
   // }, [formErrors]);
 
   return (
-    <>  <Navbar/>
+    <>  
+    {/* <Navbar/> */}
       <div className={loginstyle.login}>
 
       <form>

@@ -41,7 +41,7 @@ function App() {
       <Router>
         {/* Render Navbar on every page and pass down the props */}
         <Navbar
-          user={userState}
+          // user={userState}
           loggedIn={loggedIn}
           setLoggedIn={setLoggedIn}
           onAIToolsClick={handleAIToolsClick} // Pass down the AI Tools click handler
@@ -51,7 +51,8 @@ function App() {
         <Routes>
           {/* Home Route */}
           <Route path="/" element={<Home triggerShrink={triggerShrink} />} />
-          
+          <Route path="/home" element={<Home triggerShrink={triggerShrink} />} />
+
           {/* Login Route */}
           <Route
             path="/login"
