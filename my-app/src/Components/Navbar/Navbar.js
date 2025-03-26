@@ -145,7 +145,7 @@ const Navbar = ({ loggedIn,  setLoggedIn = () => {}, onAIToolsClick, onHomeClick
         ) : (
           <>
           <RouterLink to="/login" className={`${styles.navItem} ${styles.loginButton}`}>Sign in</RouterLink>
-          <RouterLink to="/register" className={`${styles.navItem} ${styles.registerButton}`}>Register</RouterLink>
+          <RouterLink to="/signup" className={`${styles.navItem} ${styles.registerButton}`}>Register</RouterLink>
           </> )}
       </div>
 
