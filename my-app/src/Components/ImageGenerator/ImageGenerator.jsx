@@ -34,7 +34,7 @@ import Dropdown from './Dropdown.js';
 
 const apiUrl = process.env.REACT_APP_API_URL;
 const username = JSON.parse(localStorage.getItem('user')) || {};
-const userId = username._id;
+const userId = '672f8fa5d0f99f32389f2ac0';
 
 function ImageGenerator({ onGenerateImage }) {
   const navigate = useNavigate();
