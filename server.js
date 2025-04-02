@@ -9,16 +9,23 @@ const upload = multer({ dest: 'uploads/' });
 const app = express();
 const FormData = require('form-data');
 require('dotenv').config();
+const fs = require('fs');
+
 const callbackUrl = process.env.CALLBACK_URL;
 const { v4: uuidv4 } = require('uuid'); // Import UUID
 // const multer = require("multer");
 // const path = require("path");
+const VIDEO_OUTPUT_DIR = path.join(__dirname, 'videos');
+
+if (!fs.existsSync(VIDEO_OUTPUT_DIR)) {
+  fs.mkdirSync(VIDEO_OUTPUT_DIR);
+}
 
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
-const fs = require('fs');
+const { isStringObject } = require("util/types");
 
 const uri = "mongodb+srv://asim6832475:1234@cluster0.ukza83p.mongodb.net/?retryWrites=true&w=majority";
 
@@ -41,6 +48,8 @@ mongoose.connect(uri, clientOptions)
   });
   
 // const upload = multer({ storage });
+
+
 
 app.get("/subscriptions", async (req, res) => {
   try {
@@ -292,13 +301,13 @@ app.get("/confirm_payment", async (req, res) => {
 
 let imageResults;
 let respData;
-// https://ek6vmxx07wvmnf-8000.proxy.runpod.net/docs
+// https://pk7u4tuw7jdfgj-8000.proxy.runpod.net/docs
 app.post('/image-callback', async (req, res) => {
   try {
     console.log("callback called")
     const imageUuid = req.body.uuid;
     // console.log("uuid :", imageUuid)
-    const response = await axios.get(`https://ek6vmxx07wvmnf-8000.proxy.runpod.net/getimage/${imageUuid}`, {
+    const response = await axios.get(`https://pk7u4tuw7jdfgj-8000.proxy.runpod.net/getimage/${imageUuid}`, {
       params: {
         delete: true,
         type: 'PNG',
@@ -357,6 +366,166 @@ app.get('/check-image-status/:userId/:uuid', async (req, res) => {
 
   } else {
     res.status(202).send({ message: 'Processing' }); // 202 Accepted - processing not complete
+  }
+});
+
+// app.post('/object-creation',upload.single('image'),async (req,res)=>{
+//   try {
+//     if (!req.file) {
+//       return res.status(400).send({ message: 'No image provided' });
+//     }
+
+//     const imagePath = req.file.path;
+//     const form = new FormData();
+
+//     const userId = req.body.userId; // Assuming the userId is sent in the body of the request
+//     const user = await User.findById(userId);
+
+//     // Check if the user exists
+//     if (!user) {
+//       console.log("User not found. UserId:", userId);
+//       return res.status(404).send({ message: "User not found" });
+//     }
+
+//     // Check if the user has any image generation limits left
+//     if (user.no_of_images_left <= 0) {
+//       return res.status(400).send({ message: "You have reached the image generation limit" });
+//     }
+
+//     // Decrement the user's image generation limit
+//     const updatedUser = await User.findByIdAndUpdate(userId, { $inc: { no_of_images_left: -1 } }, { new: true });
+//     if (!updatedUser) {
+//       console.log("Error updating user:", updatedUser);
+//       return res.status(500).send({ message: "Error updating user" });
+//     }
+
+//   form.append('reference_image',fs.createReadStream(imagePath), req.file.originalname)
+//   form.append('revert_extra', ''); // Empty string or any specific value if needed
+//   form.append('callback_url', '');
+//   let imageUuid
+
+//   try {
+//    const objectCreationResponse = await axios.post('https://pk7u4tuw7jdfgj-8000.proxy.runpod.net/3d_creation', form, {
+//       headers: {
+//         ...form.getHeaders(),
+//       },
+//     });
+
+//     imageUuid = objectCreationResponse.data.model[0].image_uuid
+//     console.log("image uuid", imageUuid);
+
+//   } catch (error) {
+//     console.error('Error during object creation API call:');
+//     if (error.response) {
+//       console.error('Error details:', error.response.data);
+//     }
+//     return res.status(500).send({ message: 'Error during image generation request.' });
+//   }
+//   // console.log("image uuid", imageUuid)
+
+//   fs.unlink(imagePath, (err) => {
+//     if (err) {
+//       console.error('Failed to delete the uploaded sketch image:', err);
+//     } else {
+//       console.log(`Uploaded sketch image ${imagePath} was deleted.`);
+//     }
+//   });
+  
+//   const endTime = Date.now() + 100000;
+
+//   const intervalId = setInterval(async () => {
+//     if (Date.now() >= endTime) {
+//       clearInterval(intervalId);
+//       return res.status(408).send({ message: 'Request Timeout: Image could not be retrieved in time.' });
+//     }
+
+//     try {
+//       const response = await axios.get(`https://pk7u4tuw7jdfgj-8000.proxy.runpod.net/getglb/${imageUuid}`, {
+//         params: {
+//           delete: true, // or false if you want to keep it
+//           base64_c: false
+//         },
+//         responseType: 'arraybuffer',
+//         headers: {
+//           accept: 'model/gltf-binary'
+//         }
+//       });
+      
+//       if (response.status === 200 && response.data) {
+//         clearInterval(intervalId);
+//         res.setHeader('Content-Disposition', `attachment; filename="${imageUuid}.glb"`);
+//         res.setHeader('Content-Type', 'model/gltf-binary');
+//         return res.send(response.data); // Stream the file back to frontend
+//       }
+//     } 
+//     catch (error) {
+//       console.error('Error during GLB retrieval:', error.message || error);
+//       clearInterval(intervalId);
+//       return res.status(500).send({ message: 'Internal server error during GLB retrieval.' });
+//     }
+//   }, 3000);
+//   // res.send({ uuid: imageUuid });
+//   // res.status(200).send({ message: 'Image processed successfully' });
+//   }
+//   catch(error){
+//     if (error.response) {
+//       console.error('Error details:', error.response.data.detail);
+//     }
+
+//     res.status(500).send({ message: 'Internal server error' });
+//   }
+// })
+
+app.post('/object-creation', upload.single('image'), async (req, res) => {
+  if (!req.file) {
+    return res.status(400).send({ message: 'No image provided' });
+  }
+
+  const imagePath = req.file.path;
+  const form = new FormData();
+  form.append('reference_image', fs.createReadStream(imagePath), req.file.originalname);
+  form.append('revert_extra', ''); // Empty string or any specific value if needed
+  form.append('callback_url', '');
+
+  try {
+    const creationRes = await axios.post('https://pk7u4tuw7jdfgj-8000.proxy.runpod.net/3d_creation', form, {
+      headers: form.getHeaders(),
+    });
+
+    const imageUuid = creationRes.data.model[0].image_uuid;
+    console.log('The image uuid is ',imageUuid)
+
+    fs.unlink(imagePath, () => {});
+
+    // Immediately respond with UUID to frontend
+    res.status(202).send({ uuid: imageUuid });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ message: 'Generation initiation failed.' });
+  }
+});
+
+
+app.get('/check-object/:uuid', async (req, res) => {
+  const { uuid } = req.params;
+
+
+  try {
+    const response = await axios.get(`https://pk7u4tuw7jdfgj-8000.proxy.runpod.net/getglb/${uuid}`, {
+      params: { delete: false, base64_c: true },
+      validateStatus: (status) => [200, 202].includes(status),
+    });
+
+    if (response.status === 202) {
+      return res.status(202).send({ status: 'pending' });
+    }
+
+    if (response.status === 200) {
+      return res.status(200).send(response.data); // includes base64 encoded glb
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ message: 'Internal server error checking status.' });
   }
 });
 
@@ -426,7 +595,7 @@ app.post('/sketch-to-image', upload.single('sketch_image'), async (req, res) => 
     const callbackUrlImg = `${callbackUrl}/image-callback`; // Replace with your actual callback endpoint URL
     // form.append('callback_url', callbackUrlImg);
     try {
-      sketch2imageResponse = await axios.post('https://ek6vmxx07wvmnf-8000.proxy.runpod.net/sketch2image', form, {
+      sketch2imageResponse = await axios.post('https://pk7u4tuw7jdfgj-8000.proxy.runpod.net/sketch2image', form, {
         headers: {
           ...form.getHeaders(),
         },
@@ -461,7 +630,7 @@ app.post('/sketch-to-image', upload.single('sketch_image'), async (req, res) => 
       }
 
       try {
-        const response = await axios.get(`https://ek6vmxx07wvmnf-8000.proxy.runpod.net/getimage/${imageUuid}`, {
+        const response = await axios.get(`https://pk7u4tuw7jdfgj-8000.proxy.runpod.net/getimage/${imageUuid}`, {
           params: {
             delete: false,
             type: 'PNG',
@@ -514,8 +683,255 @@ app.post('/sketch-to-image', upload.single('sketch_image'), async (req, res) => 
     res.status(500).send({ message: 'Internal server error' });
   }
 });
+const taskStatusMap = {}; // uuid -> { taskId, downloadUrl?, status }
+
+const pollVideoStatus = (uuid, taskId, headers) => {
+  const poll = setInterval(async () => {
+    try {
+      const queryRes = await axios.get(
+        `https://api.minimaxi.chat/v1/query/video_generation?task_id=${taskId}`,
+        { headers }
+      );
+      const status = queryRes.data.status;
+
+      if (status === 'Success') {
+        clearInterval(poll);
+        const fileId = queryRes.data.file_id;
+
+        const fileRes = await axios.get(
+          `https://api.minimaxi.chat/v1/files/retrieve?file_id=${fileId}`,
+          { headers }
+        );
+
+        taskStatusMap[uuid] = {
+          taskId,
+          downloadUrl: fileRes.data.file.download_url,
+          status: 'ready',
+        };
+      } else if (['Fail', 'Unknown'].includes(status)) {
+        clearInterval(poll);
+        taskStatusMap[uuid] = { taskId, status: 'error' };
+      }
+    } catch (err) {
+      clearInterval(poll);
+      taskStatusMap[uuid] = { taskId, status: 'error' };
+      console.error('Polling error:', err.message || err);
+    }
+  }, 10000);
+};
 
 
+
+app.post('/generate-video', upload.single('image'), async (req, res) => {
+  const { prompt } = req.body;
+  const imageProvided = !!req.file;
+
+  if (!prompt) {
+    return res.status(400).send({ message: 'Prompt is required' });
+  }
+
+  const taskPayload = {
+    prompt,
+    model: imageProvided ? 'S2V-01' : 'T2V-01',
+  };
+
+  if (imageProvided) {
+    const imageBuffer = fs.readFileSync(req.file.path);
+    const base64Image = imageBuffer.toString('base64');
+    taskPayload.subject_reference = [
+      {
+        type: 'character',
+        image: [`data:image/jpeg;base64,${base64Image}`],
+      },
+    ];
+  }
+
+  const headers = {
+    'authorization': `Bearer ${process.env.HAILOU_API_KEY}`,
+    'content-type': 'application/json',
+  };
+
+  try {
+    const submitRes = await axios.post(
+      'https://api.minimaxi.chat/v1/video_generation',
+      taskPayload,
+      { headers }
+    );
+
+    const taskId = submitRes.data.task_id;
+    console.log(submitRes)
+    // Save taskId in memory or database keyed by a UUID
+    const videoUuid = uuidv4();
+    taskStatusMap[videoUuid] = { taskId, status: 'pending' };
+
+    // Begin polling in background
+    pollVideoStatus(videoUuid, taskId, headers);
+
+    res.status(202).send({ uuid: videoUuid });
+  } catch (err) {
+    console.error('Error starting video generation:', err.response?.data || err.message);
+    res.status(500).send({ message: 'Video generation failed to start' });
+  } finally {
+    if (req.file) fs.unlink(req.file.path, () => {});
+  }
+});
+
+app.get('/check-video/:uuid', (req, res) => {
+  const { uuid } = req.params;
+  const statusEntry = taskStatusMap[uuid];
+  console.log(taskStatusMap)
+
+  if (!statusEntry) {
+    return res.status(404).send({ message: 'Unknown video UUID' });
+  }
+
+  if (statusEntry.status === 'pending') {
+    return res.status(202).send({ status: 'pending' });
+  }
+
+  if (statusEntry.status === 'ready') {
+    console.log(statusEntry.downloadUrl)
+    return res.status(200).send({ downloadUrl: statusEntry.downloadUrl });
+  }
+
+  return res.status(500).send({ status: 'error', message: 'Video generation failed' });
+});
+
+app.post('/image-enhancement', upload.single('image'), async (req, res) => {
+  console.log("inpainting got a request");
+  
+  try {
+    const maskImagePath = req.file.path;
+
+    if (!req.file) {
+      return res.status(400).send({ message: 'No mask image provided' });
+    }
+
+    // User authentication and limit checking
+    const userId = req.body.userId;
+    const user = await User.findById(userId);
+
+    if (!user) {
+      console.log("User not found. UserId:", userId);
+      return res.status(404).send({ message: "User not found" });
+    }
+
+    if (user.no_of_images_left <= 0) {
+      return res.status(400).send({ message: "You have reached the image generation limit" });
+    }
+
+    // Decrement the user's image generation limit
+    const updatedUser = await User.findByIdAndUpdate(
+      userId, 
+      { $inc: { no_of_images_left: -1 } }, 
+      { new: true }
+    );
+    
+    if (!updatedUser) {
+      console.log("Error updating user:", updatedUser);
+      return res.status(500).send({ message: "Error updating user" });
+    }
+
+    // Prepare form data for the API call
+    const form = new FormData();
+    form.append('denoise', 1);
+    form.append('prompt', req.body.prompt);
+    form.append('revert_extra', '');
+    form.append('callback_url', '');
+    form.append('mask_image', fs.createReadStream(maskImagePath), {
+      filename: req.file.originalname,
+      contentType: 'image/png'
+    });
+
+    // Make request to Python service
+    let inpaintingResponse = await axios.post('https://pk7u4tuw7jdfgj-8000.proxy.runpod.net/inpainting', form, {
+      headers: {
+        ...form.getHeaders(),
+      },
+    });
+    
+    const imageUuid = inpaintingResponse.data.images[0].image_uuid;
+    console.log("image uuid", imageUuid);
+
+    // Clean up the uploaded file
+    if (req.file.path) {
+      fs.unlink(req.file.path, (err) => {
+        if (err) {
+          console.error('Failed to delete the uploaded image:', err);
+        } else {
+          console.log(`Uploaded image ${req.file.path} was deleted.`);
+        }
+      });
+    }
+
+    // Return the UUID for polling
+    res.status(202).send({ 
+      uuid: imageUuid,
+      message: 'Image processing started. Use the check-image endpoint to get results.' 
+    });
+
+  } catch (error) {
+    console.error('Error during inpainting process:', error);
+    if (error.response) {
+      console.error('Error details:', error.response.data);
+    }
+    res.status(500).send({ message: 'Internal server error' });
+  }
+});
+
+// Second API endpoint - Polling for results
+app.get('/check-image/:uuid', async (req, res) => {
+  const imageUuid = req.params.uuid;
+  
+  try {
+    const response = await axios.get(`https://pk7u4tuw7jdfgj-8000.proxy.runpod.net/getimage/${imageUuid}`, {
+      params: {
+        delete: false,
+        type: 'PNG',
+        base64_c: false,
+        quality_level: 90,
+      },
+      headers: {
+        'accept': 'application/json'
+      },
+      responseType: 'arraybuffer'
+    });
+
+    if (response.data) {
+      const dataStr = response.data.toString();
+      if (dataStr.includes("Image not found")) {
+        // Image is still processing
+        return res.status(202).send({ message: 'Image is still processing' });
+      } else {
+        // Image is ready
+        const imageBase64 = Buffer.from(response.data, 'binary').toString('base64');
+        const imageDataUrl = `data:image/png;base64,${imageBase64}`;
+
+        // If userId is provided, save the image to database
+        const userId = req.query.userId;
+        if (userId) {
+          const generatedImage = new GeneratedImage({
+            userId: userId,
+            image: response.data
+          });
+          await generatedImage.save();
+        }
+
+        return res.status(200).send({ 
+          imageUrls: imageDataUrl, 
+          message: 'Image processed successfully' 
+        });
+      }
+    }
+  } catch (error) {
+    if (error.response && (error.response.status === 404 || (error.response.data && error.response.data.includes("Image not found")))) {
+      return res.status(202).send({ message: 'Image is still processing' });
+    } else {
+      console.error('Error during image retrieval:', error);
+      return res.status(500).send({ message: 'Internal server error during image retrieval.' });
+    }
+  }
+});
 
 app.post('/text-to-image',upload.none(), async (req, res) => {
   try {
@@ -579,7 +995,7 @@ app.post('/text-to-image',upload.none(), async (req, res) => {
     form.append('maintain_aspect_ratio', req.body.maintainAspectRatio || 'false');
     form.append('scheduler', 'Default');    
     try {
-      sketch2imageResponse = await axios.post('https://ek6vmxx07wvmnf-8000.proxy.runpod.net/text2image', form, {
+      sketch2imageResponse = await axios.post('https://pk7u4tuw7jdfgj-8000.proxy.runpod.net/text2image', form, {
         headers: {
           ...form.getHeaders(),
         },
@@ -607,7 +1023,7 @@ app.post('/text-to-image',upload.none(), async (req, res) => {
       }
 
       try {
-        const response = await axios.get(`https://ek6vmxx07wvmnf-8000.proxy.runpod.net/getimage/${imageUuid}`, {
+        const response = await axios.get(`https://pk7u4tuw7jdfgj-8000.proxy.runpod.net/getimage/${imageUuid}`, {
           params: {
             delete: true,
             type: 'PNG',
@@ -650,7 +1066,7 @@ app.post('/text-to-image',upload.none(), async (req, res) => {
     }, 3000);
 
     // setTimeout(async () => {
-    //   const response = await axios.get(`https://ek6vmxx07wvmnf-8000.proxy.runpod.net/getimage/${imageUuid}`, {
+    //   const response = await axios.get(`https://pk7u4tuw7jdfgj-8000.proxy.runpod.net/getimage/${imageUuid}`, {
     //     params: {
     //       delete: true,
     //       type: 'PNG',
@@ -697,7 +1113,7 @@ app.post('/text-callback', async (req, res) => {
     console.log("text callback called")
     const textUuid = req.body.text_uuid;
     console.log("uuid :",textUuid )
-    const response = await axios.get(`https://ek6vmxx07wvmnf-8000.proxy.runpod.net/gettext/${textUuid}`, {
+    const response = await axios.get(`https://pk7u4tuw7jdfgj-8000.proxy.runpod.net/gettext/${textUuid}`, {
       headers: {
         'accept': 'application/json'
       }});
@@ -767,7 +1183,7 @@ app.post('/prompt-enhancer', upload.none(), async (req, res) => {
     form.append('callback_url', callbackUrltext);
 
     // First API call to generate the image 
-    const response = await axios.post('https://ek6vmxx07wvmnf-8000.proxy.runpod.net/promptenhancer', form, {
+    const response = await axios.post('https://pk7u4tuw7jdfgj-8000.proxy.runpod.net/promptenhancer', form, {
       headers: {
         ...form.getHeaders(),
       },
@@ -804,7 +1220,7 @@ app.post('/prompt-enhancer', upload.none(), async (req, res) => {
 // await new Promise(resolve => setTimeout(resolve, delayInSeconds * 1000));
 
 // // Second API call to retrieve the generated image using the UUID
-// const response = await axios.get(`https://ek6vmxx07wvmnf-8000.proxy.runpod.net/getimage/${imageUuid}`, {
+// const response = await axios.get(`https://pk7u4tuw7jdfgj-8000.proxy.runpod.net/getimage/${imageUuid}`, {
 //   params: {
 //     delete: true,
 //     type: 'PNG',
@@ -942,7 +1358,6 @@ app.post('/prompt-enhancer', upload.none(), async (req, res) => {
 // });
 
 // ... (existing code)
-
 
 
 

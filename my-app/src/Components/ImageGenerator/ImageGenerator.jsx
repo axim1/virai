@@ -4,6 +4,8 @@ import styles from './ImageGenerator.module.css';
 import { useNavigate, useLocation } from "react-router-dom";
 import wsImage1 from '../../assets/House_sketch-to-image_web.jpg'; // Replace with your image path
 import DropdownPortal from './DropdownPortal.js';
+import CanvasInpainting from './canvas.js';
+import ModelViewer from './ModelViewer.js';
 
 
 import genIcon from '../../assets/vector_icons/AI Replacement-01.svg';
@@ -43,7 +45,9 @@ function ImageGenerator({ onGenerateImage }) {
   const [apiType, setApiType] = useState(initialApiType);
 
   useEffect(() => {
-    console.log("Current API Type:", apiType); // Debugging
+    setGeneratedImages([]);
+    setGeneratedModelUrl(null);
+    setGeneratedVideoUrl(null);
   }, [apiType]);
 
   // const location = useLocation(); // Use useLocation to retrieve passed state
@@ -51,7 +55,14 @@ function ImageGenerator({ onGenerateImage }) {
   const [isLoading, setIsLoading] = useState(false);
   const [images, setImages] = useState([]);
   const [generatedImages, setGeneratedImages] = useState([]);
+  const [generatedModelUrl, setGeneratedModelUrl] = useState(null);
+  const [generatedVideoUrl, setGeneratedVideoUrl] = useState(null);
+  // const [enhancedImage, setEnhancedImage] = useState(null);
+
+
+
   // const [apiType, setApiType] = useState(location.state?.apiType || 'text-to-image'); 
+  const canvasRef = useRef(null);
   const [generatorType, setGeneratorType] = useState('');
   const [promptText, setPromptText] = useState('');
   const [negativePromptText, setNegativePromptText] = useState('');
@@ -65,7 +76,23 @@ function ImageGenerator({ onGenerateImage }) {
 
   const numberOfImages = [1, 2, 4, 6, 12]; // Array of numbers
 
-
+  function base64ToBlob(base64, mime) {
+    const byteCharacters = atob(base64);
+    const byteArrays = [];
+  
+    for (let offset = 0; offset < byteCharacters.length; offset += 512) {
+      const slice = byteCharacters.slice(offset, offset + 512);
+      const byteNumbers = new Array(slice.length);
+      for (let i = 0; i < slice.length; i++) {
+        byteNumbers[i] = slice.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      byteArrays.push(byteArray);
+    }
+  
+    return new Blob(byteArrays, { type: mime });
+  }
+  
 
 
 
@@ -86,14 +113,12 @@ function ImageGenerator({ onGenerateImage }) {
 
 
   const handleGenerateClick = async () => {
-
-    // console.log(`Generating image using API type: ${location.state.apiType}`);
-
     setIsLoading(true);
     if (!userId) {
       navigate('/login');
       return;
     }
+    
     try {
       const formData = new FormData();
       formData.append('generatorType', generatorType);
@@ -106,30 +131,213 @@ function ImageGenerator({ onGenerateImage }) {
       formData.append('width', imageWidth);
       formData.append('height', imageHeight);
       formData.append('strength', strength);
-
+  
+      // Handle image enhancement with masked image
+      if (apiType === 'image-enhancement' && canvasRef.current) {
+        try {
+          // Get the masked image blob from the canvas component
+          const maskedImageBlob = await canvasRef.current.getMaskedImageBlob();
+          
+          // Add the masked image to formData with the correct field name
+          formData.append('image', maskedImageBlob, 'masked_image.png');
+        } catch (error) {
+          console.error('Error getting masked image:', error);
+          setIsLoading(false);
+          return;
+        }
+      }
+  
+      // Handle sketch-to-image or regular image upload
       if (apiType === 'sketch-to-image' && uploadedImage) {
         formData.append('sketch_image', uploadedImage);
       } else if (uploadedImage) {
         formData.append('image', uploadedImage);
       }
-
-      const response = await axios.post(`${apiUrl}${apiType}`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
-
-      const imageUrls = Array.isArray(response.data.imageUrls) ? response.data.imageUrls : [response.data.imageUrls];
-      setGeneratedImages(imageUrls);
-      onGenerateImage(imageUrls);
+  
+      // Handle different API types
+      if (apiType === 'video-generation') {
+        await handleVideoGeneration(formData);
+      } else if (apiType === 'object-creation') {
+        await handleObjectCreation(formData);
+      } else if (apiType === 'image-enhancement') {
+        await handleImageEnhancement(formData);
+      } else {
+        // Handle other image generation types
+        const response = await axios.post(`${apiUrl}${apiType}`, formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+          responseType: 'json'
+        });
+        
+        const imageUrls = Array.isArray(response.data.imageUrls)
+          ? response.data.imageUrls
+          : [response.data.imageUrls];
+        
+        setGeneratedImages(imageUrls);
+        onGenerateImage(imageUrls);
+      }
     } catch (error) {
       console.error('Error generating image:', error);
     }
+    
     setIsLoading(false);
+  };
+  
+  // New function for handling image enhancement with polling
+  const handleImageEnhancement = async (formData) => {
+    try {
+      // Step 1: Submit the initial request
+      const initResponse = await axios.post(`${apiUrl}image-enhancement`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      
+      if (!initResponse.data.uuid) {
+        throw new Error('No UUID received from server');
+      }
+      
+      const imageUuid = initResponse.data.uuid;
+      
+      // Step 2: Poll for results
+      const endTime = Date.now() + 100000; // 100 seconds timeout
+      
+      // Create a polling function that returns a promise
+      const pollForResult = () => {
+        return new Promise((resolve, reject) => {
+          const intervalId = setInterval(async () => {
+            if (Date.now() >= endTime) {
+              clearInterval(intervalId);
+              reject(new Error('Request Timeout: Image could not be retrieved in time.'));
+              return;
+            }
+            
+            try {
+              const response = await axios.get(`${apiUrl}check-image/${imageUuid}`, {
+                params: { userId: userId }
+              });
+              
+              // If status is 200, image is ready
+              if (response.status === 200) {
+                clearInterval(intervalId);
+                
+                const imageUrls = Array.isArray(response.data.imageUrls)
+                  ? response.data.imageUrls
+                  : [response.data.imageUrls];
+                
+                resolve(imageUrls);
+              }
+              // If status is 202, image is still processing, continue polling
+            } catch (error) {
+              if (error.response && error.response.status === 202) {
+                // Still processing, continue polling
+                return;
+              }
+              
+              clearInterval(intervalId);
+              reject(error);
+            }
+          }, 3000); // Poll every 3 seconds
+        });
+      };
+      
+      // Start polling and wait for results
+      const imageUrls = await pollForResult();
+      console.log(imageUrls[0])
+      const base64Data = imageUrls[0].replace(/^data:image\/\w+;base64,/, '');
+const mimeType = imageUrls[0].match(/^data:(image\/\w+);base64/)[1];
+const byteCharacters = atob(base64Data);
+const byteNumbers = new Array(byteCharacters.length);
+for (let i = 0; i < byteCharacters.length; i++) {
+  byteNumbers[i] = byteCharacters.charCodeAt(i);
+}
+const byteArray = new Uint8Array(byteNumbers);
+const blob = new Blob([byteArray], { type: mimeType });
+
+// Create a fully loaded Image object from the blob
+const imageObjectUrl = URL.createObjectURL(blob);
+const img = new Image();
+img.onload = () => {
+  setUploadedImage(img);
+};
+img.src = imageObjectUrl; // just take first if array
+      
+    } catch (error) {
+      console.error('Error during image enhancement:', error);
+      throw error;
+    }
+  };
+  
+  // Existing video generation handler (kept for reference)
+  const handleVideoGeneration = async (formData) => {
+    try {
+      const res = await axios.post(`${apiUrl}generate-video`, formData);
+      const videoUuid = res.data.uuid;
+  
+      const endTime = Date.now() + 240000;
+  
+      const pollInterval = setInterval(async () => {
+        if (Date.now() > endTime) {
+          clearInterval(pollInterval);
+          setIsLoading(false);
+          alert('Video generation timed out');
+          return;
+        }
+  
+        const statusRes = await axios.get(`${apiUrl}check-video/${videoUuid}`);
+  
+        if (statusRes.status === 202) return;
+  
+        if (statusRes.status === 200) {
+          clearInterval(pollInterval);
+          const downloadUrl = statusRes.data.downloadUrl;
+          setGeneratedVideoUrl(downloadUrl);
+          setIsLoading(false);
+        }
+      }, 3000);
+    } catch (error) {
+      console.error('Error generating video:', error);
+      throw error;
+    }
+  };
+  
+  // Existing object creation handler (kept for reference)
+  const handleObjectCreation = async (formData) => {
+    try {
+      const res = await axios.post(`${apiUrl}object-creation`, formData);
+      const imageUuid = res.data.uuid;
+      const endTime = Date.now() + 240000; // 4 minutes
+    
+      const pollInterval = setInterval(async () => {
+        if (Date.now() > endTime) {
+          clearInterval(pollInterval);
+          setIsLoading(false);
+          alert('GLB generation timed out');
+          return;
+        }
+    
+        const statusRes = await axios.get(`${apiUrl}check-object/${imageUuid}`);
+        if (statusRes.status === 202) return; // Still generating
+    
+        if (statusRes.status === 200) {
+          clearInterval(pollInterval);
+          const { glb_data } = statusRes.data;
+          const blob = base64ToBlob(glb_data, 'model/gltf-binary');
+          const url = URL.createObjectURL(blob);
+          setGeneratedModelUrl(url);
+          setIsLoading(false);
+        }
+      }, 3000);
+    } catch (error) {
+      console.error('Error generating 3D object:', error);
+      throw error;
+    }
   };
 
   const handleApiTypeChange = (value) => {
     setApiType(value);
+    console.log("API CHANGEDD")
     setUploadedImage(null);
-
+    setGeneratedImages([]);
+    setGeneratedModelUrl(null);   // Reset model URL if applicable
+    setGeneratedVideoUrl(null);   // Reset video URL if applicable
   };
 
   const handleStyleTypeChange = (style) => {
@@ -155,7 +363,18 @@ function ImageGenerator({ onGenerateImage }) {
 
   }
   const handleImageUpload = (event) => {
-    setUploadedImage(event.target.files[0]);
+    if (apiType === 'image-enhancement') {
+      const file = event.target.files[0];
+      if (file) {
+        const img = new Image();
+        img.onload = () => {
+          setUploadedImage(img); // Set the fully loaded image
+        };
+        img.src = URL.createObjectURL(file); // Convert to a URL
+      }
+    } else {
+      setUploadedImage(event.target.files[0]);
+    }
   };
   const formatApiType = (apiType) => {
     return apiType
@@ -174,9 +393,12 @@ function ImageGenerator({ onGenerateImage }) {
     "image-to-sketch",
     "sketch-to-image",
     "image-enhancement",
-    "image-expansion",
-    "inpainting",
+    "video-generation",
+    "object-creation",
   ];
+
+
+  
 
   return (
     <>
@@ -307,7 +529,8 @@ function ImageGenerator({ onGenerateImage }) {
 
 
             {/* Upload Image */}
-            {apiType == 'sketch-to-image' &&
+            {(apiType === 'sketch-to-image' || apiType === 'object-creation' || apiType === 'video-generation' || apiType === 'image-enhancement')&&
+            
               <div className={styles.inputRow}>
                 <div className={styles.inputColumn}>
                   <p className={styles.label_l}>Upload Image</p>
@@ -320,12 +543,16 @@ function ImageGenerator({ onGenerateImage }) {
                     <span className={styles.uploadPlaceholder}>UPLOAD IMAGE</span>
                   </label>
                 </div>
+        
+
               </div>
             }
 
 
 
             {/* Prompt input */}
+            {apiType !== 'object-creation' &&
+            
             <div className={styles.inputRow}>
               <div className={styles.inputColumn} style={{ margin: '0px' }}>
 
@@ -377,7 +604,8 @@ function ImageGenerator({ onGenerateImage }) {
 
 
               </div>
-            </div>
+            </div>}
+            
 
             <br />
 
@@ -629,19 +857,44 @@ function ImageGenerator({ onGenerateImage }) {
           </div>
 
           <div className={styles.imageContainer}>
-            {generatedImages.length > 0 && (
-              <div className={styles.generatedImagesContainer}>
-                {generatedImages.map((imageUrl, index) => (
-                  <img
-                    key={index}
-                    className={styles.generatedImage}
-                    src={imageUrl}
-                    alt={`Generated Image ${index + 1}`}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
+  {apiType === 'object-creation' && generatedModelUrl && (
+    <ModelViewer modelPath={generatedModelUrl} />
+  )}
+
+  {apiType === 'video-generation' && generatedVideoUrl && (
+    <div className={styles.generatedVideoContainer}>
+      <video controls className={styles.generatedVideo}>
+        <source src={generatedVideoUrl} type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
+      <a
+        href={generatedVideoUrl}
+        download="generated_video.mp4"
+        className={styles.downloadButton}
+      >
+        Download Video
+      </a>
+    </div>
+  )}
+  {apiType === 'image-enhancement' && uploadedImage && (
+    <CanvasInpainting uploadedImage ={uploadedImage}
+    canvasRef={canvasRef}/>
+  )}
+
+  {apiType !== 'object-creation' && apiType !== 'video-generation' && generatedImages.length > 0 && (
+    <div className={styles.generatedImagesContainer}>
+      {generatedImages.map((imageUrl, index) => (
+        <img
+          key={index}
+          className={styles.generatedImage}
+          src={imageUrl}
+          alt={`Generated Image ${index + 1}`}
+        />
+      ))}
+    </div>
+  )}
+</div>
+
         </div>
       </div>
     </>
