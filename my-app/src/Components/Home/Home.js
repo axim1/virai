@@ -139,8 +139,8 @@ function Home({ triggerShrink }) {
   };
 
   return (
-    <div style={{ backgroundColor: "#000" }}>
-      <Navbar />
+    <div style={{ backgroundColor: "#000", alignItems:'center', width:'100%' }}>
+      {/* <Navbar /> */}
 
       {/* Hero Section */}
       <div className="herosection" style={heroStyle}>
@@ -181,18 +181,18 @@ function Home({ triggerShrink }) {
 
       {/* FAQ Section */}
       {/* FAQ Section */}
-      <div id="faq-section" className={`scroll-trigger ${faqVisible ? 'fade-in' : 'fade-out'}`} style={{display:'flex', maxWidth:'100%' ,marginTop: "100px", marginBottom: "100px" }}>
+      <div id="faq-section" className={`scroll-trigger ${faqVisible ? 'fade-in' : 'fade-out'}`} style={{display:'flex', width:'100%', marginTop: "100px", marginBottom: "100px" }}>
         <FAQ />
       </div>
 
 
       {/* Testimonials */}
-      <div style={{ width: "100%", padding: "50px 32px" }}>
+      <div style={{ width: "100%", display:'flex',alignItems:'center',justifyContent:'center', padding: "50px 32px" }}>
         <TestimonialCarousel />
       </div>
 
       {/* Newsletter */}
-      <div>
+      <div style={{ width: "100%", display:'flex',alignItems:'center',justifyContent:'center' }}>
         <NewsLetter />
       </div>
     </div>

@@ -1034,6 +1034,112 @@ app.get("/api/user/:userId", async (req, res) => {
     res.status(500).send({ message: "Internal server error" });
   }
 });
+
+
+
+app.get('/api/images', async (req, res) => {
+  try {
+    const { filter, page = 1, limit = 8, userId } = req.query;
+    let sortQuery = {};
+    let findQuery = {};
+    console.log('server image api called', userId);
+
+    switch (filter) {
+      case 'Newest':
+        sortQuery = { createdAt: -1 };
+        break;
+      case 'Oldest':
+        sortQuery = { createdAt: 1 };
+        break;
+      case 'Most Liked':
+        sortQuery = { likes: -1 };
+        break;
+      case 'Most Viewed':
+        sortQuery = { views: -1 };
+        break;
+      case 'Shared':
+        sortQuery = { shares: -1 };
+        break;
+      case 'Trending':
+        sortQuery = { likes: -1, views: -1 };
+        break;
+      case 'Owned by Me':
+        if (!userId) {
+          return res.status(400).json({ error: "Missing userId for 'Owned by Me' filter" });
+        }
+        findQuery = { userId: userId };
+        sortQuery = { createdAt: -1 };
+        break;
+      default:
+        sortQuery = {};
+    }
+
+    const pageNumber = parseInt(page, 10);
+    const limitNumber = parseInt(limit, 10);
+    const skip = (pageNumber - 1) * limitNumber;
+
+    const totalImages = await GeneratedImage.countDocuments(findQuery);
+
+    // Fetch images along with the user's details
+    const images = await GeneratedImage.find(findQuery)
+      .populate('userId', 'fname lname profilePic') // Populate user details
+      .sort(sortQuery)
+      .skip(skip)
+      .limit(limitNumber);
+
+    const formattedImages = images.map(image => {
+      let base64Image = null;
+      if (image.image && image.image.buffer) {
+        base64Image = `data:image/jpeg;base64,${image.image.toString('base64')}`;
+      }
+
+      return {
+        ...image._doc,
+        image: base64Image,
+        owner: image.userId ? { 
+          name: `${image.userId.fname} ${image.userId.lname}`,
+          profilePic: image.userId.profilePic
+        } : null, // Default if no user found
+      };
+    });
+
+    res.json({ images: formattedImages, total: totalImages, page: pageNumber, limit: limitNumber });
+  } catch (error) {
+    console.error("Error fetching images:", error);
+    res.status(500).json({ error: "Error fetching images" });
+  }
+});
+
+
+app.post("/api/images/:id/like", async (req, res) => {
+  try {
+    const { id } = req.params;
+    console.log('image id: ',id)
+    const image = await GeneratedImage.findByIdAndUpdate(id, { $inc: { likes: 1 } }, { new: true });
+    if (!image) {
+      return res.status(404).json({ message: "Image not found" });
+    }
+    res.json(image);
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
+  }
+});
+
+app.post("/api/images/:id/view", async (req, res) => {
+  try {
+    const { id } = req.params;
+    console.log('image id: ',id)
+    const image = await GeneratedImage.findByIdAndUpdate(id, { $inc: { views: 1 } }, { new: true });
+    if (!image) {
+      return res.status(404).json({ message: "Image not found" });
+    }
+    res.json(image);
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
+  }
+});
+
+
 app.use(express.static(path.join(__dirname, 'my-app/build')));
 
 app.get('*', (req, res) => {

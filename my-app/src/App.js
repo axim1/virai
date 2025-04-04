@@ -9,6 +9,7 @@ import Navbar from "./Components/Navbar/Navbar"; // Import the Navbar component
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { useEffect, useState } from "react";
 import Footer from "./Components/Home/Components/Footer";
+import ImageGallery from "./Components/ImageGallery/ImageGallery";
 
 function App() {
   const [userState, setUserState] = useState({});
@@ -64,6 +65,7 @@ function App() {
 
           {/* Image Generator Route */}
           <Route path="/gen" element={<ImageGenerator />} />
+          <Route path="/gallery" element={<ImageGallery />} />
 
           {/* Terms of Service Route */}
           <Route path="/terms-of-service" element={<TermsOfService />} />

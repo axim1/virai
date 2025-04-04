@@ -1,14 +1,21 @@
 /* Ensure the container takes full width */
 .carouselContainer {
   width: 100%;
+  max-width: 1370px;
   position: relative;
   overflow: hidden;
+  /* display: flex;
+  align-items: center;
+  flex-direction: column; */
   /* padding: 20px 0; */
 }
 
 /* Make sure Swiper takes full width */
 .swiper {
+  overflow: hidden !important;
+
   width: 100% !important;
+  max-width: 1370px !important;
 }
 
 /* Ensure each slide is properly aligned */
@@ -142,6 +149,7 @@ margin-bottom: 45px;
 /* Prevent Swiper from clipping the icon */
 .swiper {
   overflow: visible !important;
+  max-width: 1370px;
 }
 
 .swiper-slide {

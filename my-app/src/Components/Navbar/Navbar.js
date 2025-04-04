@@ -98,9 +98,16 @@ const Navbar = ({ loggedIn,  setLoggedIn = () => {}, onAIToolsClick, onHomeClick
           Creation
         </RouterLink>
 
-        <ScrollLink to="gallery-section" smooth={true} duration={50} className={styles.navItem} offset={-150} onSetActive={() => setActiveLink('gallery')}>
+        <RouterLink
+          to="/gallery"
+          className={`${styles.navItem} ${activeLink === 'gallery' ? styles.active : ''}`}
+          onClick={() => setActiveLink('gallery')}
+        >
           Gallery
-        </ScrollLink>
+        </RouterLink>
+        {/* <ScrollLink to="gallery-section" smooth={true} duration={50} className={styles.navItem} offset={-150} onSetActive={() => setActiveLink('gallery')}>
+          Gallery
+        </ScrollLink> */}
 
         <ScrollLink to="pricing-section" smooth={true} duration={50} className={styles.navItem} offset={-150} onSetActive={() => setActiveLink('pricing')}>
           Pricing
