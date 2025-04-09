@@ -424,7 +424,7 @@ text-transform: uppercase;
     background-color: transparent;
     /* color: white; */
   }
-  
+  .searchButtonSml,
   .searchButton {
     position: absolute;
      right: 10px;
@@ -451,6 +451,9 @@ text-transform: uppercase;
     border-radius: 100px;
     background: #2E8B57;
   }
+  .searchButtonSml{
+    display: none;
+  }
   
   .searchButton:hover {
     background-color: #3e8e41;
@@ -464,24 +467,35 @@ text-transform: uppercase;
   
     
     } */
+    .searchButton{
+      display: none;
+
+    }
+    .searchButtonSml{
+      display: unset;
+      width: 50px;
+      height: 50px;
+    }
     .imageItem{
       min-width: 100%;
       height: auto;
       aspect-ratio: 3.2/4;
     }
-    .searchContainer {
+    /* .searchContainer {
       flex-direction: column;
       height: auto;
       border-radius: 15px;
-    }
+    } */
     
     .dropdownButton {
-      width: 100%;
+      /* width: 70%; */
+      max-width: 210px;
+
     }
     
-    .inputWrapper {
+    /* .inputWrapper {
       width: 100%;
-    }
+    } */
     
     .searchButton {
       position: relative;

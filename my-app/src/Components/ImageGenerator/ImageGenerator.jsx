@@ -613,6 +613,7 @@ function ImageGenerator({ onGenerateImage }) {
                         alignItems: "center",
                         justifyContent: "center",
                         width: "100%",
+                        borderLeft:'1px solid #000'
                       }}
                     >
                       <img

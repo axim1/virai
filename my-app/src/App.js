@@ -1,5 +1,5 @@
 import "./App.css";
-// import Profile from "./Components/Profile/Profile";
+import { useLocation } from "react-router-dom";
 import Login from "./Components/Login/Login";
 import Register from "./Components/Register/Register";
 import Home from "./Components/Home/Home";
@@ -12,11 +12,14 @@ import Footer from "./Components/Home/Components/Footer";
 import ImageGallery from "./Components/ImageGallery/ImageGallery";
 
 function App() {
+  // const location = useLocation();
+
   const [userState, setUserState] = useState({});
   const [loggedIn, setLoggedIn] = useState(false);
   const [scrollY, setScrollY] = useState(0); // State to track scroll position
   const [triggerShrink, setTriggerShrink] = useState(false); // State to trigger hero section shrink
-
+  const [activeSection, setActiveSection] = useState('home');
+  // const scrollToSection = location.state?.scrollToSection;
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
@@ -26,9 +29,9 @@ function App() {
   }, []);
 
   // Function to trigger hero shrink effect when "AI Tools" is clicked
-  const handleAIToolsClick = () => {
-    setTriggerShrink(true);
-  };
+  // const handleAIToolsClick = () => {
+  //   // setTriggerShrink(true);
+  // };
 
   // Function to reset everything when "Home" is clicked
   const handleHomeClick = () => {
@@ -41,18 +44,29 @@ function App() {
     <div className="App">
       <Router>
         {/* Render Navbar on every page and pass down the props */}
-        <Navbar
-          // user={userState}
-          loggedIn={loggedIn}
-          setLoggedIn={setLoggedIn}
-          onAIToolsClick={handleAIToolsClick} // Pass down the AI Tools click handler
-          onHomeClick={handleHomeClick} // Pass down the Home click handler
-        />
+<Navbar 
+  loggedIn={loggedIn} 
+  setLoggedIn={setLoggedIn}
+  onHomeClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+  activeLink={activeSection}
+  setActiveLink={setActiveSection}
+/>
 
         <Routes>
           {/* Home Route */}
-          <Route path="/" element={<Home triggerShrink={triggerShrink} />} />
-          <Route path="/home" element={<Home triggerShrink={triggerShrink} />} />
+          <Route
+        path="/"
+        element={
+          <Home
+            triggerShrink={triggerShrink}
+            // scrollToSection={scrollToSection}
+          />
+        }
+      />
+          <Route path="/home" element={          <Home
+            triggerShrink={triggerShrink}
+            // scrollToSection={scrollToSection}
+          />} />
 
           {/* Login Route */}
           <Route
@@ -70,7 +84,10 @@ function App() {
           {/* Terms of Service Route */}
           <Route path="/terms-of-service" element={<TermsOfService />} />
         </Routes>
-        <Footer/>
+        <Footer   loggedIn={loggedIn}
+          setLoggedIn={setLoggedIn}
+
+        />
       </Router>
     </div>
   );

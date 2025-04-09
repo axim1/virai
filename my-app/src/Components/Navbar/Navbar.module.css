@@ -98,6 +98,9 @@
   .mobileMenuIcon {
     display: block;
   }
+  .navbarRight{
+    display: none;
+  }
 }
 .loginButton{
   color: #2E8B57;
