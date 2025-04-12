@@ -821,23 +821,23 @@ text-transform: capitalize;
   /* background: #333; */
 }
 .generatedImagesContainer {
-  display: flex;
-  /* grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); Dynamically create columns */
-  gap: 20px; /* Space between images */
-  flex-wrap: wrap;
-  justify-content: center; /* Center the grid items */
-  padding: 100px;
-  max-height: calc(100vh - 120px); /* Adjust height based on the screen height */
-  overflow-y: auto; /* Enable vertical scroll when there are more images */
-  scrollbar-width: thin; /* Makes the scrollbar thinner */
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+    padding: 20px;
+
+  
 }
 
 .generatedImage {
-  height: auto; /* Maintain aspect ratio */
-  /* object-fit: cover; Ensures the image covers the area without distortion */
-  width: 600px; /* Restricts the image to the grid cell's width */
-  border-radius: 0px; /* Adds rounded corners */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Adds a subtle shadow */
+  width: 100%;
+  max-width: 700px;
+  max-height: 500px;
+  height: auto;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* WebKit scrollbars for Chrome/Safari */
@@ -950,10 +950,10 @@ border: none;
   }
 
   .imageContainer {
-    width: 100%; /* Full width on tablets */
-    /* margin-left: 0; */
-    height: auto;
-    /* border-radius: 0px;  */
+    width: 100%;
+    background-color: #2e2e2e;
+    padding: 20px;
+    border-radius: 7px;
   }
   .inputContainer, .imageContainer {
     width: 100%;
