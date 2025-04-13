@@ -6,6 +6,7 @@ import wsImage1 from '../../assets/House_sketch-to-image_web.jpg'; // Replace wi
 import DropdownPortal from './DropdownPortal.js';
 import CanvasInpainting from './canvas.js';
 import ModelViewer from './ModelViewer.js';
+import { saveAs } from 'file-saver';
 
 
 import genIcon from '../../assets/vector_icons/AI Replacement-01.svg';
@@ -54,6 +55,7 @@ function ImageGenerator({ onGenerateImage }) {
 
   const [isLoading, setIsLoading] = useState(false);
   const [images, setImages] = useState([]);
+  const [selectedNumImages, setSelectedNumImages] = useState(1);
   const [generatedImages, setGeneratedImages] = useState([]);
   const [generatedModelUrl, setGeneratedModelUrl] = useState(null);
   const [generatedVideoUrl, setGeneratedVideoUrl] = useState(null);
@@ -74,7 +76,37 @@ function ImageGenerator({ onGenerateImage }) {
   const [imageHeight, setImageHeight] = useState(512);
   const [strength, setStrength] = useState(0.75);
 
-  const numberOfImages = [1, 2, 4, 6, 12]; // Array of numbers
+  useEffect(() => {
+    // Automatically update size when aspect ratio changes
+    if (imageHeight === 512) {
+      handleImageSizeChange('small');
+    } else if (imageHeight === 1024) {
+      handleImageSizeChange('medium');
+    } else if (imageHeight === 1444) {
+      handleImageSizeChange('large');
+    }
+  }, [aspectRatio]);
+  
+
+  const numberOfImages = [1, 2, 4]; // Array of numbers
+
+  const handleDownloadAll = async () => {
+    try {
+      if (apiType === 'object-creation' && generatedModelUrl) {
+        const response = await fetch(generatedModelUrl);
+        const blob = await response.blob();
+        saveAs(blob, 'generated_model.glb');
+      } else if (generatedImages.length > 0) {
+        for (let i = 0; i < generatedImages.length; i++) {
+          const response = await fetch(generatedImages[i]);
+          const blob = await response.blob();
+          saveAs(blob, `generated_image_${i + 1}.png`);
+        }
+      }
+    } catch (error) {
+      console.error('Download failed:', error);
+    }
+  };
 
   function base64ToBlob(base64, mime) {
     const byteCharacters = atob(base64);
@@ -122,6 +154,7 @@ function ImageGenerator({ onGenerateImage }) {
     try {
       const formData = new FormData();
       formData.append('generatorType', generatorType);
+      formData.append('num_images', selectedNumImages);
       formData.append('prompt', promptText);
       formData.append('negativePromptText', negativePromptText);
       formData.append('styleType', styleType);
@@ -174,12 +207,13 @@ function ImageGenerator({ onGenerateImage }) {
         
         setGeneratedImages(imageUrls);
         onGenerateImage(imageUrls);
+        setIsLoading(false);
       }
     } catch (error) {
       console.error('Error generating image:', error);
     }
     
-    setIsLoading(false);
+   
   };
   
   // New function for handling image enhancement with polling
@@ -347,21 +381,27 @@ img.src = imageObjectUrl; // just take first if array
   const handleAspectRatioChange = (event) => {
     setAspectRatio(event.target.value);
   };
-  const handleImageSizeChange = (value) => {
-    if (value == 'small') {
-      setImageHeight('512')
-      setImageHeight('512')
+  const handleImageSizeChange = (sizeLabel) => {
+    let baseHeight;
+    if (sizeLabel === 'small') baseHeight = 512;
+    else if (sizeLabel === 'medium') baseHeight = 1024;
+    else if (sizeLabel === 'large') baseHeight = 1444;
+  
+    let widthRatio = 1;
+    let heightRatio = 1;
+  
+    const [w, h] = aspectRatio.split(':').map(Number);
+    if (!isNaN(w) && !isNaN(h)) {
+      widthRatio = w;
+      heightRatio = h;
     }
-    if (value == 'medium') {
-      setImageHeight('1024')
-      setImageHeight('1024')
-    }
-    if (value == 'large') {
-      setImageHeight('1444')
-      setImageHeight('1444')
-    }
-
-  }
+  
+    const calculatedWidth = Math.round((baseHeight * widthRatio) / heightRatio);
+  
+    setImageHeight(baseHeight);
+    setImageWidth(calculatedWidth);
+  };
+  
   const handleImageUpload = (event) => {
     if (apiType === 'image-enhancement') {
       const file = event.target.files[0];
@@ -551,7 +591,7 @@ img.src = imageObjectUrl; // just take first if array
 
 
             {/* Prompt input */}
-            {apiType !== 'object-creation' &&
+            {apiType !== 'object-creation'  && 
             
             <div className={styles.inputRow}>
               <div className={styles.inputColumn} style={{ margin: '0px' }}>
@@ -612,7 +652,7 @@ img.src = imageObjectUrl; // just take first if array
 
 
 
-            <p className={styles.label_l} style={{ margin: '0px' }}>Advanced Settings</p>
+            {<p className={styles.label_l} style={{ margin: '0px' }}>Advanced Settings</p>}
 
             <br />
 
@@ -623,22 +663,24 @@ img.src = imageObjectUrl; // just take first if array
 
             {/* image number  */}
             {/* <div className={styles.inputRow}> */}
+            {apiType !== 'object-creation' && apiType !== 'image-enhancement' && apiType !== 'video-generation' && apiType !== 'sketch-to-image' && 
             <div className={styles.numButtonCont}>
 
               <p className={styles.label} >Images Number</p>
 
               <div className={styles.numberButtons}>
-                {numberOfImages.map((number) => (
-                  <button
-                    key={number}
-                    className={`${styles.numButton} ${images === number ? styles.activeButton : ''}`}
-                    onClick={() => setImages(number)}
-                  >
-                    {number}
-                  </button>
-                ))}
+              {numberOfImages.map((number) => (
+  <button
+    key={number}
+    className={`${styles.numButton} ${selectedNumImages === number ? styles.activeButton : ''}`}
+    onClick={() => setSelectedNumImages(number)}
+  >
+    {number}
+  </button>
+))}
+
               </div>
-            </div>
+            </div>}
 
 
 
@@ -646,6 +688,8 @@ img.src = imageObjectUrl; // just take first if array
 
             {/* Aspect Ratio */}
             {/* <div className={styles.inputRow}> */}
+            {apiType !== 'object-creation' && apiType !== 'image-enhancement' && apiType !== 'video-generation' && apiType !== 'sketch-to-image' &&   
+            
             <div className={styles.inputColumn}>
               <p className={styles.label}>Aspect Ratio</p>
               <div className={styles.aspectRatioButtons}>
@@ -689,63 +733,69 @@ img.src = imageObjectUrl; // just take first if array
 
 
               </div>
-            </div>
+            </div>}
+            
             {/* </div> */}
 
 
 
 
             {/* Image Size */}
+            {apiType !== 'object-creation' && apiType !== 'image-enhancement' && apiType !== 'video-generation' && apiType !== 'sketch-to-image' &&
+            
             <div className={styles.inputColumn}>
-              <p className={styles.label} style={{ margin: '0px', alignItems: 'center', justifyContent: 'center' }}>Image Size (px)</p>
-              <div className={styles.sizeButtons}>
+            <p className={styles.label} style={{ margin: '0px', alignItems: 'center', justifyContent: 'center' }}>Image Size (px)</p>
+            <div className={styles.sizeButtons}>
 
-                <button
-                  className={`${styles.aspectButton} ${imageHeight === '512' ? styles.activeButton : ''}`}
-                  onClick={() => handleImageSizeChange('small')}
-                // style={{ height: 'calc(70px / (2 / 3))' }} 
-                >
-                  Small
-                </button>
-                <button
-                  className={`${styles.aspectButton} ${imageHeight === '1024' ? styles.activeButton : ''}`}
-                  onClick={() => handleImageSizeChange('medium')}
-                // style={{ height: 'calc(70px / (2 / 3))' }} 
-                >
-                  Normal
-                </button>
-                <button
-                  className={`${styles.aspectButton} ${imageHeight === '1444' ? styles.activeButton : ''}`}
-                  onClick={() => handleImageSizeChange('large')}
-                // style={{ height: 'calc(70px / (2 / 3))' }} 
-                >
-                  Large
-                </button>
+              <button
+                className={`${styles.aspectButton} ${imageHeight === 512 ? styles.activeButton : ''}`}
+                onClick={() => handleImageSizeChange('small')}
+              // style={{ height: 'calc(70px / (2 / 3))' }} 
+              >
+                Small
+              </button>
+              <button
+                className={`${styles.aspectButton} ${imageHeight === 1024 ? styles.activeButton : ''}`}
+                onClick={() => handleImageSizeChange('medium')}
+              // style={{ height: 'calc(70px / (2 / 3))' }} 
+              >
+                Normal
+              </button>
+              <button
+                className={`${styles.aspectButton} ${imageHeight === 1444 ? styles.activeButton : ''}`}
+                onClick={() => handleImageSizeChange('large')}
+              // style={{ height: 'calc(70px / (2 / 3))' }} 
+              >
+                Large
+              </button>
 
-                {/* <input
-                  type="number"
-                  className={styles.inputWidthHeight}
-                  placeholder="Width"
-                  value={imageWidth}
-                  onChange={(e) => setImageWidth(e.target.value)}
-                /> */}
-                {/* <input
-                  type="number"
-                  className={styles.inputWidthHeight}
-                  placeholder="Height"
-                  value={imageHeight}
-                  onChange={(e) => setImageHeight(e.target.value)}
-                /> */}
-              </div>
-
+              {/* <input
+                type="number"
+                className={styles.inputWidthHeight}
+                placeholder="Width"
+                value={imageWidth}
+                onChange={(e) => setImageWidth(e.target.value)}
+              /> */}
+              {/* <input
+                type="number"
+                className={styles.inputWidthHeight}
+                placeholder="Height"
+                value={imageHeight}
+                onChange={(e) => setImageHeight(e.target.value)}
+              /> */}
             </div>
+
+          </div>}
+           
 
 
 
 
 
             {/* Negative prompt */}
-            <div className={styles.inputRow}>
+
+
+            {<div className={styles.inputRow}>
               <div className={styles.inputColumn}>
                 <p className={styles.label}>Negative Prompt</p>
                 <textarea
@@ -766,7 +816,8 @@ img.src = imageObjectUrl; // just take first if array
                   placeholder='Add negative prompts, e.g. "blurry image"'
                 />
               </div>
-            </div>
+            </div>}
+            
 
 
 
@@ -829,6 +880,11 @@ img.src = imageObjectUrl; // just take first if array
                   <div key={index} style={{ width: "100%" }}>
                     <button
                       // onClick={() => handleApiTypeChange(apiTypes[index])} // Set API Type
+                      onClick={() => {
+                        if (index === 4) {
+                          handleDownloadAll(); // Only the 5th icon (index 4) triggers download
+                        }
+                      }}
                       style={{
                         background: "none",
                         border: "none",
@@ -867,13 +923,13 @@ img.src = imageObjectUrl; // just take first if array
         <source src={generatedVideoUrl} type="video/mp4" />
         Your browser does not support the video tag.
       </video>
-      <a
+      {/* <a
         href={generatedVideoUrl}
         download="generated_video.mp4"
         className={styles.downloadButton}
       >
         Download Video
-      </a>
+      </a> */}
     </div>
   )}
   {apiType === 'image-enhancement' && uploadedImage && (
@@ -882,16 +938,12 @@ img.src = imageObjectUrl; // just take first if array
   )}
 
   {apiType !== 'object-creation' && apiType !== 'video-generation' && generatedImages.length > 0 && (
-    <div className={styles.generatedImagesContainer}>
-      {generatedImages.map((imageUrl, index) => (
-        <img
-          key={index}
-          className={styles.generatedImage}
-          src={imageUrl}
-          alt={`Generated Image ${index + 1}`}
-        />
-      ))}
-    </div>
+   <div className={`${styles.generatedImagesGrid} ${styles['grid-' + selectedNumImages]}`}>
+   {generatedImages.slice(0, selectedNumImages).map((url, index) => (
+     <img key={index} src={url}  alt={`Generated ${index}`} />
+   ))}
+ </div>
+ 
   )}
 </div>
 

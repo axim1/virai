@@ -1,4 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
+import styles from './ImageGenerator.module.css'
 
 const CanvasInpainting = (props) => {
   const imageCanvasRef = useRef(null);
@@ -178,7 +179,7 @@ setScaleFactor(displayWidth / props.uploadedImage.width);
         height: '100%' 
       }}>
       <div style={{ marginTop: '10px' }}>
-        <label>Brush Size: {brushSize}px</label>
+        <label style={{fontFamily:'Poppins'}}>Brush Size: {brushSize}px</label>
         <input
           type="range"
           min="5"
@@ -221,8 +222,10 @@ setScaleFactor(displayWidth / props.uploadedImage.width);
       </div>
       
       <br />
-      <button onClick={clearMask} style={{ marginTop: '10px' }}>Clear Mask</button>
-      <button onClick={saveCombinedImage} style={{ marginTop: '10px', marginLeft: '10px' }}>Save Image</button>
+      <div style={{ display: 'flex', gap: '12px', marginTop: '12px' }}>
+  <button onClick={clearMask} className={styles.downloadButton}>Clear Mask</button>
+  <button onClick={saveCombinedImage} className={styles.downloadButton}>Save Image</button>
+</div>
     </div>
   );
 };

@@ -428,6 +428,42 @@ cursor: pointer;
   cursor: pointer;
   width: 100px;
 }
+.generatedImagesGrid {
+  display: grid;
+  gap: 20px;
+  justify-items: center;
+  max-width: 800px; /* Set your desired maximum width for the entire grid */
+  max-height: 800px; /* Set your desired maximum height for the entire grid */
+  margin: 0 auto;
+}
+
+.grid-1 {
+  grid-template-columns: 1fr;
+}
+.grid-1 img {
+  max-width: 100%;
+  max-height: 550px;
+  object-fit: contain;
+}
+
+.grid-2 {
+  grid-template-columns: repeat(2, 1fr); /* Changed to 2 columns */
+}
+.grid-2 img {
+  max-width: 100%;
+  max-height: 550px; /* (800px - 20px gap) / 2 */
+  object-fit: contain;
+}
+
+.grid-4 {
+  grid-template-columns: repeat(2, 1fr); /* 2x2 grid */
+  grid-template-rows: repeat(2, 1fr);
+}
+.grid-4 img {
+  max-width: 100%;
+  max-height: 250px; /* (800px - 20px gap) / 2 */
+  object-fit: contain;
+}
 
 .moreButton:hover .dropdown  {
   display: block; /* Show the dropdown when hovering */

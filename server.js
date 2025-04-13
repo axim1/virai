@@ -301,13 +301,13 @@ app.get("/confirm_payment", async (req, res) => {
 
 let imageResults;
 let respData;
-// https://pk7u4tuw7jdfgj-8000.proxy.runpod.net/docs
+// https://r5xrvs6jw6lz02-8000.proxy.runpod.net/docs
 app.post('/image-callback', async (req, res) => {
   try {
     console.log("callback called")
     const imageUuid = req.body.uuid;
     // console.log("uuid :", imageUuid)
-    const response = await axios.get(`https://pk7u4tuw7jdfgj-8000.proxy.runpod.net/getimage/${imageUuid}`, {
+    const response = await axios.get(`https://r5xrvs6jw6lz02-8000.proxy.runpod.net/getimage/${imageUuid}`, {
       params: {
         delete: true,
         type: 'PNG',
@@ -405,7 +405,7 @@ app.get('/check-image-status/:userId/:uuid', async (req, res) => {
 //   let imageUuid
 
 //   try {
-//    const objectCreationResponse = await axios.post('https://pk7u4tuw7jdfgj-8000.proxy.runpod.net/3d_creation', form, {
+//    const objectCreationResponse = await axios.post('https://r5xrvs6jw6lz02-8000.proxy.runpod.net/3d_creation', form, {
 //       headers: {
 //         ...form.getHeaders(),
 //       },
@@ -440,7 +440,7 @@ app.get('/check-image-status/:userId/:uuid', async (req, res) => {
 //     }
 
 //     try {
-//       const response = await axios.get(`https://pk7u4tuw7jdfgj-8000.proxy.runpod.net/getglb/${imageUuid}`, {
+//       const response = await axios.get(`https://r5xrvs6jw6lz02-8000.proxy.runpod.net/getglb/${imageUuid}`, {
 //         params: {
 //           delete: true, // or false if you want to keep it
 //           base64_c: false
@@ -488,7 +488,7 @@ app.post('/object-creation', upload.single('image'), async (req, res) => {
   form.append('callback_url', '');
 
   try {
-    const creationRes = await axios.post('https://pk7u4tuw7jdfgj-8000.proxy.runpod.net/3d_creation', form, {
+    const creationRes = await axios.post('https://r5xrvs6jw6lz02-8000.proxy.runpod.net/3d_creation', form, {
       headers: form.getHeaders(),
     });
 
@@ -511,7 +511,7 @@ app.get('/check-object/:uuid', async (req, res) => {
 
 
   try {
-    const response = await axios.get(`https://pk7u4tuw7jdfgj-8000.proxy.runpod.net/getglb/${uuid}`, {
+    const response = await axios.get(`https://r5xrvs6jw6lz02-8000.proxy.runpod.net/getglb/${uuid}`, {
       params: { delete: false, base64_c: true },
       validateStatus: (status) => [200, 202].includes(status),
     });
@@ -595,7 +595,7 @@ app.post('/sketch-to-image', upload.single('sketch_image'), async (req, res) => 
     const callbackUrlImg = `${callbackUrl}/image-callback`; // Replace with your actual callback endpoint URL
     // form.append('callback_url', callbackUrlImg);
     try {
-      sketch2imageResponse = await axios.post('https://pk7u4tuw7jdfgj-8000.proxy.runpod.net/sketch2image', form, {
+      sketch2imageResponse = await axios.post('https://r5xrvs6jw6lz02-8000.proxy.runpod.net/sketch2image', form, {
         headers: {
           ...form.getHeaders(),
         },
@@ -630,7 +630,7 @@ app.post('/sketch-to-image', upload.single('sketch_image'), async (req, res) => 
       }
 
       try {
-        const response = await axios.get(`https://pk7u4tuw7jdfgj-8000.proxy.runpod.net/getimage/${imageUuid}`, {
+        const response = await axios.get(`https://r5xrvs6jw6lz02-8000.proxy.runpod.net/getimage/${imageUuid}`, {
           params: {
             delete: false,
             type: 'PNG',
@@ -844,7 +844,7 @@ app.post('/image-enhancement', upload.single('image'), async (req, res) => {
     });
 
     // Make request to Python service
-    let inpaintingResponse = await axios.post('https://pk7u4tuw7jdfgj-8000.proxy.runpod.net/inpainting', form, {
+    let inpaintingResponse = await axios.post('https://r5xrvs6jw6lz02-8000.proxy.runpod.net/inpainting', form, {
       headers: {
         ...form.getHeaders(),
       },
@@ -884,7 +884,7 @@ app.get('/check-image/:uuid', async (req, res) => {
   const imageUuid = req.params.uuid;
   
   try {
-    const response = await axios.get(`https://pk7u4tuw7jdfgj-8000.proxy.runpod.net/getimage/${imageUuid}`, {
+    const response = await axios.get(`https://r5xrvs6jw6lz02-8000.proxy.runpod.net/getimage/${imageUuid}`, {
       params: {
         delete: false,
         type: 'PNG',
@@ -934,6 +934,7 @@ app.get('/check-image/:uuid', async (req, res) => {
 });
 
 app.post('/text-to-image',upload.none(), async (req, res) => {
+  console.log("TEXT TO IMAGE")
   try {
     console.log("Request Body:", req.body); // Log the raw request body
 
@@ -944,6 +945,7 @@ app.post('/text-to-image',upload.none(), async (req, res) => {
     const form = new FormData();
     const { prompt, width, height, styleType, model_xl, negativePrompt, maintainAspectRatio } = req.body;
     const userId = req.body.userId; // Assuming the userId is sent in the body of the request
+    const numImages = parseInt(req.body.num_images || '1');
 
     // Check and log the received values
     console.log("Prompt:", prompt );
@@ -977,96 +979,93 @@ app.post('/text-to-image',upload.none(), async (req, res) => {
 
     // Append text fields
     // form.append('strength', '0.8');
-    form.append('guidance_scale', '7.5');
-    form.append('prompt', req.body.prompt || 'high quality interior'); // Use the prompt from the request or a default value
-    form.append('width', req.body.width || '512');
-    form.append('height', req.body.height || '512');
-    form.append('steps', '25');
-    form.append('safetensor', 'false');
-    form.append('model_xl', req.body.model_xl||'false');
-    form.append('negative_prompt', req.body.negativePrompt || 'bad, blurry, low quality, low resolution, deformed'); // Long string as in the example
-    form.append('clip_skip', '0');
-    form.append('num_images', '1');
-    form.append('style', req.body.styleType || 'default');
-    form.append('seed', ''); // Empty string or any specific value if needed
-    form.append('sketch_image_uuid', '456'); // Example UUID, replace with actual if available
-    form.append('revert_extra', ''); // Empty string or any specific value if needed
-    // form.append('callback_url', ''); // Empty string or any specific value if needed
-    form.append('maintain_aspect_ratio', req.body.maintainAspectRatio || 'false');
-    form.append('scheduler', 'Default');    
-    try {
-      sketch2imageResponse = await axios.post('https://pk7u4tuw7jdfgj-8000.proxy.runpod.net/text2image', form, {
-        headers: {
-          ...form.getHeaders(),
-        },
-      });
+    const imageUuids = [];
 
-      imageUuid = sketch2imageResponse.data.images[0].image_uuid;
-      console.log("image uuid", imageUuid);
-
-    } catch (error) {
-      console.error('Error during sketch2image API call:', error);
-      if (error.response) {
-        console.error('Error details:', error.response.data);
+    for (let i = 0; i < numImages; i++) {
+      const form = new FormData();
+      form.append('guidance_scale', '7.5');
+      form.append('prompt', req.body.prompt || 'high quality interior');
+      form.append('width', req.body.width || '512');
+      form.append('height', req.body.height || '512');
+      form.append('steps', '25');
+      form.append('safetensor', 'false');
+      form.append('model_xl', req.body.model_xl || 'false');
+      form.append('negative_prompt', req.body.negativePrompt || 'bad, blurry, low quality, low resolution, deformed');
+      form.append('clip_skip', '0');
+      form.append('style', req.body.styleType || 'default');
+      form.append('seed', '');
+      form.append('sketch_image_uuid', '456');
+      form.append('revert_extra', '');
+      form.append('maintain_aspect_ratio', req.body.maintainAspectRatio || 'false');
+      form.append('scheduler', 'Default');
+    
+      try {
+        const sketch2imageResponse = await axios.post('https://r5xrvs6jw6lz02-8000.proxy.runpod.net/text2image', form, {
+          headers: form.getHeaders(),
+        });
+    
+        const imageUuid = sketch2imageResponse.data.images[0].image_uuid;
+        console.log(`Image ${i + 1} UUID:`, imageUuid);
+        imageUuids.push(imageUuid);
+      } catch (error) {
+        console.error('Error during sketch2image API call:', error);
+        return res.status(500).send({ message: 'Error during image generation request.' });
       }
-      return res.status(500).send({ message: 'Error during image generation request.' });
     }
-    console.log("image uuid", imageUuid)
 
 
     const endTime = Date.now() + 100000;
 
-    const intervalId = setInterval(async () => {
-      if (Date.now() >= endTime) {
-        clearInterval(intervalId);
-        return res.status(408).send({ message: 'Request Timeout: Image could not be retrieved in time.' });
+    const pollImage = async (uuid) => {
+  const endTime = Date.now() + 100000;
+
+  while (Date.now() < endTime) {
+    try {
+      const response = await axios.get(`https://r5xrvs6jw6lz02-8000.proxy.runpod.net/getimage/${uuid}`, {
+        params: {
+          delete: true,
+          type: 'PNG',
+          base64_c: false,
+          quality_level: 90,
+        },
+        headers: {
+          'accept': 'application/json'
+        },
+        responseType: 'arraybuffer'
+      });
+
+      const dataStr = response.data.toString();
+      if (!dataStr.includes("Image not found")) {
+        const imageBase64 = Buffer.from(response.data, 'binary').toString('base64');
+        return `data:image/png;base64,${imageBase64}`;
       }
-
-      try {
-        const response = await axios.get(`https://pk7u4tuw7jdfgj-8000.proxy.runpod.net/getimage/${imageUuid}`, {
-          params: {
-            delete: true,
-            type: 'PNG',
-            base64_c: false,
-            quality_level: 90,
-          },
-          headers: {
-            'accept': 'application/json'
-          },
-          responseType: 'arraybuffer'
-        });
-
-        if (response.data) {
-          const dataStr = response.data.toString();
-          if (dataStr.includes("Image not found")) {
-            console.log("Image not found in response, retrying...");
-          } else {
-            const imageBase64 = Buffer.from(response.data, 'binary').toString('base64');
-            const imageDataUrl = `data:image/png;base64,${imageBase64}`;
-
-            const generatedImage = new GeneratedImage({
-              userId: userId,
-              image: response.data
-            });
-            await generatedImage.save();
-
-            clearInterval(intervalId);
-            return res.status(200).send({ imageUrls: imageDataUrl, message: 'Image processed successfully' });
-          }
-        }
-      } catch (error) {
-        if (error.response && (error.response.status === 404 || error.response.data.includes("Image not found"))) {
-          console.log("Image not found, retrying...");
-        } else {
-          console.error('Error during image retrieval:', error);
-          clearInterval(intervalId);
-          return res.status(500).send({ message: 'Internal server error during image retrieval.' });
-        }
+    } catch (error) {
+      if (!error.response || error.response.status !== 404) {
+        throw error;
       }
-    }, 3000);
+    }
+    await new Promise(r => setTimeout(r, 3000));
+  }
+  throw new Error(`Timeout for UUID: ${uuid}`);
+};
+
+try {
+  const imageUrls = await Promise.all(imageUuids.map(uuid => pollImage(uuid)));
+
+  for (const imageDataUrl of imageUrls) {
+    const imageBuffer = Buffer.from(imageDataUrl.split(',')[1], 'base64');
+    await GeneratedImage.create({ userId, image: imageBuffer });
+  }
+
+  return res.status(200).send({ imageUrls, message: 'Images processed successfully' });
+} catch (err) {
+  console.error('Polling error:', err);
+  return res.status(500).send({ message: 'Error retrieving generated images.' });
+}
+
 
     // setTimeout(async () => {
-    //   const response = await axios.get(`https://pk7u4tuw7jdfgj-8000.proxy.runpod.net/getimage/${imageUuid}`, {
+    //   const response = await axios.get(`https://r5xrvs6jw6lz02-8000.proxy.runpod.net/getimage/${imageUuid}`, {
     //     params: {
     //       delete: true,
     //       type: 'PNG',
@@ -1113,7 +1112,7 @@ app.post('/text-callback', async (req, res) => {
     console.log("text callback called")
     const textUuid = req.body.text_uuid;
     console.log("uuid :",textUuid )
-    const response = await axios.get(`https://pk7u4tuw7jdfgj-8000.proxy.runpod.net/gettext/${textUuid}`, {
+    const response = await axios.get(`https://r5xrvs6jw6lz02-8000.proxy.runpod.net/gettext/${textUuid}`, {
       headers: {
         'accept': 'application/json'
       }});
@@ -1183,7 +1182,7 @@ app.post('/prompt-enhancer', upload.none(), async (req, res) => {
     form.append('callback_url', callbackUrltext);
 
     // First API call to generate the image 
-    const response = await axios.post('https://pk7u4tuw7jdfgj-8000.proxy.runpod.net/promptenhancer', form, {
+    const response = await axios.post('https://r5xrvs6jw6lz02-8000.proxy.runpod.net/promptenhancer', form, {
       headers: {
         ...form.getHeaders(),
       },
@@ -1220,7 +1219,7 @@ app.post('/prompt-enhancer', upload.none(), async (req, res) => {
 // await new Promise(resolve => setTimeout(resolve, delayInSeconds * 1000));
 
 // // Second API call to retrieve the generated image using the UUID
-// const response = await axios.get(`https://pk7u4tuw7jdfgj-8000.proxy.runpod.net/getimage/${imageUuid}`, {
+// const response = await axios.get(`https://r5xrvs6jw6lz02-8000.proxy.runpod.net/getimage/${imageUuid}`, {
 //   params: {
 //     delete: true,
 //     type: 'PNG',
@@ -1502,11 +1501,11 @@ app.get('*', (req, res) => {
 
 // ... (existing code)
 
-// app.listen(8000, () => {
-//   console.log("Server starting at 8000");
-// });
-
-app.listen(8000, '92.240.254.103', () => {
-  console.log("Server starting at 92.240.254.103 on port 8000");
+app.listen(8000, () => {
+  console.log("Server starting at 8000");
 });
+
+// app.listen(8000, '92.240.254.103', () => {
+//   console.log("Server starting at 92.240.254.103 on port 8000");
+// });
 
