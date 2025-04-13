@@ -207,12 +207,13 @@ function ImageGenerator({ onGenerateImage }) {
         
         setGeneratedImages(imageUrls);
         onGenerateImage(imageUrls);
-        setIsLoading(false);
       }
     } catch (error) {
       console.error('Error generating image:', error);
     }
-    
+    if (apiType != 'video-generation' && apiType != 'object-creation'){
+    setIsLoading(false);
+    }
    
   };
   
