@@ -368,6 +368,7 @@ img.src = imageObjectUrl; // just take first if array
 
   const handleApiTypeChange = (value) => {
     setApiType(value);
+    setSelectedNumImages(1);
     console.log("API CHANGEDD")
     setUploadedImage(null);
     setGeneratedImages([]);
@@ -689,7 +690,7 @@ img.src = imageObjectUrl; // just take first if array
 
             {/* Aspect Ratio */}
             {/* <div className={styles.inputRow}> */}
-            {apiType !== 'object-creation' && apiType !== 'image-enhancement' && apiType !== 'video-generation' && apiType !== 'sketch-to-image' &&   
+            {apiType !== 'object-creation' && apiType !== 'image-enhancement' && apiType !== 'video-generation' &&    
             
             <div className={styles.inputColumn}>
               <p className={styles.label}>Aspect Ratio</p>
@@ -742,7 +743,7 @@ img.src = imageObjectUrl; // just take first if array
 
 
             {/* Image Size */}
-            {apiType !== 'object-creation' && apiType !== 'image-enhancement' && apiType !== 'video-generation' && apiType !== 'sketch-to-image' &&
+            {apiType !== 'object-creation' && apiType !== 'image-enhancement' && apiType !== 'video-generation' && 
             
             <div className={styles.inputColumn}>
             <p className={styles.label} style={{ margin: '0px', alignItems: 'center', justifyContent: 'center' }}>Image Size (px)</p>
