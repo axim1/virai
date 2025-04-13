@@ -591,7 +591,7 @@ img.src = imageObjectUrl; // just take first if array
             }
 
 
-
+<div style={{width:250}}></div>
             {/* Prompt input */}
             {apiType !== 'object-creation'  && 
             
