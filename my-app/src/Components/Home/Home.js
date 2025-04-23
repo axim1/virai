@@ -33,7 +33,21 @@ const scrollStage3End = 800; // Motto fades out, background zooms, tools appear
   const mottoFadeOut = scrollY >= 500 && scrollY < 800 ? 1 - (scrollY - 500) / 300 : scrollY >= 800 ? 0 : 1;
   const bgImageMove = scrollY >= 500 ? Math.min((scrollY - 500) / 300, 1) : 0;
   
+  const params = new URLSearchParams(window.location.search);
+  const user = {
+    _id: params.get('_id'),
+    email: params.get('email'),
+    fname: params.get('fname'),
+    lname: params.get('lname'),
+    no_of_images_left: params.get('no_of_images_left'),
+    subscribed_monthly: params.get('subscribed_monthly') === 'true',
+    subscribed_yearly: params.get('subscribed_yearly') === 'true',
+  };
+  if(user._id){
+    localStorage.setItem('user', JSON.stringify(user));
 
+  }
+  
 
   const logoOpacity = scrollY < scrollStage1End
   ? 1 - (scrollY / scrollStage1End) * 0.5

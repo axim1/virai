@@ -102,6 +102,18 @@ const Login = ({ setLoggedIn, setUserState }) => {
       <div className="mt-3 text-center">
         <NavLink to="/signup">Not yet registered? Register Now</NavLink>
       </div>
+
+
+      <button
+  className="btn btn-outline-danger"
+  style={{margin:'50px'}}
+  onClick={() => {
+    window.location.href = `${process.env.REACT_APP_API_URL}auth/google`;
+  }}
+>
+  Sign in with Google
+</button>
+
     </div>
     </>
 

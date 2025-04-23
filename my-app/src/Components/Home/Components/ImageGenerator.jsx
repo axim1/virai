@@ -159,6 +159,7 @@ function ImageGenerator({ onGenerateImage }) {
         break;
     }
   };
+  const isMobile = window.innerWidth <= 768;
 
   const handleWidthChange = (event) => {
     setImageWidth(Number(event.target.value) || 0);

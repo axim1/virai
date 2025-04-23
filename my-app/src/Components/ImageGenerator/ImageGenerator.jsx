@@ -167,8 +167,10 @@ function ImageGenerator({ onGenerateImage }) {
       ) // Capitalize the first letter of the first word
       .join(' '); // Join the words back with spaces
   }
-  const icons = [icon1, icon2, icon3, icon4, icon5, icon6,icon7];
-  const iconsbottom = [ icon8, icon9,icon10];
+  const isMobile = window.innerWidth <= 1024;
+
+  const icons = isMobile? [icon1, icon2, icon3, icon4, icon5, icon6,icon7,icon8, icon9,icon10]:[icon1, icon2, icon3, icon4, icon5, icon6,icon7];
+  const iconsbottom = isMobile?[]:[ icon8, icon9,icon10];
   const tticons = [tticon1, tticon2, tticon3, tticon4, tticon5, tticon6];
 
   const apiTypes = [
@@ -178,7 +180,10 @@ function ImageGenerator({ onGenerateImage }) {
     "image-enhancement",
     "image-expansion",
     "video-generation",
-    "3D-object-generation"
+    "3D-object-generation",
+    "",
+    "",
+"",
   ];
 
   return (

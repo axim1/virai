@@ -219,6 +219,7 @@ color:#999999;
 .inputColumn {
   display: flex;
   flex-direction: column;
+  margin-top: 10px;
   /* margin: 20px 0; */
   /* align-items: center; */
 
@@ -340,7 +341,9 @@ cursor: pointer;
 
  
 }
-
+.sizeButtons{
+  max-width: 396px;
+}
 
 .numButton,
 .aspectButton,
@@ -839,6 +842,12 @@ text-transform: capitalize;
   .generatedImagesContainer {
     grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); /* Adjust grid for tablets */
   }
+  .rightSection{
+    min-height: 510px;
+    /* height: 510px; */
+/*  */
+  }
+
 }
 
 /* Adjust for larger screens */
@@ -913,7 +922,7 @@ border: none;
   }
   .leftToolBar {
     max-width: 50px;
-
+    height: 510px;
   }
 
   .topInputContainer {
@@ -924,7 +933,12 @@ border: none;
     max-width: 100%;
 
   }
-
+.leftToolBarBottom{
+  display:none;
+}
+.leftToolBarTop {
+  max-height: 100%;
+}
   .imageContainer {
     width: 100%; /* Full width on tablets */
     /* margin-left: 0; */
