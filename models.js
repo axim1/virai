@@ -67,6 +67,17 @@ const userSchema = new Schema({
     default: 'PENDING',
     enum: ['PENDING', 'PAY_METHOD_SELECTED', 'COMPLETED', 'FAILED'],
   },
+  googleId: {
+    type: String,
+    unique: true,
+    sparse: true,
+  },
+  authProvider: {
+    type: String,
+    enum: ['local', 'google'],
+    default: 'local',
+  }
+  
 });
 
 

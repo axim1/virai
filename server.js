@@ -14,7 +14,19 @@ const { v4: uuidv4 } = require('uuid'); // Import UUID
 // const multer = require("multer");
 // const path = require("path");
 
+const session = require("express-session");
+const passport = require("passport");
+require("./passport-config"); // Load the Passport config
 
+
+app.use(session({
+  secret: "your-session-secret",
+  resave: false,
+  saveUninitialized: false,
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
@@ -42,6 +54,10 @@ mongoose.connect(uri, clientOptions)
   
 // const upload = multer({ storage });
 
+
+
+
+
 app.get("/subscriptions", async (req, res) => {
   try {
     const subscriptions = await Subscription.find();
@@ -51,6 +67,60 @@ app.get("/subscriptions", async (req, res) => {
     res.status(500).send({ message: "Internal server error" });
   }
 });
+// Route to initiate Google sign-in
+app.get('/auth/google',
+  passport.authenticate('google', { scope: ['profile', 'email'] })
+);
+
+// Callback route for Google
+app.get('/auth/google/callback',
+  passport.authenticate('google', { failureRedirect: '/login', session: true }),
+  (req, res) => {
+    // Send user data to frontend
+    const user = req.user;
+    const frontendUrl = `${process.env.FRONTEND_URL}home`;
+
+    const userData = {
+      _id: user._id,
+      email: user.email,
+      fname: user.fname,
+      lname: user.lname,
+      no_of_images_left: user.no_of_images_left,
+      subscribed_monthly: user.subscribed_monthly,
+      subscribed_yearly: user.subscribed_yearly,
+    };
+
+    // Option 1: Redirect with user data in query params (not ideal for sensitive data)
+    const query = new URLSearchParams(userData).toString();
+    res.redirect(`${frontendUrl}?${query}`);
+  }
+);
+
+
+// app.get('/auth/google/callback',
+//   passport.authenticate('google', { failureRedirect: '/login', session: true }),
+//   (req, res) => {
+//     console.log('I am at the callback')
+//     // Successful login, redirect to home or send user data
+//     res.redirect(`${process.env.FRONTEND_URL}home`);
+//   }
+// );
+
+// Optional: current user route
+app.get('/auth/user', (req, res) => {
+  res.send(req.user || null);
+});
+
+// Logout
+app.get('/auth/logout', (req, res) => {
+  req.logout(err => {
+    if (err) return res.status(500).send({ message: "Logout error" });
+    res.redirect(`${process.env.FRONTEND_URL}/login`);
+  });
+});
+
+
+
 
 // Example of updating a route to use Mongoose syntax
 app.post("/login", async (req, res) => {
@@ -1193,11 +1263,11 @@ app.get('*', (req, res) => {
 
 // ... (existing code)
 
-// app.listen(8000, () => {
-//   console.log("Server starting at 8000");
-// });
-
-app.listen(8000, '92.240.254.103', () => {
-  console.log("Server starting at 92.240.254.103 on port 8000");
+app.listen(8000, () => {
+  console.log("Server starting at 8000");
 });
+
+// app.listen(8000, '92.240.254.103', () => {
+//   console.log("Server starting at 92.240.254.103 on port 8000");
+// });
 
