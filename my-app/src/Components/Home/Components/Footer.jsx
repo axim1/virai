@@ -1,9 +1,32 @@
+import React, { useState, useEffect } from 'react';
+
 import styles from "./Footer.module.css";
 import iconsApps from '../../../assets/vector_icons/downloadapp 1.png';
 import virai_log from '../../../assets/vector_icons/virai-logo.svg';
+import { useNavigate, NavLink } from "react-router-dom";
 
 // my-app/src/assets/vector_icons/virai-logo.svg
-const Footer = () => {
+const Footer = ({loggedIn,setLoggedIn = () => {}}) => {
+    const navigate = useNavigate();
+  
+    const [user, setUser] = useState(null);
+    useEffect(() => {
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {  
+        setUser(JSON.parse(storedUser));
+        setLoggedIn(true);
+      } else {
+        setUser(null);
+        setLoggedIn(false);
+      }
+    }, [loggedIn,user]); // ✅ Add 'loggedIn' as a dependency
+    const handleLogout = () => {
+      localStorage.removeItem('user');
+      setUser(null);
+      setLoggedIn(false);
+      navigate("/", { replace: true });
+  
+    };
   return (
     <footer className={styles.footer}>
         <div className={styles.divider} />
@@ -28,7 +51,11 @@ const Footer = () => {
             <li><a href="/" className={styles.link}>Home</a></li>
             <li><a href="/gallery" className={styles.link}>Gallery</a></li>
             <li><a href="/pricing" className={styles.link}>Pricing</a></li>
-            <li><a href="/login" className={styles.link}>Log In</a></li>
+            <li>
+            {user ? (<a   onClick={handleLogout} className={styles.link}>Log Out</a>):(
+              <a href="/login" className={styles.link}>Log In</a>
+            )}
+            </li>
           </ul>
         </div>
 
@@ -38,7 +65,7 @@ const Footer = () => {
           <div className={styles.divider_sml} />
 
           <ul className={styles.linkList}>
-            <li><a href="/terms" className={styles.link}>Terms Of Service</a></li>
+            <li><a href="/terms-of-service" className={styles.link}>Terms Of Service</a></li>
             <li><a href="/refund-policy" className={styles.link}>Refund Policy</a></li>
             <li><a href="/privacy-policy" className={styles.link}>Privacy Policy</a></li>
             <li><a href="/cookie-policy" className={styles.link}>Cookie Policy</a></li>

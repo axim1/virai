@@ -1,7 +1,9 @@
 .footer {
     display: flex;
     justify-content: space-between;
-    padding: 32px;
+    padding: 32px ;
+    width: 100%;
+    max-width: 1370px;
   }
   
   .section {

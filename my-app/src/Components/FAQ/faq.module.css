@@ -23,6 +23,7 @@ background: #333;
   /* align-items: center; */
   /* justify-content: center; */
   width: 100%;
+max-width:1370px;
 }
 .ButtonContact{
     color: #FFF;

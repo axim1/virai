@@ -67,6 +67,17 @@ const userSchema = new Schema({
     default: 'PENDING',
     enum: ['PENDING', 'PAY_METHOD_SELECTED', 'COMPLETED', 'FAILED'],
   },
+  googleId: {
+    type: String,
+    unique: true,
+    sparse: true,
+  },
+  authProvider: {
+    type: String,
+    enum: ['local', 'google'],
+    default: 'local',
+  }
+  
 });
 
 
@@ -127,24 +138,46 @@ subscriptionSchema.virtual('users', {
 });
 
 // GeneratedImage model
-const generatedImageSchema = new Schema({
-  image: {
-    type: Buffer,
-    required: true,
-  },
-  userId: {
-    type: Schema.Types.ObjectId,
-    ref: 'User',
-  },
+// const generatedImageSchema = new Schema({
+//   image: {
+//     type: Buffer,
+//     required: true,
+//   },
+//   userId: {
+//     type: Schema.Types.ObjectId,
+//     ref: 'User',
+//   },
+// });
+
+// const GeneratedImage = mongoose.model('GeneratedImage', generatedImageSchema);
+
+
+
+
+const GeneratedImageSchema = new mongoose.Schema({
+  image: Buffer,
+  title: String,
+  description: String,
+  category: String,
+  likes: { type: Number, default: 0 },
+  shares: { type: Number, default: 0 },
+  views: { type: Number, default: 0 },
+  createdAt: { type: Date, default: Date.now },
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
 });
 
-const GeneratedImage = mongoose.model('GeneratedImage', generatedImageSchema);
+const GeneratedImage = mongoose.model('GeneratedImage', GeneratedImageSchema);
+// module.exports = { GeneratedImage };
 
 // GeneratedImage belongs to User
-generatedImageSchema.virtual('user', {
-  ref: 'User',
-  localField: 'userId',
-  foreignField: '_id',
-});
+// generatedImageSchema.virtual('user', {
+//   ref: 'User',
+//   localField: 'userId',
+//   foreignField: '_id',
+// });
+
+
+
+
 
 module.exports = { User, Subscription, GeneratedImage };

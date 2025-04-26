@@ -6,14 +6,15 @@ import { useNavigate, NavLink } from "react-router-dom";
 import styles from './Navbar.module.css'; // Import the CSS module
 import virlogo from '../../assets/vector_icons/virai-logo.svg';
 import coinIcon from '../../assets/vector_icons/pricing-01 1.svg'
-const Navbar = ({ loggedIn,  setLoggedIn = () => {}, onAIToolsClick, onHomeClick }) => {
+const Navbar = ({ loggedIn,  setLoggedIn = () => {}, onHomeClick,activeLink,setActiveLink}) => {
   const navigate = useNavigate();
 
   const [navBackground, setNavBackground] = useState(false);
   const [user, setUser] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [activeLink, setActiveLink] = useState('home');
+  const [localActiveLink, setLocalActiveLink] = useState('home');
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const currentActive = activeLink || localActiveLink;
 
   useEffect(() => {
     const handleScroll = () => setNavBackground(window.scrollY >= 50);
@@ -21,14 +22,10 @@ const Navbar = ({ loggedIn,  setLoggedIn = () => {}, onAIToolsClick, onHomeClick
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // useEffect(() => {
-  //   const storedUser = localStorage.getItem('user');
-  //   if (storedUser && setLoggedIn) {  // ✅ Ensure setLoggedIn is defined
-  //     setUser(JSON.parse(storedUser));
-  //     setLoggedIn(true);
-  //   }
-  // }, [loggedIn]); // ✅ Correct dependency array
-  
+
+  const handleNavClick = (section) => {
+    navigate('/', { state: { scrollToSection: section } });
+  };
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
     if (storedUser) {  
@@ -52,12 +49,20 @@ const Navbar = ({ loggedIn,  setLoggedIn = () => {}, onAIToolsClick, onHomeClick
 
   const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-  const handleAIToolsClick = async () => {
-    onHomeClick();
-    await delay(500);
-    onAIToolsClick();
+  const handleAIToolsClick = () => {
     setActiveLink('ai-tools');
+    navigate('/', { state: { scrollToSection: 'tools-section' } });
   };
+  const handlePricingClick = () => {
+    setActiveLink('pricing');
+    navigate('/', { state: { scrollToSection: 'pricing-section' } });
+  };
+  
+  const handleFAQClick = () => {
+    setActiveLink('faq');
+    navigate('/', { state: { scrollToSection: 'faq-section' } });
+  };
+  
 
   const handleHomeClick = () => {
     onHomeClick();
@@ -65,7 +70,7 @@ const Navbar = ({ loggedIn,  setLoggedIn = () => {}, onAIToolsClick, onHomeClick
   };
 
   return (
-    <nav className={`${styles.navbar} ${navBackground ? styles.navbarSolid : styles.navbarTransparent}`}>
+    <nav className={`${styles.navbar} ${navBackground ? styles.navbarSolid : styles.navbarSolid}`}>
       <div className={styles.navbarLeft}>
         <img src={virlogo} alt="VirtuartAI Logo" className={styles.navbarLogo} />
       </div>
@@ -98,17 +103,40 @@ const Navbar = ({ loggedIn,  setLoggedIn = () => {}, onAIToolsClick, onHomeClick
           Creation
         </RouterLink>
 
-        <ScrollLink to="gallery-section" smooth={true} duration={50} className={styles.navItem} offset={-150} onSetActive={() => setActiveLink('gallery')}>
+        <RouterLink
+          to="/gallery"
+          className={`${styles.navItem} ${activeLink === 'gallery' ? styles.active : ''}`}
+          onClick={() => setActiveLink('gallery')}
+        >
           Gallery
-        </ScrollLink>
+        </RouterLink>
+        {/* <ScrollLink to="gallery-section" smooth={true} duration={50} className={styles.navItem} offset={-150} onSetActive={() => setActiveLink('gallery')}>
+          Gallery
+        </ScrollLink> */}
 
-        <ScrollLink to="pricing-section" smooth={true} duration={50} className={styles.navItem} offset={-150} onSetActive={() => setActiveLink('pricing')}>
-          Pricing
-        </ScrollLink>
+<ScrollLink 
+  to="pricing-section" 
+  smooth={true} 
+  duration={50} 
+  className={`${styles.navItem} ${activeLink === 'pricing' ? styles.active : ''}`}
+  offset={150} 
+  // onSetActive={() => setActiveLink('pricing')}
+  onClick={handlePricingClick}
+>
+  Pricing
+</ScrollLink>
 
-        <ScrollLink to="faq-section" smooth={true} duration={50} className={styles.navItem} offset={-150} onSetActive={() => setActiveLink('faq')}>
-          FAQ
-        </ScrollLink>
+<ScrollLink 
+  to="faq-section" 
+  smooth={true} 
+  duration={50} 
+  className={`${styles.navItem} ${activeLink === 'faq' ? styles.active : ''}`}
+  offset={150} 
+  onClick={handleFAQClick}
+>
+  FAQ
+</ScrollLink>
+
       </div>
 
       {/* User & Login/Signup Section */}
@@ -151,7 +179,13 @@ const Navbar = ({ loggedIn,  setLoggedIn = () => {}, onAIToolsClick, onHomeClick
 
       {/* Mobile Menu Icon */}
       <div className={styles.mobileMenuIcon} onClick={toggleMenu}>
-        &#9776;
+        {/* &#9776; */}
+        <svg width="45" height="22" viewBox="0 0 45 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect x="4" width="40.5" height="3.35455" rx="1.67727" fill="#999999"/>
+<rect y="9" width="45" height="3.35" rx="1.675" fill="#999999"/>
+<rect x="13" y="18" width="31.5" height="3.35455" rx="1.67727" fill="#999999"/>
+</svg>
+
       </div>
     </nav>
   );

@@ -2,12 +2,14 @@
     background-color: #000;
     color: white;
     padding-bottom: 32px;
+
   }
 .divider{
-    max-width: 95%;
+    /* width: 100%; */
+    margin: 0px 32px;
     height: 1px;
     background: #333;
-   margin: 0px auto; 
+   /* margin: 0px auto;  */
 }
 .divider_sml{
     max-width: 40%;

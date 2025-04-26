@@ -5,7 +5,9 @@ import checkmark from '../../../assets/vector_icons/checkmark 1.svg';
 import './PricingSection.css';
 import sliderIcon from '../../../assets/vector_icons/Scroll Icon.svg'
 import arrow from '../../../assets/vector_icons/Arrow 2.svg'; // Replace with your image path
+import arrow_gold from '../../../assets/vector_icons/Arrow_gold.svg'; // Replace with your image path
 
+import checkmark_black from '../../../assets/vector_icons/checkmark_black.svg';
 
 const PricingSection = () => {
   const apiUrl = process.env.REACT_APP_API_URL;
@@ -55,7 +57,7 @@ const PricingSection = () => {
 
   return (
     <div className="pricing-section">
-      <div style={{margin:'32px'}}>
+      <div style={{margin:'32px 0px'}}>
         <p className="p1">AI-powered creative toolkit for</p>
         <p className="p2">individuals & teams.</p>
         <button className='topButton'>Start your 7-day free trial</button>
@@ -71,7 +73,11 @@ const PricingSection = () => {
             { title: "Business", price: 24, subscription: "business", features: ["4800 Generated images", "Fast generations", "160 Video generations", "Commercial license", "Images are kept private"] },
             { title: "Premium", price: 48, subscription: "premium", features: ["9600 Generated images", "Fast generations", "320 Video generations", "Commercial license", "Images are kept private"] }
           ].map((plan, index) => (
-            <div key={index} className="pricing-card">
+            <div
+            key={index}
+            className={`pricing-card ${plan.subscription === "business" ? "highlighted-card" : ""}`}
+          >
+          
               <h2 className="card-title">{plan.title}</h2>
               <div className="card-price">
                 <span className="price-currency">€</span>
@@ -80,13 +86,13 @@ const PricingSection = () => {
               </div>
               <ul className="card-features">
                 {plan.features.map((feature, i) => (
-                  <li key={i}><img src={checkmark} alt="✔" className="price-check" /> {feature}</li>
+                  <li key={i}><img src={` ${plan.subscription === "business" ? checkmark_black:checkmark}`} alt="✔" className="price-check" /> {feature}</li>
                 ))}
               </ul>
               {plan.price > 0 ? (
-                <button className="card-button" onClick={(event) => submitForm(event, plan.price, plan.subscription)}>Get Now  <img src={arrow}  className='arrow'  /></button>
+                <button className="card-button" onClick={(event) => submitForm(event, plan.price, plan.subscription)}>Get Now  <img src={` ${plan.subscription === "business" ? arrow_gold:arrow}`}  className='arrow'  /></button>
               ) : (
-                <Link to="/signup"><button className="card-button">Get Now  <img src={arrow}  className='arrow'  /></button></Link>
+                <Link to="/signup"><button className="card-button">Get Now  <img  src={` ${plan.subscription === "business" ? arrow_gold:arrow}`}  className='arrow'  /></button></Link>
               )}
             </div>
           ))}

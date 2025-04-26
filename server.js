@@ -21,8 +21,21 @@ if (!fs.existsSync(VIDEO_OUTPUT_DIR)) {
   fs.mkdirSync(VIDEO_OUTPUT_DIR);
 }
 
+const session = require("express-session");
+const passport = require("passport");
+require("./passport-config"); // Load the Passport config
 
+
+app.use(session({
+  secret: "your-session-secret",
+  resave: false,
+  saveUninitialized: false,
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
 app.use(express.json());
+
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 const { isStringObject } = require("util/types");
@@ -50,7 +63,6 @@ mongoose.connect(uri, clientOptions)
 // const upload = multer({ storage });
 
 
-
 app.get("/subscriptions", async (req, res) => {
   try {
     const subscriptions = await Subscription.find();
@@ -60,6 +72,60 @@ app.get("/subscriptions", async (req, res) => {
     res.status(500).send({ message: "Internal server error" });
   }
 });
+// Route to initiate Google sign-in
+app.get('/auth/google',
+  passport.authenticate('google', { scope: ['profile', 'email'] })
+);
+
+// Callback route for Google
+app.get('/auth/google/callback',
+  passport.authenticate('google', { failureRedirect: '/login', session: true }),
+  (req, res) => {
+    // Send user data to frontend
+    const user = req.user;
+    const frontendUrl = `${process.env.FRONTEND_URL}home`;
+
+    const userData = {
+      _id: user._id,
+      email: user.email,
+      fname: user.fname,
+      lname: user.lname,
+      no_of_images_left: user.no_of_images_left,
+      subscribed_monthly: user.subscribed_monthly,
+      subscribed_yearly: user.subscribed_yearly,
+    };
+
+    // Option 1: Redirect with user data in query params (not ideal for sensitive data)
+    const query = new URLSearchParams(userData).toString();
+    res.redirect(`${frontendUrl}?${query}`);
+  }
+);
+
+
+// app.get('/auth/google/callback',
+//   passport.authenticate('google', { failureRedirect: '/login', session: true }),
+//   (req, res) => {
+//     console.log('I am at the callback')
+//     // Successful login, redirect to home or send user data
+//     res.redirect(`${process.env.FRONTEND_URL}home`);
+//   }
+// );
+
+// Optional: current user route
+app.get('/auth/user', (req, res) => {
+  res.send(req.user || null);
+});
+
+// Logout
+app.get('/auth/logout', (req, res) => {
+  req.logout(err => {
+    if (err) return res.status(500).send({ message: "Logout error" });
+    res.redirect(`${process.env.FRONTEND_URL}/login`);
+  });
+});
+
+
+
 
 // Example of updating a route to use Mongoose syntax
 app.post("/login", async (req, res) => {
@@ -1448,6 +1514,112 @@ app.get("/api/user/:userId", async (req, res) => {
     res.status(500).send({ message: "Internal server error" });
   }
 });
+
+
+
+app.get('/api/images', async (req, res) => {
+  try {
+    const { filter, page = 1, limit = 8, userId } = req.query;
+    let sortQuery = {};
+    let findQuery = {};
+    console.log('server image api called', userId);
+
+    switch (filter) {
+      case 'Newest':
+        sortQuery = { createdAt: -1 };
+        break;
+      case 'Oldest':
+        sortQuery = { createdAt: 1 };
+        break;
+      case 'Most Liked':
+        sortQuery = { likes: -1 };
+        break;
+      case 'Most Viewed':
+        sortQuery = { views: -1 };
+        break;
+      case 'Shared':
+        sortQuery = { shares: -1 };
+        break;
+      case 'Trending':
+        sortQuery = { likes: -1, views: -1 };
+        break;
+      case 'Owned by Me':
+        if (!userId) {
+          return res.status(400).json({ error: "Missing userId for 'Owned by Me' filter" });
+        }
+        findQuery = { userId: userId };
+        sortQuery = { createdAt: -1 };
+        break;
+      default:
+        sortQuery = {};
+    }
+
+    const pageNumber = parseInt(page, 10);
+    const limitNumber = parseInt(limit, 10);
+    const skip = (pageNumber - 1) * limitNumber;
+
+    const totalImages = await GeneratedImage.countDocuments(findQuery);
+
+    // Fetch images along with the user's details
+    const images = await GeneratedImage.find(findQuery)
+      .populate('userId', 'fname lname profilePic') // Populate user details
+      .sort(sortQuery)
+      .skip(skip)
+      .limit(limitNumber);
+
+    const formattedImages = images.map(image => {
+      let base64Image = null;
+      if (image.image && image.image.buffer) {
+        base64Image = `data:image/jpeg;base64,${image.image.toString('base64')}`;
+      }
+
+      return {
+        ...image._doc,
+        image: base64Image,
+        owner: image.userId ? { 
+          name: `${image.userId.fname} ${image.userId.lname}`,
+          profilePic: image.userId.profilePic
+        } : null, // Default if no user found
+      };
+    });
+
+    res.json({ images: formattedImages, total: totalImages, page: pageNumber, limit: limitNumber });
+  } catch (error) {
+    console.error("Error fetching images:", error);
+    res.status(500).json({ error: "Error fetching images" });
+  }
+});
+
+
+app.post("/api/images/:id/like", async (req, res) => {
+  try {
+    const { id } = req.params;
+    console.log('image id: ',id)
+    const image = await GeneratedImage.findByIdAndUpdate(id, { $inc: { likes: 1 } }, { new: true });
+    if (!image) {
+      return res.status(404).json({ message: "Image not found" });
+    }
+    res.json(image);
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
+  }
+});
+
+app.post("/api/images/:id/view", async (req, res) => {
+  try {
+    const { id } = req.params;
+    console.log('image id: ',id)
+    const image = await GeneratedImage.findByIdAndUpdate(id, { $inc: { views: 1 } }, { new: true });
+    if (!image) {
+      return res.status(404).json({ message: "Image not found" });
+    }
+    res.json(image);
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
+  }
+});
+
+
 app.use(express.static(path.join(__dirname, 'my-app/build')));
 
 app.get('*', (req, res) => {
@@ -1501,11 +1673,11 @@ app.get('*', (req, res) => {
 
 // ... (existing code)
 
-// app.listen(8000, () => {
-//   console.log("Server starting at 8000");
-// });
-
-app.listen(8000, '92.240.254.103', () => {
-  console.log("Server starting at 92.240.254.103 on port 8000");
+app.listen(8000, () => {
+  console.log("Server starting at 8000");
 });
+
+// app.listen(8000, '92.240.254.103', () => {
+//   console.log("Server starting at 92.240.254.103 on port 8000");
+// });
 

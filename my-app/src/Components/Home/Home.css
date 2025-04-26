@@ -44,7 +44,7 @@ font-family: Arial, Helvetica, sans-serif;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    padding: 250px;
+    /* padding: 250px; */
     /* padding: ; */
     /* max-width: ; */
     /* height: 100vh; */
@@ -64,9 +64,11 @@ background: url('../../assets/images/Hero BG.png')  lightgray 50% / cover no-rep
 }
 .virLogo{
   max-width: 606.664px;
-height: 70px;
+max-height: 70px;
+width: 100%;
 flex-shrink: 0;
 aspect-ratio: 606.66/70.00;
+/* padding: 50px; */
 }
 .content-herosection p {
   /* font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; */
@@ -92,10 +94,10 @@ color: #959595; */
   color: #CCC;
   text-align: center;
   font-family: Poppins;
-  font-size: 50px;
+  font-size: 30px;
   font-style: normal;
   font-weight: 300;
-  line-height: 50px; /* 100% */
+  line-height: 50px; /* 166.667% */
   text-transform: capitalize;
   text-align: center;
 
@@ -104,10 +106,10 @@ color: #959595; */
   .secheading{
     color: #2E8B57;
 font-family: Poppins;
-font-size: 80px;
+font-size: 50px;
 font-style: normal;
 font-weight: 700;
-line-height: 80px;
+line-height: 50px;
 text-transform: uppercase;
 text-align: center;
     
@@ -162,13 +164,16 @@ text-align: center;
   } */
 
 .firstheading{
-font-size: 30px;
+  font-size: 30px;
 
+  line-height: 30px; 
 }
 .secheading{
-  font-size: 40px;
-  
-  }
+  font-size: 50px;
+
+  line-height: 50px; 
+   } 
+
   .thirdheading{
     font-size: 18px;
     
@@ -755,7 +760,7 @@ button[type="submit"]:hover {
 .scroll-trigger {
   opacity: 0;
   transform: translateY(30px);
-  transition: opacity 1s ease, transform 1s ease;
+  transition: opacity 0.7s ease, transform 0.7s ease;
 }
 
 .scroll-trigger.fade-in {
@@ -767,7 +772,22 @@ button[type="submit"]:hover {
   opacity: 0;
   transform: translateY(30px);
 }
-
+/* Disable scroll animation on small screens */
+@media screen and (max-width: 1200px) {
+  .scroll-trigger,
+  .scroll-trigger.fade-in,
+  .scroll-trigger.fade-out {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+  .spacer{
+height: 500px
+  }
+}
+.spacer{
+  height: 800px
+    }
 /* Ensure second row of AI tools fades to black */
 .ai-tools-container {
   position: relative;
@@ -787,3 +807,5 @@ button[type="submit"]:hover {
 #pricing-section{
   /* max-width: 100%; */
 }
+
+

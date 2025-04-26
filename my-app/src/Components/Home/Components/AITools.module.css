@@ -85,8 +85,8 @@ text-align: center;
   .aiToolCard {
     position: relative;
     /* border-radius: 16px; */
-    width: 320px;
-height: 400px;
+    width: 315px;
+height: 395px;
 flex-shrink: 0;
 border-radius: 20px;
 background: linear-gradient(180deg, rgba(0, 0, 0, 0.00) 0%, #000 100%);
@@ -140,7 +140,8 @@ background: linear-gradient(180deg, rgba(0, 0, 0, 0.00) 0%, #000 100%);
     /* background: rgba(0, 0, 0, 0.7); */
     border-radius: 12px;
 
-
+height: 150px;
+overflow: visible;
     color: #FFF;
 /* text-align: center; */
 font-family: Poppins;

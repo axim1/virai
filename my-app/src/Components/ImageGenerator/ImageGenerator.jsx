@@ -15,13 +15,15 @@ import genIcon from '../../assets/vector_icons/AI Replacement-01.svg';
 import icon1 from '../../assets/vector_icons/Text to image generation-01.svg';
 import icon2 from '../../assets/vector_icons/Image to sketch-01.svg';
 import icon3 from '../../assets/vector_icons/Sketch to image-01.svg';
-import icon4 from '../../assets/vector_icons/Image enhancement-01.svg';
-import icon5 from '../../assets/vector_icons/Video generation-01.svg';
-import icon6 from '../../assets/vector_icons/3D object generation-01.svg';
 
-import icon7 from '../../assets/vector_icons/pricing-01.svg';
-import icon8 from '../../assets/vector_icons/faq-01.svg';
-import icon9 from '../../assets/vector_icons/support-01.svg';
+import icon4 from '../../assets/vector_icons/Image expansion-01.svg'
+import icon5 from '../../assets/vector_icons/Image enhancement-01.svg';
+import icon6 from '../../assets/vector_icons/Video generation-01.svg';
+import icon7 from '../../assets/vector_icons/3D object generation-01.svg';
+
+import icon8 from '../../assets/vector_icons/pricing-01.svg';
+import icon9 from '../../assets/vector_icons/faq-01.svg';
+import icon10 from '../../assets/vector_icons/support-01.svg';
 
 import tticon1 from '../../assets/vector_icons/crop-01 1.svg'
 import tticon2 from '../../assets/vector_icons/edit-01 1.svg'
@@ -426,8 +428,10 @@ img.src = imageObjectUrl; // just take first if array
       ) // Capitalize the first letter of the first word
       .join(' '); // Join the words back with spaces
   }
-  const icons = [icon1, icon2, icon3, icon4, icon5, icon6];
-  const iconsbottom = [icon7, icon8, icon9];
+  const isMobile = window.innerWidth <= 1024;
+
+  const icons = isMobile? [icon1, icon2, icon3, icon4, icon5, icon6,icon7,icon8, icon9,icon10]:[icon1, icon2, icon3, icon4, icon5, icon6,icon7];
+  const iconsbottom = isMobile?[]:[ icon8, icon9,icon10];
   const tticons = [tticon1, tticon2, tticon3, tticon4, tticon5, tticon6];
 
   const apiTypes = [
@@ -436,7 +440,8 @@ img.src = imageObjectUrl; // just take first if array
     "sketch-to-image",
     "image-enhancement",
     "video-generation",
-    "object-creation",
+    "inpainting",
+    "object-creation"
   ];
 
 
@@ -896,6 +901,7 @@ img.src = imageObjectUrl; // just take first if array
                         alignItems: "center",
                         justifyContent: "center",
                         width: "100%",
+                        borderLeft:'1px solid #000'
                       }}
                     >
                       <img

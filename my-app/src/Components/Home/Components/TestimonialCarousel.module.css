@@ -1,14 +1,22 @@
 /* Ensure the container takes full width */
 .carouselContainer {
   width: 100%;
+  max-width: 1306px;
   position: relative;
   overflow: hidden;
-  /* padding: 20px 0; */
+  /* display: flex;
+  align-items: center;
+  flex-direction: column; */
+  /* padding: 32px ; */
 }
 
 /* Make sure Swiper takes full width */
 .swiper {
+  overflow: hidden !important;
+  /* padding: 32px ; */
+
   width: 100% !important;
+  max-width: 1306px !important;
 }
 
 /* Ensure each slide is properly aligned */
@@ -29,8 +37,8 @@
   /* box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); */
   text-align: left;
   width: 100%; /* Takes full width of the slide */
-  max-width: 280px; /* Controls max card width */
-  min-width: 336px; /* Ensures it doesn’t shrink too much */
+  max-width: 700px;
+  /* min-width: 250px;  */
   /* width: 336px; */
 height: 160px;
 /* flex-shrink: 0; */
@@ -128,13 +136,13 @@ margin-bottom: 45px;
 /* Responsive Breakpoints */
 @media (max-width: 1024px) {
   .testimonialCard {
-    max-width: 90%;
+    /* max-width: 90%; */
   }
 }
 
 @media (max-width: 768px) {
   .testimonialCard {
-    max-width: 100%;
+    /* max-width: 100%; */
   }
 }
 
@@ -142,6 +150,7 @@ margin-bottom: 45px;
 /* Prevent Swiper from clipping the icon */
 .swiper {
   overflow: visible !important;
+  max-width: 1370px;
 }
 
 .swiper-slide {
@@ -158,7 +167,7 @@ margin-bottom: 45px;
   justify-content: center;
   align-items: center;
   margin-top: 20px;
-  gap: 8px; /* Space between tiles */
+  gap: 15px; /* Space between tiles */
 }
 
 /* Custom Pagination Bullets (White Tiles) */

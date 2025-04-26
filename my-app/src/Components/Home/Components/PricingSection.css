@@ -1,7 +1,9 @@
 .pricing-section {
   padding: 32px;
   text-align: center;
-  max-width: 100%;
+
+  width: 100%;
+  max-width:1370px;
 }
 
 .p1 {
@@ -51,6 +53,7 @@ margin-left: 5px;
   overflow-x: auto;
   scroll-behavior: smooth;
   scrollbar-width: none;
+  align-items:flex-end;
 }
 
 .pricing-cards::-webkit-scrollbar {
@@ -58,8 +61,8 @@ margin-left: 5px;
 }
 
 .pricing-card {
-  width: 320px;
-  height: 435px;
+  width: 300px;
+  /* height: 425px; */
   flex-shrink: 0;
     padding: 28px;
   border-radius: 22px;
@@ -131,12 +134,14 @@ text-transform: capitalize;
 border-radius: 100px;
 border: 2px solid #CCC;
 background: rgba(217, 217, 217, 0.00);
-width: 400px;
-height: 70px;
+max-width: 400px;
+width: 100%;
+min-height: 70px;
 flex-shrink: 0;
 }
 .card-button {
-  width: 280px;
+  max-width: 280px;
+  width: 100%;
   height: 40px;
   border-radius: 100px;
   border: 2px solid #2E8B57;
@@ -233,3 +238,40 @@ aspect-ratio: 1/1;
   transform: rotate(180deg);
 
 } 
+
+
+.highlighted-card {
+  /* background: linear-gradient(180deg, rgba(255, 221, 0, 0.1) 0%, #FFDD00 100%); */
+  color: black;
+height: 500px;
+display: flex;
+flex-direction: column;
+justify-content: space-between;
+padding: 28px;
+flex-shrink: 0;
+background: linear-gradient(180deg, rgba(229, 178, 25, 0.6) 100%, rgba(229, 178, 25, 0.6) 100%),
+url('../../../assets/images/texture.png') lightgray 50% / cover no-repeat;
+
+flex-shrink: 0;
+  /* border: 2px solid #FFD700; */
+  /* box-shadow: 0 0 20px rgba(255, 221, 0, 0.5); */
+}
+
+.highlighted-card .card-title,
+.highlighted-card .price-currency,
+.highlighted-card .price-amount,
+.highlighted-card .price-duration ,
+.highlighted-card .card-features li{
+  color: black;
+}
+
+.highlighted-card .card-button {
+  /* border: 2px solid black; */
+  color: #A77E01;
+  background-color: #000;
+  border:none
+}
+
+.highlighted-card .arrow {
+  stroke: black;
+}
