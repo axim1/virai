@@ -72,11 +72,14 @@ const userSchema = new Schema({
     unique: true,
     sparse: true,
   },
-  authProvider: {
-    type: String,
-    enum: ['local', 'google'],
-    default: 'local',
-  }
+  // authProvider: {
+  //   type: String,
+  //   enum: ['local', 'google'],
+  //   default: 'local',
+  // },
+  appleId: { type: String, unique: true, sparse: true },
+authProvider: { type: String },
+
   
 });
 

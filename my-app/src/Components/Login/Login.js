@@ -114,6 +114,17 @@ const Login = ({ setLoggedIn, setUserState }) => {
   Sign in with Google
 </button>
 
+
+<button
+  className="btn btn-dark"
+  style={{ margin: '20px' }}
+  onClick={() => {
+    window.location.href = `${process.env.REACT_APP_API_URL}auth/apple`;
+  }}
+>
+  Sign in with Apple
+</button>
+
     </div>
     </>
 

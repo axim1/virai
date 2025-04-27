@@ -8,9 +8,12 @@ const multer = require('multer');
 const upload = multer({ dest: 'uploads/' });
 const app = express();
 const FormData = require('form-data');
-require('dotenv').config();
-const callbackUrl = process.env.CALLBACK_URL;
 const { v4: uuidv4 } = require('uuid'); // Import UUID
+const { OpenAI } = require('openai');
+
+require('dotenv').config();
+
+const callbackUrl = process.env.CALLBACK_URL;
 // const multer = require("multer");
 // const path = require("path");
 
@@ -54,7 +57,77 @@ mongoose.connect(uri, clientOptions)
   
 // const upload = multer({ storage });
 
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
+app.post('/api/chat', async (req, res) => {
+  const { messages } = req.body;
+  console.log('user message :: ', messages)
+  try {
+
+
+    faqData = [
+      {
+        question: 'What is AI-powered text-to-image generation?',
+        answer: 'AI-powered text-to-image generation is a process that uses advanced algorithms and machine learning models to create visual images based on descriptive text provided by the user.'
+      },
+      {
+        question: 'How does your service work?',
+        answer: 'Our service utilizes AI models that analyze your text description and generate images that match your description. The process involves natural language processing and image generation using neural networks.'
+      },
+      {
+        question: 'What kind of texts can I use to generate images?',
+        answer: 'You can use any descriptive text that clearly outlines the scene, object, or concept you want to visualize. The more detailed and specific the description, the more accurate the resulting image will be.'
+      },
+      {
+        question: 'How long does it take to generate an image?',
+        answer: 'The time to generate an image can vary depending on the complexity of the description and the current load on our system. It typically takes a few minutes.'
+      },
+      {
+        question: 'Are the generated images unique?',
+        answer: 'Yes, each generated image is unique and created based on your specific text description. This ensures you receive an original image tailored to your requirements.'
+      },
+      {
+        question: 'Can I use the generated images for commercial purposes?',
+        answer: 'This depends on the licensing terms of our service. Please read our terms of use and licensing agreements for more information on commercial use.'
+      },
+      {
+        question: 'What image formats are available?',
+        answer: 'Images are generated in PNG or JPEG format, according to your preference.'
+      },
+      {
+        question: 'What if I am not satisfied with the generated image?',
+        answer: 'If you are not satisfied with the result, you can enter a new text description and generate a new image. You can also contact our customer support for assistance.'
+      },
+      {
+        question: 'How can I contact support?',
+        answer: 'You can reach our customer support via email on support@virtuartai.com.'
+      },
+      {
+        question: 'Are my text descriptions and generated images stored?',
+        answer: 'Your text descriptions and generated images are stored in accordance with our privacy policy. You can be assured that your data is securely protected.'
+      },
+      {
+        question: 'Can you generate images for any type of description?',
+        answer: 'Our AI can generate images for a wide range of descriptions, but it may have limitations with very abstract or vague descriptions. We recommend providing as specific and detailed descriptions as possible.'
+      },
+      {
+        question: 'How can I start using your service?',
+        answer: 'To get started, simply register on our website, enter your text description, and click the button to generate an image. It\'s easy and quick!'
+      }]
+    const prompt='context:\n\n' + faqData+  '\n\nbased on the following conversation, generate a response as if you are the assistant. \n\n' + messages.map(msg => `${msg.role}: ${msg.content}`).join('\n');
+    const userMessage = messages[messages.length - 1].content;
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-3.5-turbo',
+      messages: [{ role: 'assistant', content: userMessage }]
+    });
+    
+
+    res.json({ reply: completion.choices[0].message.content });
+  } catch (error) {
+    console.error('OpenAI Error:', error.response?.data || error.message);
+    res.status(500).json({ error: 'Something went wrong' });
+  }
+});
 
 
 
@@ -67,6 +140,34 @@ app.get("/subscriptions", async (req, res) => {
     res.status(500).send({ message: "Internal server error" });
   }
 });
+
+
+
+
+
+
+
+app.get('/auth/apple', passport.authenticate('apple'));
+
+app.post('/auth/apple/callback',
+  passport.authenticate('apple', { failureRedirect: '/login', session: true }),
+  (req, res) => {
+    const user = req.user;
+    const frontendUrl = `${process.env.FRONTEND_URL}home`;
+    const userData = {
+      _id: user._id,
+      email: user.email,
+      fname: user.fname,
+      lname: user.lname,
+      no_of_images_left: user.no_of_images_left,
+      subscribed_monthly: user.subscribed_monthly,
+      subscribed_yearly: user.subscribed_yearly,
+    };
+    const query = new URLSearchParams(userData).toString();
+    res.redirect(`${frontendUrl}?${query}`);
+  }
+);
+
 // Route to initiate Google sign-in
 app.get('/auth/google',
   passport.authenticate('google', { scope: ['profile', 'email'] })

@@ -10,7 +10,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { useEffect, useState } from "react";
 import Footer from "./Components/Home/Components/Footer";
 import ImageGallery from "./Components/ImageGallery/ImageGallery";
-
+import Chatgpt from './Components/Chatgpt/Chatgpt'
 function App() {
   // const location = useLocation();
 
@@ -80,6 +80,7 @@ function App() {
           {/* Image Generator Route */}
           <Route path="/gen" element={<ImageGenerator />} />
           <Route path="/gallery" element={<ImageGallery />} />
+          <Route path="/chat-ai" element={<Chatgpt />} />
 
           {/* Terms of Service Route */}
           <Route path="/terms-of-service" element={<TermsOfService />} />

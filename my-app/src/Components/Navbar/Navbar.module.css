@@ -43,7 +43,7 @@
   justify-content: center;
   align-items: center;
   gap: 40px;
-  max-width: 562px;
+  max-width: 662px;
 }
 
 /* Navbar Items */
@@ -78,7 +78,7 @@
 }
 
 /* Responsive Design */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .navbarLinks {
     display: none;
     flex-direction: column;

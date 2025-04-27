@@ -110,6 +110,8 @@ const Navbar = ({ loggedIn,  setLoggedIn = () => {}, onHomeClick,activeLink,setA
         >
           Gallery
         </RouterLink>
+
+
         {/* <ScrollLink to="gallery-section" smooth={true} duration={50} className={styles.navItem} offset={-150} onSetActive={() => setActiveLink('gallery')}>
           Gallery
         </ScrollLink> */}
@@ -136,7 +138,13 @@ const Navbar = ({ loggedIn,  setLoggedIn = () => {}, onHomeClick,activeLink,setA
 >
   FAQ
 </ScrollLink>
-
+<RouterLink
+          to="/chat-ai"
+          className={`${styles.navItem} ${activeLink === 'chat-ai' ? styles.active : ''}`}
+          onClick={() => setActiveLink('chat-ai')}
+        >
+          Chat AI
+        </RouterLink>
       </div>
 
       {/* User & Login/Signup Section */}
