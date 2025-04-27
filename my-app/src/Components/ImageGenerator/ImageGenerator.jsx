@@ -71,6 +71,8 @@ function ImageGenerator({ onGenerateImage }) {
   const [promptText, setPromptText] = useState('');
   const [negativePromptText, setNegativePromptText] = useState('');
   const [styleType, setStyleType] = useState('default');
+  const [isRetrieving, setIsRetrieving] = useState(false);
+  const retrieveTimeoutRef = useRef(null); // <--- ADD THIS
   const [aspectRatio, setAspectRatio] = useState('16:9');
   const [scale, setScale] = useState(7);
   const [uploadedImage, setUploadedImage] = useState(null);
@@ -148,6 +150,12 @@ function ImageGenerator({ onGenerateImage }) {
 
   const handleGenerateClick = async () => {
     setIsLoading(true);
+    setIsRetrieving(false);
+
+// Start 40 seconds timer
+retrieveTimeoutRef.current = setTimeout(() => {
+  setIsRetrieving(true);
+}, 40000);
     if (!userId) {
       navigate('/login');
       return;
@@ -177,6 +185,8 @@ function ImageGenerator({ onGenerateImage }) {
           formData.append('image', maskedImageBlob, 'masked_image.png');
         } catch (error) {
           console.error('Error getting masked image:', error);
+          clearTimeout(retrieveTimeoutRef.current);
+setIsRetrieving(false);
           setIsLoading(false);
           return;
         }
@@ -202,7 +212,6 @@ function ImageGenerator({ onGenerateImage }) {
           headers: { 'Content-Type': 'multipart/form-data' },
           responseType: 'json'
         });
-        
         const imageUrls = Array.isArray(response.data.imageUrls)
           ? response.data.imageUrls
           : [response.data.imageUrls];
@@ -214,6 +223,8 @@ function ImageGenerator({ onGenerateImage }) {
       console.error('Error generating image:', error);
     }
     if (apiType != 'video-generation' && apiType != 'object-creation'){
+      clearTimeout(retrieveTimeoutRef.current);
+setIsRetrieving(false);
     setIsLoading(false);
     }
    
@@ -313,6 +324,8 @@ img.src = imageObjectUrl; // just take first if array
       const pollInterval = setInterval(async () => {
         if (Date.now() > endTime) {
           clearInterval(pollInterval);
+          clearTimeout(retrieveTimeoutRef.current);
+setIsRetrieving(false);
           setIsLoading(false);
           alert('Video generation timed out');
           return;
@@ -326,6 +339,8 @@ img.src = imageObjectUrl; // just take first if array
           clearInterval(pollInterval);
           const downloadUrl = statusRes.data.downloadUrl;
           setGeneratedVideoUrl(downloadUrl);
+          clearTimeout(retrieveTimeoutRef.current);
+setIsRetrieving(false);
           setIsLoading(false);
         }
       }, 3000);
@@ -345,6 +360,8 @@ img.src = imageObjectUrl; // just take first if array
       const pollInterval = setInterval(async () => {
         if (Date.now() > endTime) {
           clearInterval(pollInterval);
+          clearTimeout(retrieveTimeoutRef.current);
+setIsRetrieving(false);
           setIsLoading(false);
           alert('GLB generation timed out');
           return;
@@ -359,6 +376,8 @@ img.src = imageObjectUrl; // just take first if array
           const blob = base64ToBlob(glb_data, 'model/gltf-binary');
           const url = URL.createObjectURL(blob);
           setGeneratedModelUrl(url);
+          clearTimeout(retrieveTimeoutRef.current);
+setIsRetrieving(false);
           setIsLoading(false);
         }
       }, 3000);
@@ -862,7 +881,8 @@ img.src = imageObjectUrl; // just take first if array
             >
               <img src={genIcon} alt="" className={styles.genIcon} />
 
-              {isLoading ? 'Generating...' : 'Generate'}
+              {isLoading ? (isRetrieving ? 'Retrieving...' : 'Generating...') : 'Generate'}
+
             </button>
           </div>
         </div>
