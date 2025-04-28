@@ -118,7 +118,7 @@ app.post('/api/chat', async (req, res) => {
     const userMessage = messages[messages.length - 1].content;
     const completion = await openai.chat.completions.create({
       model: 'gpt-3.5-turbo',
-      messages: [{ role: 'assistant', content: userMessage }]
+      messages: [{ role: 'assistant', content: prompt }]
     });
     
 
