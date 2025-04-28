@@ -318,7 +318,7 @@ function ImageGenerator({ onGenerateImage }) {
             {apiType == 'sketch-to-image' &&
               <div className={styles.inputRow}>
                 <div className={styles.inputColumn}>
-                  <p className={styles.label_l}>Upload Image</p>
+                  <p className={styles.label_l} style={{ marginBottom: '10px' }}>Upload Image</p>
                   <label className={styles.uploadLabel}>
                     <input
                       type="file"
@@ -339,9 +339,7 @@ function ImageGenerator({ onGenerateImage }) {
 
                 <div className={styles.promptLabel}>            
                     <p className={styles.label_l} style={{ margin: '0px' }}>Describe Your Image</p>
-                  {/* <button className={styles.magicButton}>
-                    Magic Prompt
-                  </button> */}
+  
                     <img 
     src={resetIcon}
     alt="Rest Button"
@@ -403,6 +401,8 @@ function ImageGenerator({ onGenerateImage }) {
 
             {/* image number  */}
             {/* <div className={styles.inputRow}> */}
+            <div className={styles.inputColumn}>
+
             <div className={styles.numButtonCont}>
 
               <p className={styles.label} >Images Number</p>
@@ -418,7 +418,8 @@ function ImageGenerator({ onGenerateImage }) {
                   </button>
                 ))}
               </div>
-            </div>
+              </div>
+              </div>
 
 
 
