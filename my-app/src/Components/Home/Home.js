@@ -25,7 +25,7 @@ function Home({ triggerShrink, scrollToSection }) {
 
   const scrollStage1End = 200; // Logo fades to 50%
 const scrollStage2End = 400; // Logo fades out, motto moves in & scales
-const scrollStage3End = 800; // Motto fades out, background zooms, tools appear
+const scrollStage3End = 600; // Motto fades out, background zooms, tools appear
 
   const logoFade = scrollY < 200 ? 1 - scrollY / 400 : 0.5; // First scroll
   const logoMoveUp = scrollY >= 200 && scrollY < 500 ? (scrollY - 200) / 300 : 0;
@@ -108,7 +108,7 @@ const isPinned = scrollY < scrollStage3End;
         setTimeout(() => {
           section.scrollIntoView({ behavior: 'smooth' });
           navigate(location.pathname, { replace: true, state: {} }); // reset state
-        }, 300);
+        }, 500);
       }
     }
   }, [location, navigate]);
@@ -129,7 +129,7 @@ const isPinned = scrollY < scrollStage3End;
       };
 
       // Delay to let layout & animations settle
-      setTimeout(tryScroll, 600);
+      setTimeout(tryScroll, 900);
     }
   }, [scrollToSection, navigate, location]);
   useEffect(() => {
@@ -138,7 +138,7 @@ const isPinned = scrollY < scrollStage3End;
         setToolsVisible(entry.isIntersecting);
         if (entry.isIntersecting) setActiveSection('ai-tools');
       },
-      { threshold: 0.5 }
+      { threshold: 0.3 }
     );
   
     const toolsSection = document.getElementById('tools-section');
@@ -167,7 +167,7 @@ const isPinned = scrollY < scrollStage3End;
       ([entry]) => {
         setPricingVisible(entry.isIntersecting);
       },
-      { threshold: 0.5 }
+      { threshold: 0.3 }
     );
 
     const pricingSection = document.getElementById('pricing-section');

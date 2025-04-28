@@ -786,7 +786,7 @@ height: 500px
   }
 }
 .spacer{
-  height: 800px
+  height: 600px
     }
 /* Ensure second row of AI tools fades to black */
 .ai-tools-container {
@@ -809,3 +809,10 @@ height: 500px
 }
 
 
+#pricing-section,
+#faq-section {
+  scroll-margin-top: 100px; /* Adjust this based on your navbar height */
+}
+#tools-section{
+  padding-top:100px ;
+}
