@@ -79,6 +79,8 @@ function ImageGenerator({ onGenerateImage }) {
   const [imageWidth, setImageWidth] = useState(512);
   const [imageHeight, setImageHeight] = useState(512);
   const [strength, setStrength] = useState(0.75);
+  const [ModOrRep,setModOrRep] = useState('replace') // state for image enhancement to check if image is to be modified or replaced
+  
 
   useEffect(() => {
     // Automatically update size when aspect ratio changes
@@ -174,23 +176,41 @@ retrieveTimeoutRef.current = setTimeout(() => {
       formData.append('width', imageWidth);
       formData.append('height', imageHeight);
       formData.append('strength', strength);
+      formData.append('denoise',ModOrRep == 'Replace'? 1:0.8)
   
       // Handle image enhancement with masked image
       if (apiType === 'image-enhancement' && canvasRef.current) {
         try {
-          // Get the masked image blob from the canvas component
           const maskedImageBlob = await canvasRef.current.getMaskedImageBlob();
-          
-          // Add the masked image to formData with the correct field name
-          formData.append('image', maskedImageBlob, 'masked_image.png');
+      
+          // Append both masked and original image
+          formData.append('masked_image', maskedImageBlob, 'masked_image.png');
+      
+          if (uploadedImage instanceof File) {
+            formData.append('original_image', uploadedImage); // raw File upload
+          } else {
+            // uploadedImage is an <img> element (from enhancement response), convert to Blob
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = uploadedImage.width;
+            tempCanvas.height = uploadedImage.height;
+            const ctx = tempCanvas.getContext('2d');
+            ctx.drawImage(uploadedImage, 0, 0);
+      
+            const blob = await new Promise((resolve) => {
+              tempCanvas.toBlob((b) => resolve(b), 'image/png');
+            });
+      
+            formData.append('original_image', blob, 'original_image.png');
+          }
         } catch (error) {
           console.error('Error getting masked image:', error);
           clearTimeout(retrieveTimeoutRef.current);
-setIsRetrieving(false);
+          setIsRetrieving(false);
           setIsLoading(false);
           return;
         }
       }
+      
   
       // Handle sketch-to-image or regular image upload
       if (apiType === 'sketch-to-image' && uploadedImage) {
@@ -675,6 +695,20 @@ setIsRetrieving(false);
 
             <br />
 
+            <div style={{ display: 'flex', gap: '10px' }}>
+  <button
+    className={`${styles.numButton} ${ModOrRep === 'Replace' ? styles.activeButton : ''}`}
+    onClick={() => setModOrRep('Replace')}
+  >
+    Replace    
+  </button>
+  <button
+    className={`${styles.numButton} ${ModOrRep === 'Modify' ? styles.activeButton : ''}`}
+    onClick={() => setModOrRep('Modify')}
+  >
+    Modify    
+  </button>
+</div>
 
 
 

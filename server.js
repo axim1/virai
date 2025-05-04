@@ -367,13 +367,13 @@ app.get("/confirm_payment", async (req, res) => {
 
 let imageResults;
 let respData;
-// https://dflwdea3i2wbkf-8000.proxy.runpod.net/docs
+// https://86oq9t6k5n8qfz-8000.proxy.runpod.net/docs
 app.post('/image-callback', async (req, res) => {
   try {
     console.log("callback called")
     const imageUuid = req.body.uuid;
     // console.log("uuid :", imageUuid)
-    const response = await axios.get(`https://dflwdea3i2wbkf-8000.proxy.runpod.net/getimage/${imageUuid}`, {
+    const response = await axios.get(`https://86oq9t6k5n8qfz-8000.proxy.runpod.net/getimage/${imageUuid}`, {
       params: {
         delete: true,
         type: 'PNG',
@@ -471,7 +471,7 @@ app.get('/check-image-status/:userId/:uuid', async (req, res) => {
 //   let imageUuid
 
 //   try {
-//    const objectCreationResponse = await axios.post('https://dflwdea3i2wbkf-8000.proxy.runpod.net/3d_creation', form, {
+//    const objectCreationResponse = await axios.post('https://86oq9t6k5n8qfz-8000.proxy.runpod.net/3d_creation', form, {
 //       headers: {
 //         ...form.getHeaders(),
 //       },
@@ -506,7 +506,7 @@ app.get('/check-image-status/:userId/:uuid', async (req, res) => {
 //     }
 
 //     try {
-//       const response = await axios.get(`https://dflwdea3i2wbkf-8000.proxy.runpod.net/getglb/${imageUuid}`, {
+//       const response = await axios.get(`https://86oq9t6k5n8qfz-8000.proxy.runpod.net/getglb/${imageUuid}`, {
 //         params: {
 //           delete: true, // or false if you want to keep it
 //           base64_c: false
@@ -554,7 +554,7 @@ app.post('/object-creation', upload.single('image'), async (req, res) => {
   form.append('callback_url', '');
 
   try {
-    const creationRes = await axios.post('https://dflwdea3i2wbkf-8000.proxy.runpod.net/3d_creation', form, {
+    const creationRes = await axios.post('https://86oq9t6k5n8qfz-8000.proxy.runpod.net/3d_creation', form, {
       headers: form.getHeaders(),
     });
 
@@ -577,7 +577,7 @@ app.get('/check-object/:uuid', async (req, res) => {
 
 
   try {
-    const response = await axios.get(`https://dflwdea3i2wbkf-8000.proxy.runpod.net/getglb/${uuid}`, {
+    const response = await axios.get(`https://86oq9t6k5n8qfz-8000.proxy.runpod.net/getglb/${uuid}`, {
       params: { delete: false, base64_c: true },
       validateStatus: (status) => [200, 202].includes(status),
     });
@@ -661,7 +661,7 @@ app.post('/sketch-to-image', upload.single('sketch_image'), async (req, res) => 
     const callbackUrlImg = `${callbackUrl}/image-callback`; // Replace with your actual callback endpoint URL
     // form.append('callback_url', callbackUrlImg);
     try {
-      sketch2imageResponse = await axios.post('https://dflwdea3i2wbkf-8000.proxy.runpod.net/sketch2image', form, {
+      sketch2imageResponse = await axios.post('https://86oq9t6k5n8qfz-8000.proxy.runpod.net/sketch2image', form, {
         headers: {
           ...form.getHeaders(),
         },
@@ -696,7 +696,7 @@ app.post('/sketch-to-image', upload.single('sketch_image'), async (req, res) => 
       }
 
       try {
-        const response = await axios.get(`https://dflwdea3i2wbkf-8000.proxy.runpod.net/getimage/${imageUuid}`, {
+        const response = await axios.get(`https://86oq9t6k5n8qfz-8000.proxy.runpod.net/getimage/${imageUuid}`, {
           params: {
             delete: false,
             type: 'PNG',
@@ -863,15 +863,21 @@ app.get('/check-video/:uuid', (req, res) => {
   return res.status(500).send({ status: 'error', message: 'Video generation failed' });
 });
 
-app.post('/image-enhancement', upload.single('image'), async (req, res) => {
+app.post('/image-enhancement', upload.fields([
+  { name: 'masked_image', maxCount: 1 },
+  { name: 'original_image', maxCount: 1 }
+]), async (req, res) => {
   console.log("inpainting got a request");
   
   try {
-    const maskImagePath = req.file.path;
+    const maskImagePath = req.files?.masked_image?.[0]?.path;
+const originalImagePath = req.files?.original_image?.[0]?.path;
 
-    if (!req.file) {
-      return res.status(400).send({ message: 'No mask image provided' });
-    }
+
+if (!maskImagePath || !originalImagePath) {
+  return res.status(400).send({ message: 'Both masked and original images are required.' });
+}
+
 
     // User authentication and limit checking
     const userId = req.body.userId;
@@ -900,17 +906,23 @@ app.post('/image-enhancement', upload.single('image'), async (req, res) => {
 
     // Prepare form data for the API call
     const form = new FormData();
-    form.append('denoise', 1);
+    form.append('denoise', req.body.denoise);
     form.append('prompt', req.body.prompt);
     form.append('revert_extra', '');
     form.append('callback_url', '');
     form.append('mask_image', fs.createReadStream(maskImagePath), {
-      filename: req.file.originalname,
+      filename: req.files.masked_image[0].originalname,
       contentType: 'image/png'
     });
+    
+    form.append('original_image', fs.createReadStream(originalImagePath), {
+      filename: req.files.original_image[0].originalname,
+      contentType: 'image/png'
+    });
+    
 
     // Make request to Python service
-    let inpaintingResponse = await axios.post('https://dflwdea3i2wbkf-8000.proxy.runpod.net/inpainting', form, {
+    let inpaintingResponse = await axios.post('https://86oq9t6k5n8qfz-8000.proxy.runpod.net/inpainting', form, {
       headers: {
         ...form.getHeaders(),
       },
@@ -920,15 +932,15 @@ app.post('/image-enhancement', upload.single('image'), async (req, res) => {
     console.log("image uuid", imageUuid);
 
     // Clean up the uploaded file
-    if (req.file.path) {
-      fs.unlink(req.file.path, (err) => {
-        if (err) {
-          console.error('Failed to delete the uploaded image:', err);
-        } else {
-          console.log(`Uploaded image ${req.file.path} was deleted.`);
-        }
-      });
-    }
+    [maskImagePath, originalImagePath].forEach(path => {
+      if (path) {
+        fs.unlink(path, err => {
+          if (err) console.error(`Failed to delete file ${path}:`, err);
+          else console.log(`Deleted file ${path}`);
+        });
+      }
+    });
+    
 
     // Return the UUID for polling
     res.status(202).send({ 
@@ -950,7 +962,7 @@ app.get('/check-image/:uuid', async (req, res) => {
   const imageUuid = req.params.uuid;
   
   try {
-    const response = await axios.get(`https://dflwdea3i2wbkf-8000.proxy.runpod.net/getimage/${imageUuid}`, {
+    const response = await axios.get(`https://86oq9t6k5n8qfz-8000.proxy.runpod.net/getimage/${imageUuid}`, {
       params: {
         delete: false,
         type: 'PNG',
@@ -1066,7 +1078,7 @@ app.post('/text-to-image',upload.none(), async (req, res) => {
       form.append('scheduler', 'Default');
     
       try {
-        const sketch2imageResponse = await axios.post('https://dflwdea3i2wbkf-8000.proxy.runpod.net/text2image', form, {
+        const sketch2imageResponse = await axios.post('https://86oq9t6k5n8qfz-8000.proxy.runpod.net/text2image', form, {
           headers: form.getHeaders(),
         });
     
@@ -1087,7 +1099,7 @@ app.post('/text-to-image',upload.none(), async (req, res) => {
 
   while (Date.now() < endTime) {
     try {
-      const response = await axios.get(`https://dflwdea3i2wbkf-8000.proxy.runpod.net/getimage/${uuid}`, {
+      const response = await axios.get(`https://86oq9t6k5n8qfz-8000.proxy.runpod.net/getimage/${uuid}`, {
         params: {
           delete: true,
           type: 'PNG',
@@ -1131,7 +1143,7 @@ try {
 
 
     // setTimeout(async () => {
-    //   const response = await axios.get(`https://dflwdea3i2wbkf-8000.proxy.runpod.net/getimage/${imageUuid}`, {
+    //   const response = await axios.get(`https://86oq9t6k5n8qfz-8000.proxy.runpod.net/getimage/${imageUuid}`, {
     //     params: {
     //       delete: true,
     //       type: 'PNG',
@@ -1178,7 +1190,7 @@ app.post('/text-callback', async (req, res) => {
     console.log("text callback called")
     const textUuid = req.body.text_uuid;
     console.log("uuid :",textUuid )
-    const response = await axios.get(`https://dflwdea3i2wbkf-8000.proxy.runpod.net/gettext/${textUuid}`, {
+    const response = await axios.get(`https://86oq9t6k5n8qfz-8000.proxy.runpod.net/gettext/${textUuid}`, {
       headers: {
         'accept': 'application/json'
       }});
@@ -1248,7 +1260,7 @@ app.post('/prompt-enhancer', upload.none(), async (req, res) => {
     form.append('callback_url', callbackUrltext);
 
     // First API call to generate the image 
-    const response = await axios.post('https://dflwdea3i2wbkf-8000.proxy.runpod.net/promptenhancer', form, {
+    const response = await axios.post('https://86oq9t6k5n8qfz-8000.proxy.runpod.net/promptenhancer', form, {
       headers: {
         ...form.getHeaders(),
       },
@@ -1285,7 +1297,7 @@ app.post('/prompt-enhancer', upload.none(), async (req, res) => {
 // await new Promise(resolve => setTimeout(resolve, delayInSeconds * 1000));
 
 // // Second API call to retrieve the generated image using the UUID
-// const response = await axios.get(`https://dflwdea3i2wbkf-8000.proxy.runpod.net/getimage/${imageUuid}`, {
+// const response = await axios.get(`https://86oq9t6k5n8qfz-8000.proxy.runpod.net/getimage/${imageUuid}`, {
 //   params: {
 //     delete: true,
 //     type: 'PNG',

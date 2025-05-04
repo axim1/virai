@@ -4,6 +4,10 @@ import styles from './ImageGenerator.module.css'
 const CanvasInpainting = (props) => {
   const imageCanvasRef = useRef(null);
   const maskCanvasRef = useRef(null);
+  const [targetAspectRatio, setTargetAspectRatio] = useState(null); // e.g., 1 (1:1), 4/3, 16/9
+  const previewCanvasRef = useRef(null);
+  const [drawMode, setDrawMode] = useState('brush'); // 'brush', 'circle', 'rectangle'
+  const [shapeStart, setShapeStart] = useState(null); // For shape drawing
   const [isDrawing, setIsDrawing] = useState(false);
   const [lastPos, setLastPos] = useState({ x: 0, y: 0 });
   const [displaySize, setDisplaySize] = useState({ width: 500, height: 500 });
@@ -11,63 +15,175 @@ const CanvasInpainting = (props) => {
   const [brushSize, setBrushSize] = useState(20); // Default brush size
 
   useEffect(() => {
-    if (props.uploadedImage && imageCanvasRef.current && maskCanvasRef.current) {
-      const canvas = imageCanvasRef.current;
-      const maskCanvas = maskCanvasRef.current;
-
-      const maxWidth = 700;
-const maxHeight = 500;
-
-const ratio = props.uploadedImage.width / props.uploadedImage.height;
-
-let displayWidth = maxWidth;
-let displayHeight = displayWidth / ratio;
-
-// If height exceeds bounds, resize by height instead
-if (displayHeight > maxHeight) {
-  displayHeight = maxHeight;
-  displayWidth = displayHeight * ratio;
-}
-
-setDisplaySize({ width: displayWidth, height: displayHeight });
-setScaleFactor(displayWidth / props.uploadedImage.width);
-
-
-      canvas.width = props.uploadedImage.width;
-      canvas.height = props.uploadedImage.height;
-      maskCanvas.width = props.uploadedImage.width;
-      maskCanvas.height = props.uploadedImage.height;
-
-      const ctx = canvas.getContext('2d');
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(props.uploadedImage, 0, 0);
-
-      const maskCtx = maskCanvas.getContext('2d');
-      maskCtx.clearRect(0, 0, maskCanvas.width, maskCanvas.height);
-      maskCtx.globalCompositeOperation = 'source-over';
+    if (!props.uploadedImage || !imageCanvasRef.current || !maskCanvasRef.current || !previewCanvasRef.current) return;
+  
+    const canvas = imageCanvasRef.current;
+    const maskCanvas = maskCanvasRef.current;
+    const previewCanvas = previewCanvasRef.current;
+  
+    const originalWidth = props.uploadedImage.width;
+    const originalHeight = props.uploadedImage.height;
+  
+    // Default to original size
+    let paddedWidth = originalWidth;
+    let paddedHeight = originalHeight;
+  
+    // Apply padding for selected aspect ratio
+    if (targetAspectRatio) {
+      const currentAspect = originalWidth / originalHeight;
+      if (currentAspect > targetAspectRatio) {
+        paddedHeight = originalWidth / targetAspectRatio;
+      } else {
+        paddedWidth = originalHeight * targetAspectRatio;
+      }
     }
-  }, [props.uploadedImage]);
+  
+    // Update display size to fit within max container bounds
+    const maxWidth = 700;
+    const maxHeight = 500;
+    const paddedAspect = paddedWidth / paddedHeight;
+  
+    let displayWidth = maxWidth;
+    let displayHeight = displayWidth / paddedAspect;
+    if (displayHeight > maxHeight) {
+      displayHeight = maxHeight;
+      displayWidth = displayHeight * paddedAspect;
+    }
+  
+    setDisplaySize({ width: displayWidth, height: displayHeight });
+    setScaleFactor(displayWidth / paddedWidth);
+  
+    // Resize canvases
+    canvas.width = paddedWidth;
+    canvas.height = paddedHeight;
+    maskCanvas.width = paddedWidth;
+    maskCanvas.height = paddedHeight;
+    previewCanvas.width = paddedWidth;
+    previewCanvas.height = paddedHeight;
+  
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, paddedWidth, paddedHeight);
+    ctx.fillStyle = 'white';
+    ctx.fillRect(0, 0, paddedWidth, paddedHeight);
+  
+    const offsetX = (paddedWidth - originalWidth) / 2;
+    const offsetY = (paddedHeight - originalHeight) / 2;
+  
+    ctx.drawImage(props.uploadedImage, offsetX, offsetY);
+  
+    // Prepare mask canvas
+    const maskCtx = maskCanvas.getContext('2d');
+    maskCtx.clearRect(0, 0, paddedWidth, paddedHeight);
+    maskCtx.fillStyle = '#ffffff';
+  
+    // Mask top/bottom padding
+    if (offsetY > 0) {
+      maskCtx.fillRect(0, 0, paddedWidth, offsetY);
+      maskCtx.fillRect(0, paddedHeight - offsetY, paddedWidth, offsetY);
+    }
+    // Mask side padding
+    if (offsetX > 0) {
+      maskCtx.fillRect(0, 0, offsetX, paddedHeight);
+      maskCtx.fillRect(paddedWidth - offsetX, 0, offsetX, paddedHeight);
+    }
+  
+    // Clear preview canvas
+    const previewCtx = previewCanvas.getContext('2d');
+    previewCtx.clearRect(0, 0, paddedWidth, paddedHeight);
+  
+  }, [props.uploadedImage, targetAspectRatio]);
+  
 
   const handleMouseDown = (e) => {
-    if (maskCanvasRef.current) {
-      setIsDrawing(true);
-      const { x, y } = getCanvasCoordinates(e);
-      setLastPos({ x, y });
+    const { x, y } = getCanvasCoordinates(e);
+    setIsDrawing(true);
+    setLastPos({ x, y });
+  
+    if (drawMode === 'brush') {
       drawCircle(x, y);
+    } else {
+      setShapeStart({ x, y });
     }
   };
-
   const handleMouseMove = (e) => {
-    if (isDrawing && maskCanvasRef.current) {
-      const { x, y } = getCanvasCoordinates(e);
+    if (!isDrawing) return;
+    const { x, y } = getCanvasCoordinates(e);
+  
+    if (drawMode === 'brush') {
       drawLine(lastPos.x, lastPos.y, x, y);
       setLastPos({ x, y });
+    } else if (shapeStart && previewCanvasRef.current) {
+      const ctx = previewCanvasRef.current.getContext('2d');
+      ctx.clearRect(0, 0, previewCanvasRef.current.width, previewCanvasRef.current.height);
+  
+      if (drawMode === 'rectangle') {
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+        ctx.fillRect(
+          Math.min(shapeStart.x, x),
+          Math.min(shapeStart.y, y),
+          Math.abs(x - shapeStart.x),
+          Math.abs(y - shapeStart.y)
+        );
+      } else if (drawMode === 'circle') {
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+        const centerX = (shapeStart.x + x) / 2;
+        const centerY = (shapeStart.y + y) / 2;
+        const radiusX = Math.abs(x - shapeStart.x) / 2;
+        const radiusY = Math.abs(y - shapeStart.y) / 2;
+        ctx.beginPath();
+        ctx.ellipse(centerX, centerY, radiusX, radiusY, 0, 0, 2 * Math.PI);
+        ctx.fill();
+      }
     }
   };
-
-  const handleMouseUp = () => {
+  
+  
+  const handleMouseUp = (e) => {
+    if (previewCanvasRef.current) {
+      previewCanvasRef.current.getContext('2d').clearRect(0, 0, previewCanvasRef.current.width, previewCanvasRef.current.height);
+    }
+    
+    if (!isDrawing || !shapeStart) {
+      setIsDrawing(false);
+      return;
+    }
+  
+    const { x, y } = getCanvasCoordinates(e);
+    if (drawMode === 'circle') {
+      drawEllipse(shapeStart.x, shapeStart.y, x, y);
+    } else if (drawMode === 'rectangle') {
+      drawRect(shapeStart.x, shapeStart.y, x, y);
+    }
+  
     setIsDrawing(false);
+    setShapeStart(null);
   };
+  
+
+  const drawEllipse = (x1, y1, x2, y2) => {
+    const ctx = maskCanvasRef.current.getContext('2d');
+    ctx.fillStyle = '#ffffff';
+    const centerX = (x1 + x2) / 2;
+    const centerY = (y1 + y2) / 2;
+    const radiusX = Math.abs(x2 - x1) / 2;
+    const radiusY = Math.abs(y2 - y1) / 2;
+  
+    ctx.beginPath();
+    ctx.ellipse(centerX, centerY, radiusX, radiusY, 0, 0, 2 * Math.PI);
+    ctx.fill();
+  };
+  
+  const drawRect = (x1, y1, x2, y2) => {
+    const ctx = maskCanvasRef.current.getContext('2d');
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(
+      Math.min(x1, x2),
+      Math.min(y1, y2),
+      Math.abs(x2 - x1),
+      Math.abs(y2 - y1)
+    );
+  };
+  
 
   const getCanvasCoordinates = (e) => {
     const rect = maskCanvasRef.current.getBoundingClientRect();
@@ -183,7 +299,7 @@ setScaleFactor(displayWidth / props.uploadedImage.width);
         <input
           type="range"
           min="5"
-          max="50"
+          max="100"
           value={brushSize}
           onChange={(e) => setBrushSize(parseInt(e.target.value))}
         />
@@ -200,6 +316,8 @@ setScaleFactor(displayWidth / props.uploadedImage.width);
           height: displaySize.height,
         }}
       >
+
+
         <canvas ref={imageCanvasRef} 
           style={{ position: 'absolute', left: 0, top: 0, width: '100%', height: '100%',backgroundColor:'white' }} 
         />
@@ -219,12 +337,50 @@ setScaleFactor(displayWidth / props.uploadedImage.width);
           onMouseUp={handleMouseUp}
           onMouseLeave={handleMouseUp}
         />
+
+<canvas ref={previewCanvasRef}
+  style={{
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    cursor: 'crosshair',
+    background: 'transparent',
+    width: '100%',
+    height: '100%',
+    pointerEvents: 'none', // Prevent interaction
+  }}
+/>
       </div>
       
       <br />
       <div style={{ display: 'flex', gap: '12px', marginTop: '12px' }}>
   <button onClick={clearMask} className={styles.downloadButton}>Clear Mask</button>
   <button onClick={saveCombinedImage} className={styles.downloadButton}>Save Image</button>
+  <div  style={{
+  marginTop: '10px',
+  display: 'flex',
+  alignItems: 'center',
+  gap: '10px',
+  fontFamily: 'Poppins',
+  fontSize: '14px'
+}}>
+  <label style={{ fontFamily: 'Poppins' }}>Mode:</label>
+  <select style={{
+      padding: '6px 10px',
+      borderRadius: '6px',
+      border: '1px solid #ccc',
+      backgroundColor: '#f9f9f9',
+      fontFamily: 'Poppins',
+      fontSize: '14px',
+      cursor: 'pointer'
+    }} value={drawMode} onChange={(e) => setDrawMode(e.target.value)}>
+    <option value="brush">Brush</option>
+    <option value="circle">Circle</option>
+    <option value="rectangle">Rectangle</option>
+  </select>
+</div>
+
+
 </div>
     </div>
   );
