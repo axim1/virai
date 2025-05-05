@@ -79,7 +79,7 @@ function ImageGenerator({ onGenerateImage }) {
   const [imageWidth, setImageWidth] = useState(512);
   const [imageHeight, setImageHeight] = useState(512);
   const [strength, setStrength] = useState(0.75);
-  const [ModOrRep,setModOrRep] = useState('replace') // state for image enhancement to check if image is to be modified or replaced
+  const [ModOrRep,setModOrRep] = useState('Replace') // state for image enhancement to check if image is to be modified or replaced
   
 
   useEffect(() => {
