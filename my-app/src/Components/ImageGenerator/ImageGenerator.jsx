@@ -996,6 +996,7 @@ setIsRetrieving(false);
   )}
   {apiType === 'image-enhancement' && uploadedImage && (
     <CanvasInpainting uploadedImage ={uploadedImage}
+    key={uploadedImage?.src || Date.now()}
     canvasRef={canvasRef}/>
   )}
 
