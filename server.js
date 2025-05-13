@@ -246,11 +246,100 @@ app.post("/login", async (req, res) => {
 });
 
 
+app.post("/api/updateUser", upload.single("profilePic"), async (req, res) => {
+  const {
+    userId, fname, lname, email, phone,
+    userType, companyName, address, vatNumber
+  } = req.body;
+console.log('updateing user')
+  try {
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).send({ message: "User not found" });
 
+    const profilePicPath = req.file ? req.file.path : user.profilePic;
+
+    user.fname = fname || user.fname;
+    user.lname = lname || user.lname;
+    user.email = email || user.email;
+    user.phone = phone || user.phone;
+    user.userType = userType || user.userType;
+    user.companyName = userType === "company" ? companyName : null;
+    user.address = userType === "company" ? address : null;
+    user.vatNumber = userType === "company" ? vatNumber : null;
+    user.profilePic = profilePicPath;
+    console.log("saving user")
+    await user.save();
+    res.send({ message: "User updated successfully", user });
+  } catch (error) {
+    console.error("Error updating user:", error);
+    res.status(500).send({ message: "Internal server error" });
+  }
+});
+
+// app.post("/api/profile/update", upload.single("profilePic"), async (req, res) => {
+//   const {
+//     userId,  // ID of user to update
+//     fname,
+//     lname,
+//     password,
+//     phone,
+//     userType,
+//     companyName,
+//     address,
+//     vatNumber,
+//     subscriptionName,
+//   } = req.body;
+
+//   try {
+//     const user = await User.findById(userId);
+//     if (!user) return res.status(404).send({ message: "User not found" });
+
+//     if (subscriptionName) {
+//       const subscription = await Subscription.findOne({ name: subscriptionName });
+//       if (!subscription) return res.status(400).send({ message: "Invalid subscription package" });
+
+//       user.subscription = subscription._id;
+//       user.no_of_images_left = subscription.generatedImages;
+//       user.subscribed_monthly = ["STARTER", "BUSINESS", "PREMIUM"].includes(subscriptionName);
+//       user.subscribed_yearly = ["BUSINESS", "PREMIUM"].includes(subscriptionName);
+//     }
+
+//     user.fname = fname || user.fname;
+//     user.lname = lname || user.lname;
+//     user.password = password || user.password;
+//     user.phone = phone || user.phone;
+//     user.userType = userType || user.userType;
+
+//     if (userType === "company") {
+//       user.companyName = companyName || user.companyName;
+//       user.address = address || user.address;
+//       user.vatNumber = vatNumber || user.vatNumber;
+//     } else {
+//       user.companyName = null;
+//       user.address = null;
+//       user.vatNumber = null;
+//     }
+
+//     if (req.file) {
+//       user.profilePic = req.file.path;
+//     }
+
+//     await user.save();
+//     res.send({ message: "Profile updated successfully", user });
+
+//   } catch (err) {
+//     console.error("Profile update error:", err);
+//     res.status(500).send({ message: "Internal server error" });
+//   }
+// });
 
 app.post("/api/signup", upload.single("profilePic"), async (req, res) => {
-  const { fname, lname, email, password, phone, subscriptionName } = req.body;
-  try {
+  const {
+    fname, lname, email, password, phone,
+    subscriptionName, userType,
+    companyName, address, vatNumber
+  } = req.body;
+    try {
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.send({ message: "User is already registered" });
@@ -263,18 +352,33 @@ app.post("/api/signup", upload.single("profilePic"), async (req, res) => {
 
     const profilePicPath = req.file ? req.file.path : null;
 
+    // const newUser = await User.create({
+    //   fname,
+    //   lname,
+    //   email,
+    //   password,
+    //   phone,
+
+    // });
+
+
     const newUser = await User.create({
       fname,
       lname,
       email,
       password,
       phone,
+      userType,
+      companyName: userType === 'company' ? companyName : null,
+      address: userType === 'company' ? address : null,
+      vatNumber: userType === 'company' ? vatNumber : null,
       no_of_images_left: subscription.generatedImages,
       subscribed_monthly: ["STARTER", "BUSINESS", "PREMIUM"].includes(subscriptionName),
       subscribed_yearly: ["BUSINESS", "PREMIUM"].includes(subscriptionName),
       subscription: subscription._id,
       profilePic: profilePicPath,
     });
+    
 
     res.send({ message: "Account created! Please login.", user: newUser });
   } catch (error) {
@@ -283,7 +387,17 @@ app.post("/api/signup", upload.single("profilePic"), async (req, res) => {
   }
 });
 
+// Custom profile pic route
+app.get("/api/uploads/profilepic/:filename", (req, res) => {
+  const filePath = path.join(__dirname, "uploads", req.params.filename);
 
+  fs.access(filePath, fs.constants.F_OK, (err) => {
+    if (err) {
+      return res.status(404).json({ message: "Image not found" });
+    }
+    res.sendFile(filePath);
+  });
+});
 // const { v4: uuidv4 } = require('uuid');
 
 app.post('/api/getPaymentUrl', async (req, res) => {
@@ -1274,12 +1388,19 @@ app.get('/api/images', async (req, res) => {
       };
     });
 
-    res.json({ images: formattedImages, total: totalImages, page: pageNumber, limit: limitNumber });
+    res.json({ 
+      images: formattedImages, 
+      total: totalImages, 
+      page: pageNumber, 
+      limit: limitNumber,
+      hasMore: skip + images.length < totalImages
+    });
   } catch (error) {
     console.error("Error fetching images:", error);
     res.status(500).json({ error: "Error fetching images" });
   }
 });
+
 
 
 app.post("/api/images/:id/like", async (req, res) => {

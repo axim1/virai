@@ -85,6 +85,7 @@ const Navbar = ({ loggedIn,  setLoggedIn = () => {}, onHomeClick,activeLink,setA
           Home
         </RouterLink>
 
+
         <ScrollLink
           to="tools-section"
           smooth={true}
@@ -94,6 +95,29 @@ const Navbar = ({ loggedIn,  setLoggedIn = () => {}, onHomeClick,activeLink,setA
         >
           AI Tools
         </ScrollLink>
+        <ScrollLink 
+  to="pricing-section" 
+  smooth={true} 
+  duration={50} 
+  className={`${styles.navItem} ${activeLink === 'pricing' ? styles.active : ''}`}
+  offset={150} 
+  // onSetActive={() => setActiveLink('pricing')}
+  onClick={handlePricingClick}
+>
+  Pricing
+</ScrollLink>
+
+<ScrollLink 
+  to="faq-section" 
+  smooth={true} 
+  duration={50} 
+  className={`${styles.navItem} ${activeLink === 'faq' ? styles.active : ''}`}
+  offset={150} 
+  onClick={handleFAQClick}
+>
+  FAQ
+</ScrollLink>
+
 
         <RouterLink
           to="/gen"
@@ -116,28 +140,7 @@ const Navbar = ({ loggedIn,  setLoggedIn = () => {}, onHomeClick,activeLink,setA
           Gallery
         </ScrollLink> */}
 
-<ScrollLink 
-  to="pricing-section" 
-  smooth={true} 
-  duration={50} 
-  className={`${styles.navItem} ${activeLink === 'pricing' ? styles.active : ''}`}
-  offset={150} 
-  // onSetActive={() => setActiveLink('pricing')}
-  onClick={handlePricingClick}
->
-  Pricing
-</ScrollLink>
 
-<ScrollLink 
-  to="faq-section" 
-  smooth={true} 
-  duration={50} 
-  className={`${styles.navItem} ${activeLink === 'faq' ? styles.active : ''}`}
-  offset={150} 
-  onClick={handleFAQClick}
->
-  FAQ
-</ScrollLink>
 <RouterLink
           to="/chat-ai"
           className={`${styles.navItem} ${activeLink === 'chat-ai' ? styles.active : ''}`}
@@ -163,10 +166,20 @@ const Navbar = ({ loggedIn,  setLoggedIn = () => {}, onHomeClick,activeLink,setA
 
               {dropdownOpen && (
                 <div className={styles.userDropdown}>
+                  <div style={{display:'flex', flexDirection:'row', justifyContent:'space-between',padding: '24px'}}>
+                 <div>
                   <div><strong>{user.fname} {user.lname}</strong></div>
-                  <div><strong>Email:</strong> {user.email}</div>
-                  <div><strong>Images Left:</strong> {user.no_of_images_left}</div>
-                  <button onClick={handleLogout} className={styles.navItem}>Logout</button>
+                  <div style={{
+                    color:'#999999'
+                  }}>{user.email}</div>
+                 </div>
+                  <div className={styles.coins} style={{width:'50px', height:'50px'}}>
+                <img src={coinIcon}/>{user.no_of_images_left}
+              </div>
+              </div>
+                  {/* <div><strong>Images Left:</strong> {user.no_of_images_left}</div> */}
+                          <RouterLink to='/user' className={styles.profileButton} >Profile</RouterLink>
+                  <button onClick={handleLogout} className={styles.logoutButton} >Logout</button>
 
                 </div>
 

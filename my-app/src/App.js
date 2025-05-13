@@ -11,6 +11,8 @@ import { useEffect, useState } from "react";
 import Footer from "./Components/Home/Components/Footer";
 import ImageGallery from "./Components/ImageGallery/ImageGallery";
 import Chatgpt from './Components/Chatgpt/Chatgpt'
+import Profile from './Components/Profile/Profile'
+
 function App() {
   // const location = useLocation();
 
@@ -58,15 +60,21 @@ function App() {
         path="/"
         element={
           <Home
-            triggerShrink={triggerShrink}
-            // scrollToSection={scrollToSection}
-          />
+          triggerShrink={triggerShrink}
+          activeLink={activeSection}
+          setActiveLink={setActiveSection}
+        />
+          // <Home
+          //   triggerShrink={triggerShrink}
+          //   // scrollToSection={scrollToSection}
+          // />
         }
       />
-          <Route path="/home" element={          <Home
-            triggerShrink={triggerShrink}
-            // scrollToSection={scrollToSection}
-          />} />
+          <Route path="/home" element={           <Home
+      triggerShrink={triggerShrink}
+      activeLink={activeSection}
+      setActiveLink={setActiveSection}
+    />} />
 
           {/* Login Route */}
           <Route
@@ -81,6 +89,7 @@ function App() {
           <Route path="/gen" element={<ImageGenerator />} />
           <Route path="/gallery" element={<ImageGallery />} />
           <Route path="/chat-ai" element={<Chatgpt />} />
+          <Route path="/user" element={<Profile />} />
 
           {/* Terms of Service Route */}
           <Route path="/terms-of-service" element={<TermsOfService />} />

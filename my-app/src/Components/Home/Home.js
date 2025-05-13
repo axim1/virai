@@ -12,7 +12,8 @@ import AITools from './Components/AITools';
 import TestimonialCarousel from './Components/TestimonialCarousel';
 import NewsLetter from './Components/NewsLetter';
 
-function Home({ triggerShrink, scrollToSection }) {
+function Home({ triggerShrink, scrollToSection, activeLink, setActiveLink }) {
+
   const [scrollY, setScrollY] = useState(0);
   const [showText, setShowText] = useState(false); // Track whether to show text or logo
   const [toolsVisible, setToolsVisible] = useState(false);
@@ -25,14 +26,15 @@ function Home({ triggerShrink, scrollToSection }) {
 
   const scrollStage1End = 200; // Logo fades to 50%
 const scrollStage2End = 400; // Logo fades out, motto moves in & scales
-const scrollStage3End = 600; // Motto fades out, background zooms, tools appear
+const scrollStage3End = 700; // Motto fades out, background zooms, tools appear
 
   const logoFade = scrollY < 200 ? 1 - scrollY / 400 : 0.5; // First scroll
   const logoMoveUp = scrollY >= 200 && scrollY < 500 ? (scrollY - 200) / 300 : 0;
   const mottoAppear = scrollY >= 200 && scrollY < 500 ? (scrollY - 200) / 300 : scrollY >= 500 ? 1 : 0;
   const mottoFadeOut = scrollY >= 500 && scrollY < 800 ? 1 - (scrollY - 500) / 300 : scrollY >= 800 ? 0 : 1;
   const bgImageMove = scrollY >= 500 ? Math.min((scrollY - 500) / 300, 1) : 0;
-  
+  const heroFadeOut = scrollY >= 650;
+
   const params = new URLSearchParams(window.location.search);
   const user = {
     _id: params.get('_id'),
@@ -67,9 +69,9 @@ const mottoOpacity = scrollY > scrollStage1End
 
 const mottoScale = 1 + mottoOpacity * 0.5;
 
-const mottoTranslateY = scrollY > scrollStage2End && scrollY < scrollStage3End
-  ? -((scrollY - scrollStage2End+150) / (scrollStage3End - scrollStage2End)) * 100
-  : scrollY >= scrollStage3End ? -100 : 0;
+const mottoTranslateY = scrollY > scrollStage2End && scrollY < 600
+  ? -((scrollY - scrollStage2End+200) / (550 - scrollStage2End)) * 100
+  : scrollY >= 550 ? -200 : 0;
 
 const mottoFinalOpacity = scrollY > scrollStage2End
   ? Math.max(1 - ((scrollY - scrollStage2End) / (scrollStage3End - scrollStage2End)), 0)
@@ -79,7 +81,7 @@ const backgroundZoom = scrollY > scrollStage2End
   ? 100 + Math.min((scrollY - scrollStage2End) / 5, 30)
   : 100;
 
-const isPinned = scrollY < scrollStage3End;
+const isPinned = scrollY < 1200;
 
   // useEffect(() => {
   //   const handleScroll = () => {
@@ -99,7 +101,18 @@ const isPinned = scrollY < scrollStage3End;
   //   }
   // }, [triggerShrink]);
 
-
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPos = window.scrollY;
+      if (scrollPos < 400) {
+        setActiveLink('home');
+      }
+    };
+  
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+  
   
   useEffect(() => {
     if (location.state?.scrollToSection) {
@@ -137,6 +150,8 @@ const isPinned = scrollY < scrollStage3End;
       ([entry]) => {
         setToolsVisible(entry.isIntersecting);
         if (entry.isIntersecting) setActiveSection('ai-tools');
+        if (entry.isIntersecting) setActiveLink('ai-tools');
+
       },
       { threshold: 0.3 }
     );
@@ -151,6 +166,8 @@ const isPinned = scrollY < scrollStage3End;
     const observer = new IntersectionObserver(
       ([entry]) => {
         setFaqVisible(entry.isIntersecting);
+        if (entry.isIntersecting) setActiveLink('faq');
+
       },
       { threshold: 0.3 }
     );
@@ -166,6 +183,8 @@ const isPinned = scrollY < scrollStage3End;
     const observer = new IntersectionObserver(
       ([entry]) => {
         setPricingVisible(entry.isIntersecting);
+        if (entry.isIntersecting) setActiveLink('pricing');
+
       },
       { threshold: 0.3 }
     );
@@ -232,6 +251,9 @@ const isPinned = scrollY < scrollStage3End;
     flexDirection: 'column',
     alignItems: 'center',
   };
+  const backgroundFadeOpacity = scrollY < 1000
+  ? 1 - Math.min((scrollY - scrollStage2End) / (1000 - scrollStage2End), 1)
+  : 0;
 
   return (
     <div style={{ backgroundColor: "#000", alignItems:'center', width:'100%' }}>
@@ -241,18 +263,20 @@ const isPinned = scrollY < scrollStage3End;
       <div
   className="herosection"
   style={{
-    position: isPinned ? 'fixed' : 'relative',
+    position: isPinned ? 'fixed' : 'fixed',
     top: 0,
     left: 0,
     width: '100%',
     height: '100%',
-    zIndex: 5,
-    // backgroundSize: `${backgroundZoom}%`,
-    // backgroundPosition: 'center',
+    opacity: backgroundFadeOpacity,
+    transition: 'opacity 0.7s ease',
     // backgroundImage: `url('/your-bg.jpg')`,
-    transition: 'background-size 0.3s ease, background-position 0.3s ease',
+    // backgroundSize: `${backgroundZoom}%`,
+    backgroundPosition: 'center',
+    zIndex: 0,
   }}
 >
+
   <div className="content-herosection" style={{ position: 'relative', height: '100%', width: '100%' }}>
     {/* Logo */}
     <img
@@ -261,7 +285,7 @@ const isPinned = scrollY < scrollStage3End;
       className='virLogo'
       style={{
         opacity: logoFinalOpacity,
-        transform: `translate(-50%, ${logoTranslateY}px)`,
+        transform: `translateX(-50%) scale(${1 + (scrollY / 400)})`,
         position: 'absolute',
         top: '30%',
         left: '50%',
@@ -277,6 +301,7 @@ const isPinned = scrollY < scrollStage3End;
         top: '60%',
         left: '50%',
         transformOrigin: 'center',
+        // opacity:mottoFinalOpacity,
         transition: ' transform 0.3s ease',
         width:'100%'
         // color: '#fff',
@@ -316,8 +341,9 @@ const isPinned = scrollY < scrollStage3End;
           <path d="M16.7929 28.707C17.1834 29.0975 17.8166 29.0975 18.2071 28.707L24.5711 22.343C24.9616 21.9525 24.9616 21.3193 24.5711 20.9288C24.1805 20.5383 23.5474 20.5383 23.1569 20.9288L17.5 26.5857L11.8431 20.9288C11.4526 20.5383 10.8195 20.5383 10.4289 20.9288C10.0384 21.3193 10.0384 21.9525 10.4289 22.343L16.7929 28.707ZM16.5 5.83322L16.5 27.9999L18.5 27.9999L18.5 5.83322L16.5 5.83322Z" fill="white" />
         </svg>
       </div>
-
+      
       <div className='spacer' ></div>
+      <div style={{ height: '60vh' }} />
 
       {/* AI Tools Section */}
       <div id="tools-section" className={`scroll-trigger ${toolsVisible ? 'fade-in' : 'fade-out'}`}>
@@ -345,7 +371,7 @@ const isPinned = scrollY < scrollStage3End;
       <div style={{ width: "100%", display:'flex',alignItems:'center',justifyContent:'center' }}>
         <NewsLetter />
       </div>
-    </div>
+      </div>
   );
 }
 

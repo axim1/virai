@@ -49,10 +49,28 @@ font-family: Arial, Helvetica, sans-serif;
     /* max-width: ; */
     /* height: 100vh; */
 /* background-color: #13181d; */
-background: url('../../assets/images/Hero BG.png')  lightgray 50% / cover no-repeat;
+/* background: url('../../assets/images/Hero BG.png')  lightgray 50% / cover no-repeat; */
     /* background-repeat: no-repeat; 
     background-size: cover;  */
 }
+
+
+
+.herosection {
+  background-image:  url('../../assets/images/Hero BG.png') ;
+  background-size: cover;
+  background-position: center;
+  /* background: url('../../assets/images/Hero BG.png')  lightgray 50% / cover no-repeat; */
+
+  transition: opacity 1s ease-in-out, transform 0.7s ease-in-out;
+  will-change: opacity, transform;
+}
+
+.herosection.fade-out {
+  opacity: 0;
+  pointer-events: none; /* So it doesn't interfere with AI Tools section */
+}
+
 .content-herosection{
     display: flex;
     flex-direction: column;

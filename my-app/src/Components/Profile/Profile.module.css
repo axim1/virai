@@ -1,60 +1,30 @@
-Profile.module.css
-
-.profile {
-    background-color: #1c1c1c;
-    color: #ffffff;
-    padding: 20px;
-    /* height: 100vh; */
-    min-height: 100vh;
-  }
-/*   
-  .nav-tabs {
-    margin-bottom: 20px;
-  } */
-  .navbar-dash {
-    position: absolute;
-    width: 100%;
-    top: 0;
-    left: 0;
-    transition: background-color 0.3s;
+.form {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 50px;
-    z-index: 1000;
-  }
-  .navbarSolid {
-    background-color: #000; /* or any dark color */
-  }
-  
-  .navbar-logo {
-    font-size: 24px; /* Adjust the size as needed */
-    color: #ffde59; /* Logo color */
+    flex-direction: column;
+    gap: 12px;
+    max-width: 400px;
+    margin: 2rem auto;
+    padding: 1rem;
+    background-color: #f4f4f4;
+    border-radius: 8px;
   }
   
-  .navbar-links {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .nav-item-dash{
- 
-    
-      text-decoration: none;
-      color:#ffde59;
-      background-color: transparent;
-    border: none;
-      border-radius: 5px;
-      padding: 10px 10px;
-      font-size: 20px;
-      margin:10px;
-    
-  }
-  .nav-item-dash:hover,
-  .active {
-    color: #ddd; /* Lighter color on hover/active */
-    border-bottom: 2px solid #fff; /* Bottom border on hover/active */
+  .form input,
+  .form select,
+  .form button {
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
   }
   
-  /* Add more styles as needed for each tab content */
+  .form button {
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+  }
+  
+  .form button:hover {
+    background-color: #0056b3;
+  }
   

@@ -26,6 +26,24 @@ const userSchema = new Schema({
     type: String,
     required: true,
   },
+  userType: {
+    type: String,
+    enum: ['individual', 'company'],
+    default: 'individual',
+    required: true
+  },
+  companyName: {
+    type: String,
+    default: null,
+  },
+  address: {
+    type: String,
+    default: null,
+  },
+  vatNumber: {
+    type: String,
+    default: null,
+  },
   profilePic: {
     type: String, // Store the file path or URL
     default: null,
@@ -67,6 +85,9 @@ const userSchema = new Schema({
     default: 'PENDING',
     enum: ['PENDING', 'PAY_METHOD_SELECTED', 'COMPLETED', 'FAILED'],
   },
+
+
+  
   googleId: {
     type: String,
     unique: true,

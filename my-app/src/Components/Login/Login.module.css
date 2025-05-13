@@ -13,11 +13,16 @@
     justify-content: center;
     align-items: center;
     text-align: center;
-    color: white; /* Set text color to white */
+    color: #2E8B57; /* Set text color to white */
     width: 100vw;
   height: 100vh;
   background-size: cover;
   background-repeat: no-repeat;
+  font-family: Poppins, sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  /* text-transform: capitalize; */
+
   }
   
   .inputContainer {
@@ -41,5 +46,55 @@
   
   .registerLink {
     color: lightblue; /* Set link color */
+  }
+  .form-container {
+    padding: 12px;
+    margin: 10px 0;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    width: 100%;
+    font-size: 16px;
+
+      text-transform: none !important;
+    
+    
+  }
+  
+  .registerButton {
+    background-color: #2e8b57;
+    color: white;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    width: 100%;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 20px;
+  }
+  
+  .registerButton:hover {
+    background-color: #256b45;
+  }
+  
+  .form-errors {
+    background-color: #ffe0e0;
+    border: 1px solid #ffaaaa;
+    color: #b00020;
+    border-radius: 5px;
+    padding: 10px 15px;
+    margin-bottom: 15px;
+    font-family: Poppins, sans-serif;
+    font-size: 14px;
+    text-align: left;
+    width: 100%;
+  }
+  
+  .form-errors ul {
+    margin: 0;
+    padding-left: 20px;
+  }
+  
+  .form-errors li {
+    list-style-type: disc;
   }
   
