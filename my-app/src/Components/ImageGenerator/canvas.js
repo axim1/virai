@@ -165,12 +165,13 @@ const CanvasInpainting = (props) => {
     if (!isDrawing) return;
 
     if (drawMode !== 'brush' && shapeStart) {
-      const coords = getCanvasCoordinates(e);
+      // For touch events ending, use lastPos since e might not have coordinates
+      const endPos = e && e.touches ? lastPos : getCanvasCoordinates(e);
 
       if (drawMode === 'circle') {
-        drawEllipse(shapeStart.x, shapeStart.y, coords.x, coords.y);
+        drawEllipse(shapeStart.x, shapeStart.y, endPos.x, endPos.y);
       } else if (drawMode === 'rectangle') {
-        drawRect(shapeStart.x, shapeStart.y, coords.x, coords.y);
+        drawRect(shapeStart.x, shapeStart.y, endPos.x, endPos.y);
       }
     }
 
@@ -197,7 +198,14 @@ const CanvasInpainting = (props) => {
 
     const handleTouchEnd = (e) => {
       e.preventDefault();
-      handleMouseUp(e);
+      // Pass the last known position for shapes
+      const finalEvent = {...e};
+      if (!finalEvent.clientX && lastPos) {
+        // Create a synthetic event with the last known position
+        finalEvent.clientX = lastPos.x;
+        finalEvent.clientY = lastPos.y;
+      }
+      handleMouseUp(finalEvent);
     };
 
     canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
