@@ -158,26 +158,26 @@ const CanvasInpainting = (props) => {
   };
 
   const handleMouseUp = (e) => {
-    if (previewCanvasRef.current) {
-      previewCanvasRef.current.getContext('2d').clearRect(0, 0, previewCanvasRef.current.width, previewCanvasRef.current.height);
+  if (previewCanvasRef.current) {
+    previewCanvasRef.current.getContext('2d').clearRect(0, 0, previewCanvasRef.current.width, previewCanvasRef.current.height);
+  }
+
+  if (!isDrawing) return;
+
+  if (drawMode !== 'brush' && shapeStart) {
+    const endPos = getCanvasCoordinates(e); // ✅ Use actual event to get final coords
+
+    if (drawMode === 'circle') {
+      drawEllipse(shapeStart.x, shapeStart.y, endPos.x, endPos.y);
+    } else if (drawMode === 'rectangle') {
+      drawRect(shapeStart.x, shapeStart.y, endPos.x, endPos.y);
     }
+  }
 
-    if (!isDrawing) return;
+  setIsDrawing(false);
+  setShapeStart(null);
+};
 
-    if (drawMode !== 'brush' && shapeStart) {
-      // For touch events ending, use lastPos since e might not have coordinates
-      const endPos = e && e.touches ? lastPos : getCanvasCoordinates(e);
-
-      if (drawMode === 'circle') {
-        drawEllipse(shapeStart.x, shapeStart.y, endPos.x, endPos.y);
-      } else if (drawMode === 'rectangle') {
-        drawRect(shapeStart.x, shapeStart.y, endPos.x, endPos.y);
-      }
-    }
-
-    setIsDrawing(false);
-    setShapeStart(null);
-  };
 
   // Improved touch handling
   useEffect(() => {
