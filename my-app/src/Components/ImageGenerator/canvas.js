@@ -1,34 +1,32 @@
 import React, { useRef, useState, useEffect } from 'react';
-import styles from './ImageGenerator.module.css'
+import styles from './ImageGenerator.module.css';
 
 const CanvasInpainting = (props) => {
   const imageCanvasRef = useRef(null);
   const maskCanvasRef = useRef(null);
-  const [targetAspectRatio, setTargetAspectRatio] = useState(null); // e.g., 1 (1:1), 4/3, 16/9
   const previewCanvasRef = useRef(null);
-  const [drawMode, setDrawMode] = useState('brush'); // 'brush', 'circle', 'rectangle'
-  const [shapeStart, setShapeStart] = useState(null); // For shape drawing
+  const [targetAspectRatio, setTargetAspectRatio] = useState(null);
+  const [drawMode, setDrawMode] = useState('brush');
+  const [shapeStart, setShapeStart] = useState(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [lastPos, setLastPos] = useState({ x: 0, y: 0 });
   const [displaySize, setDisplaySize] = useState({ width: 500, height: 500 });
   const [scaleFactor, setScaleFactor] = useState(1);
-  const [brushSize, setBrushSize] = useState(20); // Default brush size
+  const [brushSize, setBrushSize] = useState(20);
 
   useEffect(() => {
     if (!props.uploadedImage || !imageCanvasRef.current || !maskCanvasRef.current || !previewCanvasRef.current) return;
-  
+
     const canvas = imageCanvasRef.current;
     const maskCanvas = maskCanvasRef.current;
     const previewCanvas = previewCanvasRef.current;
-  
+
     const originalWidth = props.uploadedImage.width;
     const originalHeight = props.uploadedImage.height;
-  
-    // Default to original size
+
     let paddedWidth = originalWidth;
     let paddedHeight = originalHeight;
-  
-    // Apply padding for selected aspect ratio
+
     if (targetAspectRatio) {
       const currentAspect = originalWidth / originalHeight;
       if (currentAspect > targetAspectRatio) {
@@ -37,85 +35,78 @@ const CanvasInpainting = (props) => {
         paddedWidth = originalHeight * targetAspectRatio;
       }
     }
-  
-    // Update display size to fit within max container bounds
+
     const maxWidth = 700;
     const maxHeight = 500;
     const paddedAspect = paddedWidth / paddedHeight;
-  
+
     let displayWidth = maxWidth;
     let displayHeight = displayWidth / paddedAspect;
     if (displayHeight > maxHeight) {
       displayHeight = maxHeight;
       displayWidth = displayHeight * paddedAspect;
     }
-  
+
     setDisplaySize({ width: displayWidth, height: displayHeight });
     setScaleFactor(displayWidth / paddedWidth);
-  
-    // Resize canvases
+
     canvas.width = paddedWidth;
     canvas.height = paddedHeight;
     maskCanvas.width = paddedWidth;
     maskCanvas.height = paddedHeight;
     previewCanvas.width = paddedWidth;
     previewCanvas.height = paddedHeight;
-  
+
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, paddedWidth, paddedHeight);
     ctx.fillStyle = 'white';
     ctx.fillRect(0, 0, paddedWidth, paddedHeight);
-  
+
     const offsetX = (paddedWidth - originalWidth) / 2;
     const offsetY = (paddedHeight - originalHeight) / 2;
-  
+
     ctx.drawImage(props.uploadedImage, offsetX, offsetY);
-  
-    // Prepare mask canvas
+
     const maskCtx = maskCanvas.getContext('2d');
     maskCtx.clearRect(0, 0, paddedWidth, paddedHeight);
     maskCtx.fillStyle = '#ffffff';
-  
-    // Mask top/bottom padding
+
     if (offsetY > 0) {
       maskCtx.fillRect(0, 0, paddedWidth, offsetY);
       maskCtx.fillRect(0, paddedHeight - offsetY, paddedWidth, offsetY);
     }
-    // Mask side padding
     if (offsetX > 0) {
       maskCtx.fillRect(0, 0, offsetX, paddedHeight);
       maskCtx.fillRect(paddedWidth - offsetX, 0, offsetX, paddedHeight);
     }
-  
-    // Clear preview canvas
+
     const previewCtx = previewCanvas.getContext('2d');
     previewCtx.clearRect(0, 0, paddedWidth, paddedHeight);
-  
   }, [props.uploadedImage, targetAspectRatio]);
-  
 
   const handleMouseDown = (e) => {
     const { x, y } = getCanvasCoordinates(e);
     setIsDrawing(true);
     setLastPos({ x, y });
-  
+
     if (drawMode === 'brush') {
       drawCircle(x, y);
     } else {
       setShapeStart({ x, y });
     }
   };
+
   const handleMouseMove = (e) => {
     if (!isDrawing) return;
     const { x, y } = getCanvasCoordinates(e);
-  
+
     if (drawMode === 'brush') {
       drawLine(lastPos.x, lastPos.y, x, y);
       setLastPos({ x, y });
     } else if (shapeStart && previewCanvasRef.current) {
       const ctx = previewCanvasRef.current.getContext('2d');
       ctx.clearRect(0, 0, previewCanvasRef.current.width, previewCanvasRef.current.height);
-  
+
       if (drawMode === 'rectangle') {
         ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
         ctx.fillRect(
@@ -136,29 +127,59 @@ const CanvasInpainting = (props) => {
       }
     }
   };
-  
-  
-  const handleMouseUp = (e) => {
+
+  const handleMouseUp = () => {
     if (previewCanvasRef.current) {
       previewCanvasRef.current.getContext('2d').clearRect(0, 0, previewCanvasRef.current.width, previewCanvasRef.current.height);
     }
-    
+
     if (!isDrawing || !shapeStart) {
       setIsDrawing(false);
       return;
     }
-  
-    const { x, y } = getCanvasCoordinates(e);
+
     if (drawMode === 'circle') {
-      drawEllipse(shapeStart.x, shapeStart.y, x, y);
+      drawEllipse(shapeStart.x, shapeStart.y, lastPos.x, lastPos.y);
     } else if (drawMode === 'rectangle') {
-      drawRect(shapeStart.x, shapeStart.y, x, y);
+      drawRect(shapeStart.x, shapeStart.y, lastPos.x, lastPos.y);
     }
-  
+
     setIsDrawing(false);
     setShapeStart(null);
   };
-  
+
+  // 👇 TOUCH SUPPORT: Add touch event listeners
+  useEffect(() => {
+    const canvas = maskCanvasRef.current;
+    if (!canvas) return;
+
+    const handleTouchStart = (e) => {
+      e.preventDefault();
+      const touch = e.touches[0];
+      handleMouseDown({ clientX: touch.clientX, clientY: touch.clientY });
+    };
+
+    const handleTouchMove = (e) => {
+      e.preventDefault();
+      const touch = e.touches[0];
+      handleMouseMove({ clientX: touch.clientX, clientY: touch.clientY });
+    };
+
+    const handleTouchEnd = (e) => {
+      e.preventDefault();
+      handleMouseUp();
+    };
+
+    canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+    canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
+    canvas.addEventListener('touchend', handleTouchEnd, { passive: false });
+
+    return () => {
+      canvas.removeEventListener('touchstart', handleTouchStart);
+      canvas.removeEventListener('touchmove', handleTouchMove);
+      canvas.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, []);
 
   const drawEllipse = (x1, y1, x2, y2) => {
     const ctx = maskCanvasRef.current.getContext('2d');
@@ -167,12 +188,11 @@ const CanvasInpainting = (props) => {
     const centerY = (y1 + y2) / 2;
     const radiusX = Math.abs(x2 - x1) / 2;
     const radiusY = Math.abs(y2 - y1) / 2;
-  
     ctx.beginPath();
     ctx.ellipse(centerX, centerY, radiusX, radiusY, 0, 0, 2 * Math.PI);
     ctx.fill();
   };
-  
+
   const drawRect = (x1, y1, x2, y2) => {
     const ctx = maskCanvasRef.current.getContext('2d');
     ctx.fillStyle = '#ffffff';
@@ -183,13 +203,14 @@ const CanvasInpainting = (props) => {
       Math.abs(y2 - y1)
     );
   };
-  
 
   const getCanvasCoordinates = (e) => {
     const rect = maskCanvasRef.current.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
     return {
-      x: (e.clientX - rect.left) * (maskCanvasRef.current.width / rect.width),
-      y: (e.clientY - rect.top) * (maskCanvasRef.current.height / rect.height),
+      x: (clientX - rect.left) * (maskCanvasRef.current.width / rect.width),
+      y: (clientY - rect.top) * (maskCanvasRef.current.height / rect.height),
     };
   };
 
@@ -219,7 +240,6 @@ const CanvasInpainting = (props) => {
     }
   };
 
-  // This function creates and returns the masked image as a Blob
   const getMaskedImageBlob = () => {
     return new Promise((resolve, reject) => {
       if (!imageCanvasRef.current || !maskCanvasRef.current) {
@@ -253,21 +273,17 @@ const CanvasInpainting = (props) => {
       finalCtx.putImageData(finalImageData, 0, 0);
 
       finalCanvas.toBlob((blob) => {
-        if (blob) {
-          resolve(blob);
-        } else {
-          reject('Failed to create image blob');
-        }
+        if (blob) resolve(blob);
+        else reject('Failed to create image blob');
       }, 'image/png');
     });
   };
 
-  // Expose getMaskedImageBlob to parent component via ref
   useEffect(() => {
     if (props.canvasRef) {
       props.canvasRef.current = {
         getMaskedImageBlob,
-        clearMask
+        clearMask,
       };
     }
   }, [props.canvasRef]);
@@ -286,42 +302,23 @@ const CanvasInpainting = (props) => {
   };
 
   return (
-    <div style={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center',
-        flexDirection: 'column',
-        width: '100%',
-        height: '100%' 
-      }}>
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', width: '100%', height: '100%' }}>
       <div style={{ marginTop: '10px' }}>
-        <label style={{fontFamily:'Poppins'}}>Brush Size: {brushSize}px</label>
-        <input
-          type="range"
-          min="5"
-          max="100"
-          value={brushSize}
-          onChange={(e) => setBrushSize(parseInt(e.target.value))}
-        />
+        <label style={{ fontFamily: 'Poppins' }}>Brush Size: {brushSize}px</label>
+        <input type="range" min="5" max="100" value={brushSize} onChange={(e) => setBrushSize(parseInt(e.target.value))} />
       </div>
 
-      <div
-        style={{
-          position: 'relative',
-          border: '1px solid #ccc',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          width: displaySize.width,
-          height: displaySize.height,
-        }}
-      >
-
-
-        <canvas ref={imageCanvasRef} 
-          style={{ position: 'absolute', left: 0, top: 0, width: '100%', height: '100%',backgroundColor:'white' }} 
-        />
-        <canvas ref={maskCanvasRef} 
+      <div style={{
+        position: 'relative',
+        border: '1px solid #ccc',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        width: displaySize.width,
+        height: displaySize.height,
+      }}>
+        <canvas ref={imageCanvasRef} style={{ position: 'absolute', left: 0, top: 0, width: '100%', height: '100%', backgroundColor: 'white' }} />
+        <canvas ref={maskCanvasRef}
           style={{
             position: 'absolute',
             left: 0,
@@ -331,57 +328,54 @@ const CanvasInpainting = (props) => {
             background: 'transparent',
             width: '100%',
             height: '100%',
-          }} 
+          }}
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
           onMouseLeave={handleMouseUp}
         />
-
-<canvas ref={previewCanvasRef}
-  style={{
-    position: 'absolute',
-    left: 0,
-    top: 0,
-    cursor: 'crosshair',
-    background: 'transparent',
-    width: '100%',
-    height: '100%',
-    pointerEvents: 'none', // Prevent interaction
-  }}
-/>
+        <canvas ref={previewCanvasRef}
+          style={{
+            position: 'absolute',
+            left: 0,
+            top: 0,
+            cursor: 'crosshair',
+            background: 'transparent',
+            width: '100%',
+            height: '100%',
+            pointerEvents: 'none',
+          }}
+        />
       </div>
-      
+
       <br />
       <div style={{ display: 'flex', gap: '12px', marginTop: '12px' }}>
-  <button onClick={clearMask} className={styles.downloadButton}>Clear Mask</button>
-  <button onClick={saveCombinedImage} className={styles.downloadButton}>Save Image</button>
-  <div  style={{
-  marginTop: '10px',
-  display: 'flex',
-  alignItems: 'center',
-  gap: '10px',
-  fontFamily: 'Poppins',
-  fontSize: '14px'
-}}>
-  <label style={{ fontFamily: 'Poppins' }}>Mode:</label>
-  <select style={{
-      padding: '6px 10px',
-      borderRadius: '6px',
-      border: '1px solid #ccc',
-      backgroundColor: '#f9f9f9',
-      fontFamily: 'Poppins',
-      fontSize: '14px',
-      cursor: 'pointer'
-    }} value={drawMode} onChange={(e) => setDrawMode(e.target.value)}>
-    <option value="brush">Brush</option>
-    <option value="circle">Circle</option>
-    <option value="rectangle">Rectangle</option>
-  </select>
-</div>
-
-
-</div>
+        <button onClick={clearMask} className={styles.downloadButton}>Clear Mask</button>
+        <button onClick={saveCombinedImage} className={styles.downloadButton}>Save Image</button>
+        <div style={{
+          marginTop: '10px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px',
+          fontFamily: 'Poppins',
+          fontSize: '14px'
+        }}>
+          <label style={{ fontFamily: 'Poppins' }}>Mode:</label>
+          <select style={{
+            padding: '6px 10px',
+            borderRadius: '6px',
+            border: '1px solid #ccc',
+            backgroundColor: '#f9f9f9',
+            fontFamily: 'Poppins',
+            fontSize: '14px',
+            cursor: 'pointer'
+          }} value={drawMode} onChange={(e) => setDrawMode(e.target.value)}>
+            <option value="brush">Brush</option>
+            <option value="circle">Circle</option>
+            <option value="rectangle">Rectangle</option>
+          </select>
+        </div>
+      </div>
     </div>
   );
 };
