@@ -148,7 +148,7 @@ const CanvasInpainting = (props) => {
     setShapeStart(null);
   };
 
-  // 👇 TOUCH SUPPORT: Add touch event listeners
+  // 👇 Touch Support: Full tracking with lastPos for strokes
   useEffect(() => {
     const canvas = maskCanvasRef.current;
     if (!canvas) return;
@@ -156,13 +156,15 @@ const CanvasInpainting = (props) => {
     const handleTouchStart = (e) => {
       e.preventDefault();
       const touch = e.touches[0];
-      handleMouseDown({ clientX: touch.clientX, clientY: touch.clientY });
+      const fakeEvent = { clientX: touch.clientX, clientY: touch.clientY };
+      handleMouseDown(fakeEvent);
     };
 
     const handleTouchMove = (e) => {
       e.preventDefault();
       const touch = e.touches[0];
-      handleMouseMove({ clientX: touch.clientX, clientY: touch.clientY });
+      const fakeEvent = { clientX: touch.clientX, clientY: touch.clientY };
+      handleMouseMove(fakeEvent);
     };
 
     const handleTouchEnd = (e) => {
