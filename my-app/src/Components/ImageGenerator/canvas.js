@@ -10,6 +10,7 @@ const CanvasInpainting = (props) => {
   const [shapeStart, setShapeStart] = useState(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [lastPos, setLastPos] = useState({ x: 0, y: 0 });
+  const [currentPos, setCurrentPos] = useState({ x: 0, y: 0 }); // ✅ Track latest position
   const [displaySize, setDisplaySize] = useState({ width: 500, height: 500 });
   const [scaleFactor, setScaleFactor] = useState(1);
   const [brushSize, setBrushSize] = useState(20);
@@ -86,8 +87,8 @@ const CanvasInpainting = (props) => {
 
   const getCanvasCoordinates = (e) => {
     const rect = maskCanvasRef.current.getBoundingClientRect();
-    const clientX = e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
-    const clientY = e.clientY || (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
+    const clientX = e.clientX || (e.touches && e.touches[0]?.clientX);
+    const clientY = e.clientY || (e.touches && e.touches[0]?.clientY);
     return {
       x: (clientX - rect.left) * (maskCanvasRef.current.width / rect.width),
       y: (clientY - rect.top) * (maskCanvasRef.current.height / rect.height),
@@ -117,6 +118,7 @@ const CanvasInpainting = (props) => {
     const coords = getCanvasCoordinates(e);
     setIsDrawing(true);
     setLastPos(coords);
+    setCurrentPos(coords); // ✅ Set initial position
 
     if (drawMode === 'brush') {
       drawCircle(coords.x, coords.y);
@@ -128,6 +130,7 @@ const CanvasInpainting = (props) => {
   const handleMouseMove = (e) => {
     if (!isDrawing) return;
     const coords = getCanvasCoordinates(e);
+    setCurrentPos(coords); // ✅ Continuously track current position
 
     if (drawMode === 'brush') {
       drawLine(lastPos.x, lastPos.y, coords.x, coords.y);
@@ -157,29 +160,26 @@ const CanvasInpainting = (props) => {
     }
   };
 
-  const handleMouseUp = (e) => {
-  if (previewCanvasRef.current) {
-    previewCanvasRef.current.getContext('2d').clearRect(0, 0, previewCanvasRef.current.width, previewCanvasRef.current.height);
-  }
-
-  if (!isDrawing) return;
-
-  if (drawMode !== 'brush' && shapeStart) {
-    const endPos = getCanvasCoordinates(e); // ✅ Use actual event to get final coords
-
-    if (drawMode === 'circle') {
-      drawEllipse(shapeStart.x, shapeStart.y, endPos.x, endPos.y);
-    } else if (drawMode === 'rectangle') {
-      drawRect(shapeStart.x, shapeStart.y, endPos.x, endPos.y);
+  const handleMouseUp = () => {
+    if (previewCanvasRef.current) {
+      previewCanvasRef.current.getContext('2d').clearRect(0, 0, previewCanvasRef.current.width, previewCanvasRef.current.height);
     }
-  }
 
-  setIsDrawing(false);
-  setShapeStart(null);
-};
+    if (!isDrawing) return;
 
+    if (drawMode !== 'brush' && shapeStart) {
+      if (drawMode === 'circle') {
+        drawEllipse(shapeStart.x, shapeStart.y, currentPos.x, currentPos.y); // ✅ Use currentPos
+      } else if (drawMode === 'rectangle') {
+        drawRect(shapeStart.x, shapeStart.y, currentPos.x, currentPos.y);
+      }
+    }
 
-  // Improved touch handling
+    setIsDrawing(false);
+    setShapeStart(null);
+  };
+
+  // Touch support
   useEffect(() => {
     const canvas = maskCanvasRef.current;
     if (!canvas) return;
@@ -191,21 +191,12 @@ const CanvasInpainting = (props) => {
 
     const handleTouchMove = (e) => {
       e.preventDefault();
-      if (isDrawing) {
-        handleMouseMove(e);
-      }
+      handleMouseMove(e);
     };
 
     const handleTouchEnd = (e) => {
       e.preventDefault();
-      // Pass the last known position for shapes
-      const finalEvent = {...e};
-      if (!finalEvent.clientX && lastPos) {
-        // Create a synthetic event with the last known position
-        finalEvent.clientX = lastPos.x;
-        finalEvent.clientY = lastPos.y;
-      }
-      handleMouseUp(finalEvent);
+      handleMouseUp();
     };
 
     canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
@@ -217,7 +208,7 @@ const CanvasInpainting = (props) => {
       canvas.removeEventListener('touchmove', handleTouchMove);
       canvas.removeEventListener('touchend', handleTouchEnd);
     };
-  }, [isDrawing, drawMode, lastPos, shapeStart, brushSize]); // Added dependencies
+  }, [isDrawing, drawMode, shapeStart, currentPos]);
 
   const drawEllipse = (x1, y1, x2, y2) => {
     const ctx = maskCanvasRef.current.getContext('2d');
@@ -243,39 +234,38 @@ const CanvasInpainting = (props) => {
   };
 
   const clearMask = () => {
-    if (maskCanvasRef.current) {
-      const ctx = maskCanvasRef.current.getContext('2d');
-      ctx.clearRect(0, 0, maskCanvasRef.current.width, maskCanvasRef.current.height);
-    }
+    const ctx = maskCanvasRef.current?.getContext('2d');
+    ctx?.clearRect(0, 0, maskCanvasRef.current.width, maskCanvasRef.current.height);
   };
 
   const getMaskedImageBlob = () => {
     return new Promise((resolve, reject) => {
-      if (!imageCanvasRef.current || !maskCanvasRef.current) {
+      const imageCanvas = imageCanvasRef.current;
+      const maskCanvas = maskCanvasRef.current;
+      if (!imageCanvas || !maskCanvas) {
         reject('Canvas not available');
         return;
       }
 
-      const width = imageCanvasRef.current.width;
-      const height = imageCanvasRef.current.height;
+      const width = imageCanvas.width;
+      const height = imageCanvas.height;
 
       const finalCanvas = document.createElement('canvas');
       finalCanvas.width = width;
       finalCanvas.height = height;
       const finalCtx = finalCanvas.getContext('2d');
 
-      finalCtx.drawImage(imageCanvasRef.current, 0, 0);
+      finalCtx.drawImage(imageCanvas, 0, 0);
 
       const finalImageData = finalCtx.getImageData(0, 0, width, height);
       const finalData = finalImageData.data;
 
-      const maskCtx = maskCanvasRef.current.getContext('2d');
-      const maskImageData = maskCtx.getImageData(0, 0, width, height);
-      const maskData = maskImageData.data;
+      const maskCtx = maskCanvas.getContext('2d');
+      const maskData = maskCtx.getImageData(0, 0, width, height).data;
 
       for (let i = 0; i < maskData.length; i += 4) {
         if (maskData[i] === 255 && maskData[i + 1] === 255 && maskData[i + 2] === 255 && maskData[i + 3] > 0) {
-          finalData[i + 3] = 0;
+          finalData[i + 3] = 0; // make transparent
         }
       }
 
@@ -325,7 +315,7 @@ const CanvasInpainting = (props) => {
         alignItems: 'center',
         width: displaySize.width,
         height: displaySize.height,
-        touchAction: 'none', // Prevents browser handling of touch events
+        touchAction: 'none',
       }}>
         <canvas ref={imageCanvasRef} style={{ position: 'absolute', left: 0, top: 0, width: '100%', height: '100%', backgroundColor: 'white' }} />
         <canvas ref={maskCanvasRef}
@@ -350,11 +340,10 @@ const CanvasInpainting = (props) => {
             position: 'absolute',
             left: 0,
             top: 0,
-            cursor: 'crosshair',
+            pointerEvents: 'none',
             background: 'transparent',
             width: '100%',
             height: '100%',
-            pointerEvents: 'none',
             touchAction: 'none',
           }}
         />
