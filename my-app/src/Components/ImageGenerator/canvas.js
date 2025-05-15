@@ -84,132 +84,10 @@ const CanvasInpainting = (props) => {
     previewCtx.clearRect(0, 0, paddedWidth, paddedHeight);
   }, [props.uploadedImage, targetAspectRatio]);
 
-  const handleMouseDown = (e) => {
-    const { x, y } = getCanvasCoordinates(e);
-    setIsDrawing(true);
-    setLastPos({ x, y });
-
-    if (drawMode === 'brush') {
-      drawCircle(x, y);
-    } else {
-      setShapeStart({ x, y });
-    }
-  };
-
-  const handleMouseMove = (e) => {
-    if (!isDrawing) return;
-    const { x, y } = getCanvasCoordinates(e);
-
-    if (drawMode === 'brush') {
-      drawLine(lastPos.x, lastPos.y, x, y);
-      setLastPos({ x, y });
-    } else if (shapeStart && previewCanvasRef.current) {
-      const ctx = previewCanvasRef.current.getContext('2d');
-      ctx.clearRect(0, 0, previewCanvasRef.current.width, previewCanvasRef.current.height);
-
-      if (drawMode === 'rectangle') {
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
-        ctx.fillRect(
-          Math.min(shapeStart.x, x),
-          Math.min(shapeStart.y, y),
-          Math.abs(x - shapeStart.x),
-          Math.abs(y - shapeStart.y)
-        );
-      } else if (drawMode === 'circle') {
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
-        const centerX = (shapeStart.x + x) / 2;
-        const centerY = (shapeStart.y + y) / 2;
-        const radiusX = Math.abs(x - shapeStart.x) / 2;
-        const radiusY = Math.abs(y - shapeStart.y) / 2;
-        ctx.beginPath();
-        ctx.ellipse(centerX, centerY, radiusX, radiusY, 0, 0, 2 * Math.PI);
-        ctx.fill();
-      }
-    }
-  };
-
-  const handleMouseUp = () => {
-    if (previewCanvasRef.current) {
-      previewCanvasRef.current.getContext('2d').clearRect(0, 0, previewCanvasRef.current.width, previewCanvasRef.current.height);
-    }
-
-    if (!isDrawing || !shapeStart) {
-      setIsDrawing(false);
-      return;
-    }
-
-    if (drawMode === 'circle') {
-      drawEllipse(shapeStart.x, shapeStart.y, lastPos.x, lastPos.y);
-    } else if (drawMode === 'rectangle') {
-      drawRect(shapeStart.x, shapeStart.y, lastPos.x, lastPos.y);
-    }
-
-    setIsDrawing(false);
-    setShapeStart(null);
-  };
-
-  // 👇 Touch Support: Full tracking with lastPos for strokes
-  useEffect(() => {
-    const canvas = maskCanvasRef.current;
-    if (!canvas) return;
-
-    const handleTouchStart = (e) => {
-      e.preventDefault();
-      const touch = e.touches[0];
-      const fakeEvent = { clientX: touch.clientX, clientY: touch.clientY };
-      handleMouseDown(fakeEvent);
-    };
-
-    const handleTouchMove = (e) => {
-      e.preventDefault();
-      const touch = e.touches[0];
-      const fakeEvent = { clientX: touch.clientX, clientY: touch.clientY };
-      handleMouseMove(fakeEvent);
-    };
-
-    const handleTouchEnd = (e) => {
-      e.preventDefault();
-      handleMouseUp();
-    };
-
-    canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
-    canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
-    canvas.addEventListener('touchend', handleTouchEnd, { passive: false });
-
-    return () => {
-      canvas.removeEventListener('touchstart', handleTouchStart);
-      canvas.removeEventListener('touchmove', handleTouchMove);
-      canvas.removeEventListener('touchend', handleTouchEnd);
-    };
-  }, []);
-
-  const drawEllipse = (x1, y1, x2, y2) => {
-    const ctx = maskCanvasRef.current.getContext('2d');
-    ctx.fillStyle = '#ffffff';
-    const centerX = (x1 + x2) / 2;
-    const centerY = (y1 + y2) / 2;
-    const radiusX = Math.abs(x2 - x1) / 2;
-    const radiusY = Math.abs(y2 - y1) / 2;
-    ctx.beginPath();
-    ctx.ellipse(centerX, centerY, radiusX, radiusY, 0, 0, 2 * Math.PI);
-    ctx.fill();
-  };
-
-  const drawRect = (x1, y1, x2, y2) => {
-    const ctx = maskCanvasRef.current.getContext('2d');
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(
-      Math.min(x1, x2),
-      Math.min(y1, y2),
-      Math.abs(x2 - x1),
-      Math.abs(y2 - y1)
-    );
-  };
-
   const getCanvasCoordinates = (e) => {
     const rect = maskCanvasRef.current.getBoundingClientRect();
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    const clientX = e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
+    const clientY = e.clientY || (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
     return {
       x: (clientX - rect.left) * (maskCanvasRef.current.width / rect.width),
       y: (clientY - rect.top) * (maskCanvasRef.current.height / rect.height),
@@ -233,6 +111,127 @@ const CanvasInpainting = (props) => {
     ctx.moveTo(x1, y1);
     ctx.lineTo(x2, y2);
     ctx.stroke();
+  };
+
+  const handleMouseDown = (e) => {
+    const coords = getCanvasCoordinates(e);
+    setIsDrawing(true);
+    setLastPos(coords);
+
+    if (drawMode === 'brush') {
+      drawCircle(coords.x, coords.y);
+    } else {
+      setShapeStart(coords);
+    }
+  };
+
+  const handleMouseMove = (e) => {
+    if (!isDrawing) return;
+    const coords = getCanvasCoordinates(e);
+
+    if (drawMode === 'brush') {
+      drawLine(lastPos.x, lastPos.y, coords.x, coords.y);
+      setLastPos(coords);
+    } else if (shapeStart && previewCanvasRef.current) {
+      const ctx = previewCanvasRef.current.getContext('2d');
+      ctx.clearRect(0, 0, previewCanvasRef.current.width, previewCanvasRef.current.height);
+
+      if (drawMode === 'rectangle') {
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+        ctx.fillRect(
+          Math.min(shapeStart.x, coords.x),
+          Math.min(shapeStart.y, coords.y),
+          Math.abs(coords.x - shapeStart.x),
+          Math.abs(coords.y - shapeStart.y)
+        );
+      } else if (drawMode === 'circle') {
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+        const centerX = (shapeStart.x + coords.x) / 2;
+        const centerY = (shapeStart.y + coords.y) / 2;
+        const radiusX = Math.abs(coords.x - shapeStart.x) / 2;
+        const radiusY = Math.abs(coords.y - shapeStart.y) / 2;
+        ctx.beginPath();
+        ctx.ellipse(centerX, centerY, radiusX, radiusY, 0, 0, 2 * Math.PI);
+        ctx.fill();
+      }
+    }
+  };
+
+  const handleMouseUp = (e) => {
+    if (previewCanvasRef.current) {
+      previewCanvasRef.current.getContext('2d').clearRect(0, 0, previewCanvasRef.current.width, previewCanvasRef.current.height);
+    }
+
+    if (!isDrawing) return;
+
+    if (drawMode !== 'brush' && shapeStart) {
+      const coords = getCanvasCoordinates(e);
+
+      if (drawMode === 'circle') {
+        drawEllipse(shapeStart.x, shapeStart.y, coords.x, coords.y);
+      } else if (drawMode === 'rectangle') {
+        drawRect(shapeStart.x, shapeStart.y, coords.x, coords.y);
+      }
+    }
+
+    setIsDrawing(false);
+    setShapeStart(null);
+  };
+
+  // Improved touch handling
+  useEffect(() => {
+    const canvas = maskCanvasRef.current;
+    if (!canvas) return;
+
+    const handleTouchStart = (e) => {
+      e.preventDefault();
+      handleMouseDown(e);
+    };
+
+    const handleTouchMove = (e) => {
+      e.preventDefault();
+      if (isDrawing) {
+        handleMouseMove(e);
+      }
+    };
+
+    const handleTouchEnd = (e) => {
+      e.preventDefault();
+      handleMouseUp(e);
+    };
+
+    canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+    canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
+    canvas.addEventListener('touchend', handleTouchEnd, { passive: false });
+
+    return () => {
+      canvas.removeEventListener('touchstart', handleTouchStart);
+      canvas.removeEventListener('touchmove', handleTouchMove);
+      canvas.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [isDrawing, drawMode, lastPos, shapeStart, brushSize]); // Added dependencies
+
+  const drawEllipse = (x1, y1, x2, y2) => {
+    const ctx = maskCanvasRef.current.getContext('2d');
+    ctx.fillStyle = '#ffffff';
+    const centerX = (x1 + x2) / 2;
+    const centerY = (y1 + y2) / 2;
+    const radiusX = Math.abs(x2 - x1) / 2;
+    const radiusY = Math.abs(y2 - y1) / 2;
+    ctx.beginPath();
+    ctx.ellipse(centerX, centerY, radiusX, radiusY, 0, 0, 2 * Math.PI);
+    ctx.fill();
+  };
+
+  const drawRect = (x1, y1, x2, y2) => {
+    const ctx = maskCanvasRef.current.getContext('2d');
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(
+      Math.min(x1, x2),
+      Math.min(y1, y2),
+      Math.abs(x2 - x1),
+      Math.abs(y2 - y1)
+    );
   };
 
   const clearMask = () => {
@@ -318,6 +317,7 @@ const CanvasInpainting = (props) => {
         alignItems: 'center',
         width: displaySize.width,
         height: displaySize.height,
+        touchAction: 'none', // Prevents browser handling of touch events
       }}>
         <canvas ref={imageCanvasRef} style={{ position: 'absolute', left: 0, top: 0, width: '100%', height: '100%', backgroundColor: 'white' }} />
         <canvas ref={maskCanvasRef}
@@ -330,6 +330,7 @@ const CanvasInpainting = (props) => {
             background: 'transparent',
             width: '100%',
             height: '100%',
+            touchAction: 'none',
           }}
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
@@ -346,6 +347,7 @@ const CanvasInpainting = (props) => {
             width: '100%',
             height: '100%',
             pointerEvents: 'none',
+            touchAction: 'none',
           }}
         />
       </div>
