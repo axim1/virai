@@ -718,9 +718,6 @@ setIsRetrieving(false);
 
 
 
-
-            {/* image number  */}
-            {/* <div className={styles.inputRow}> */}
             {apiType !== 'object-creation' && apiType !== 'image-enhancement' && apiType !== 'video-generation' && apiType !== 'sketch-to-image' && 
             <div className={styles.inputColumn}>
 
@@ -740,63 +737,51 @@ setIsRetrieving(false);
 ))}
 
               </div>
+              </div>
               </div>}
-              </div>
+           
 
 
 
+{apiType !== 'object-creation' && apiType !== 'image-enhancement' && apiType !== 'video-generation' && (
+  <div className={styles.inputColumn}>
+    <p className={styles.label}>Aspect Ratio</p>
+    <div className={styles.aspectRatioButtons}>
+      <button
+        className={`${styles.aspectButton} ${aspectRatio === '16:9' ? styles.activeButton : ''}`}
+        onClick={() => setAspectRatio('16:9')}
+      >
+        16:9
+      </button>
+      <button
+        className={`${styles.aspectButton} ${aspectRatio === '3:2' ? styles.activeButton : ''}`}
+        onClick={() => setAspectRatio('3:2')}
+      >
+        3:2
+      </button>
+      <button
+        className={`${styles.aspectButton} ${aspectRatio === '4:3' ? styles.activeButton : ''}`}
+        onClick={() => setAspectRatio('4:3')}
+      >
+        4:3
+      </button>
+      <button
+        className={`${styles.aspectButton} ${aspectRatio === '1:1' ? styles.activeButton : ''}`}
+        onClick={() => setAspectRatio('1:1')}
+      >
+        1:1
+      </button>
+      <button
+        className={`${styles.aspectButton} ${aspectRatio === '2:3' ? styles.activeButton : ''}`}
+        onClick={() => setAspectRatio('2:3')}
+      >
+        2:3
+      </button>
+    </div>
+  </div>
+)}
 
-
-            {/* Aspect Ratio */}
-            {/* <div className={styles.inputRow}> */}
-            {apiType !== 'object-creation' && apiType !== 'image-enhancement' && apiType !== 'video-generation' &&    
             
-            <div className={styles.inputColumn}>
-              <p className={styles.label}>Aspect Ratio</p>
-              <div className={styles.aspectRatioButtons}>
-                <button
-                  className={`${styles.aspectButton} ${aspectRatio === '16:9' ? styles.activeButton : ''}`}
-                  onClick={() => setAspectRatio('16:9')}
-                // style={{ height: 'calc(70px / (16 / 9))' }} 
-                >
-                  16:9
-                </button>
-                <button
-                  className={`${styles.aspectButton} ${aspectRatio === '3:2' ? styles.activeButton : ''}`}
-                  onClick={() => setAspectRatio('3:2')}
-                // style={{ height: 'calc(70px / (3 / 2))' }} 
-                >
-                  3:2
-                </button>
-                <button
-                  className={`${styles.aspectButton} ${aspectRatio === '4:3' ? styles.activeButton : ''}`}
-                  onClick={() => setAspectRatio('4:3')}
-                // style={{ height: 'calc(70px / (4 / 3))' }} 
-                >
-                  4:3
-                </button>
-                <button
-                  className={`${styles.aspectButton} ${aspectRatio === '1:1' ? styles.activeButton : ''}`}
-                  onClick={() => setAspectRatio('1:1')}
-                // style={{ height: '70px' }} 
-                >
-                  1:1
-                </button>
-                <button
-                  className={`${styles.aspectButton} ${aspectRatio === '2:3' ? styles.activeButton : ''}`}
-                  onClick={() => setAspectRatio('2:3')}
-                // style={{ height: 'calc(70px / (2 / 3))' }} 
-                >
-                  2:3
-                </button>
-
-
-
-
-              </div>
-            </div>}
-            
-            {/* </div> */}
 
 
 
