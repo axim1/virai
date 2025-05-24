@@ -619,7 +619,7 @@ setIsRetrieving(false);
             
               <div className={styles.inputRow}>
                 <div className={styles.inputColumn}>
-                  <p className={styles.label_l}>Upload Image</p>
+                  <p className={styles.label_l} style={{ marginBottom: '10px' }}>Upload Image</p>
                   <label className={styles.uploadLabel}>
                     <input
                       type="file"
@@ -644,9 +644,7 @@ setIsRetrieving(false);
 
                 <div className={styles.promptLabel}>            
                     <p className={styles.label_l} style={{ margin: '0px' }}>Describe Your Image</p>
-                  {/* <button className={styles.magicButton}>
-                    Magic Prompt
-                  </button> */}
+  
                     <img 
     src={resetIcon}
     alt="Rest Button"
@@ -724,6 +722,8 @@ setIsRetrieving(false);
             {/* image number  */}
             {/* <div className={styles.inputRow}> */}
             {apiType !== 'object-creation' && apiType !== 'image-enhancement' && apiType !== 'video-generation' && apiType !== 'sketch-to-image' && 
+            <div className={styles.inputColumn}>
+
             <div className={styles.numButtonCont}>
 
               <p className={styles.label} >Images Number</p>
@@ -740,7 +740,8 @@ setIsRetrieving(false);
 ))}
 
               </div>
-            </div>}
+              </div>}
+              </div>
 
 
 

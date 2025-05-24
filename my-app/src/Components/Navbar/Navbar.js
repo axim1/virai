@@ -85,6 +85,7 @@ const Navbar = ({ loggedIn,  setLoggedIn = () => {}, onHomeClick,activeLink,setA
           Home
         </RouterLink>
 
+
         <ScrollLink
           to="tools-section"
           smooth={true}
@@ -94,27 +95,7 @@ const Navbar = ({ loggedIn,  setLoggedIn = () => {}, onHomeClick,activeLink,setA
         >
           AI Tools
         </ScrollLink>
-
-        <RouterLink
-          to="/gen"
-          className={`${styles.navItem} ${activeLink === 'compo' ? styles.active : ''}`}
-          onClick={() => setActiveLink('compo')}
-        >
-          Creation
-        </RouterLink>
-
-        <RouterLink
-          to="/gallery"
-          className={`${styles.navItem} ${activeLink === 'gallery' ? styles.active : ''}`}
-          onClick={() => setActiveLink('gallery')}
-        >
-          Gallery
-        </RouterLink>
-        {/* <ScrollLink to="gallery-section" smooth={true} duration={50} className={styles.navItem} offset={-150} onSetActive={() => setActiveLink('gallery')}>
-          Gallery
-        </ScrollLink> */}
-
-<ScrollLink 
+        <ScrollLink 
   to="pricing-section" 
   smooth={true} 
   duration={50} 
@@ -137,6 +118,36 @@ const Navbar = ({ loggedIn,  setLoggedIn = () => {}, onHomeClick,activeLink,setA
   FAQ
 </ScrollLink>
 
+
+        <RouterLink
+          to="/gen"
+          className={`${styles.navItem} ${activeLink === 'compo' ? styles.active : ''}`}
+          onClick={() => setActiveLink('compo')}
+        >
+          Creation
+        </RouterLink>
+
+        <RouterLink
+          to="/gallery"
+          className={`${styles.navItem} ${activeLink === 'gallery' ? styles.active : ''}`}
+          onClick={() => setActiveLink('gallery')}
+        >
+          Gallery
+        </RouterLink>
+
+
+        {/* <ScrollLink to="gallery-section" smooth={true} duration={50} className={styles.navItem} offset={-150} onSetActive={() => setActiveLink('gallery')}>
+          Gallery
+        </ScrollLink> */}
+
+
+<RouterLink
+          to="/chat-ai"
+          className={`${styles.navItem} ${activeLink === 'chat-ai' ? styles.active : ''}`}
+          onClick={() => setActiveLink('chat-ai')}
+        >
+          Chat AI
+        </RouterLink>
       </div>
 
       {/* User & Login/Signup Section */}
@@ -155,10 +166,20 @@ const Navbar = ({ loggedIn,  setLoggedIn = () => {}, onHomeClick,activeLink,setA
 
               {dropdownOpen && (
                 <div className={styles.userDropdown}>
+                  <div style={{display:'flex', flexDirection:'row', justifyContent:'space-between',padding: '24px'}}>
+                 <div>
                   <div><strong>{user.fname} {user.lname}</strong></div>
-                  <div><strong>Email:</strong> {user.email}</div>
-                  <div><strong>Images Left:</strong> {user.no_of_images_left}</div>
-                  <button onClick={handleLogout} className={styles.navItem}>Logout</button>
+                  <div style={{
+                    color:'#999999'
+                  }}>{user.email}</div>
+                 </div>
+                  <div className={styles.coins} style={{width:'50px', height:'50px'}}>
+                <img src={coinIcon}/>{user.no_of_images_left}
+              </div>
+              </div>
+                  {/* <div><strong>Images Left:</strong> {user.no_of_images_left}</div> */}
+                          <RouterLink to='/user' className={styles.profileButton} >Profile</RouterLink>
+                  <button onClick={handleLogout} className={styles.logoutButton} >Logout</button>
 
                 </div>
 

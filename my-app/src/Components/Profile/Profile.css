@@ -1,0 +1,206 @@
+.userProfile {
+    margin: 100px 0px;
+    font-family: Poppins, sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    /* text-transform: capitalize; */
+  
+    width: 100vw;
+    /* height: 100%; */
+    /* background: #0f0f0f; */
+    /* background-size: cover; */
+    background-repeat: no-repeat;
+    color: #2E8B57;
+  
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
+    text-align: center;
+  
+    /* box-shadow: 0 2px 4px rgb(0 0 10 / 64%), 0 8px 16px rgb(0 10 0 / 34%); */
+    /* border-radius: 8px; */
+    padding: 1rem;
+  }
+  
+  form {
+    /* width: 400px; */
+  display: flex;
+  flex-wrap: wrap;
+  max-width: 800px;
+  justify-content: center;
+    background: #1a1a1a;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+  }
+  .form-ddd{
+    padding: 10px;
+    margin-bottom: 18px;
+  }
+  .form-container {
+    width: 100%;
+    height: 40px;
+    padding: 0 15px;
+    margin: 8px 0;
+    box-sizing: border-box;
+  
+    border: none;
+    border-radius: 30px;
+    background: #666;
+    color: #CCC;
+  
+    font-family: Poppins, sans-serif;
+    font-size: 14px;
+  }
+  
+  .form-container::placeholder {
+    color: #CCC;
+  }
+  
+  input[type="file"].form-container {
+    padding: 8px;
+    height: auto;
+    /* background: transparent; */
+    /* color: #EEE; */
+    border-radius: 30px;
+  
+  }
+  
+  select.form-container {
+    background: #666;
+    color: #CCC;
+    border: none;
+  }
+  
+  .updateButton {
+    width: 100%;
+    height: 40px;
+    margin-top: 10px;
+    border: none;
+    border-radius: 100px !important;
+    background-color: #2E8B57 !important;
+    color: #FFF !important;
+  
+    font-family: Poppins, sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    text-transform: capitalize;
+  
+    cursor: pointer;
+  }
+  
+  /* .upload-label {
+    display: inline-block;
+    width: 100%;
+    height: 40px;
+    line-height: 40px;
+    text-align: center;
+    border-radius: 30px;
+    background: #444;
+    color: #ccc;
+    font-family: Poppins;
+    font-size: 14px;
+    font-weight: 400;
+    cursor: pointer;
+    margin-bottom: 10px;
+    transition: background 0.3s ease;
+  } */
+  /* 
+  .upload-label:hover {
+    background: #2E8B57;
+    color: #fff;
+  }
+  
+  input[type="file"] {
+    display: none;
+  } */
+  .form-errors {
+    /* background-color: #ffe0e0; */
+    /* border: 1px solid #ffaaaa;
+    color: #b00020;
+    border-radius: 5px; */
+    padding: 10px 15px;
+    margin-bottom: 15px;
+    font-family: Poppins;
+    font-size: 14px;
+  }
+  
+  .form-errors ul {
+    margin: 0;
+    padding-left: 20px;
+  }
+  
+  .form-errors li {
+    list-style-type: disc;
+  }
+  .profile-summary {
+    width: 100%;
+    max-width: 800px;
+    background: #1a1a1a;
+    border-radius: 12px;
+    padding: 30px 20px;
+    margin-bottom: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: 'Poppins', sans-serif;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    color: #f0f0f0;
+    text-align: left;
+  }
+  
+  .profile-pic {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #2E8B57;
+    background-color: #444;
+    margin-bottom: 12px;
+  }
+  
+  .profile-text {
+    width: 100%;
+    display: flex;
+    /* margin: 20px 0px; */
+    justify-content: space-evenly;
+  }
+  
+  .profile-text h2 {
+    font-size: 20px;
+    margin: 0 0 12px 0;
+    text-align: center;
+  }
+  
+  .profile-text p {
+    margin: 4px 0;
+    font-size: 14px;
+    color: #ccc;
+    text-align: left;
+  }
+  
+  @media (max-width: 600px) {
+    .profile-summary {
+      max-width: 100%;
+    }
+  }
+  
+
+  .coins{
+    display: flex;
+    /* height: 70px; */
+    /* width: 100px; */
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    color: #999;
+  text-align: center;
+  font-family: Poppins;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  }

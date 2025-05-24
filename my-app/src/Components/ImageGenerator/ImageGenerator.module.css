@@ -102,7 +102,7 @@ color:#999999;
 }
 
 .leftToolBarTop {
-  max-height: 350px; /* Adjusted for better spacing */
+  max-height: 355px; /* Adjusted for better spacing */
   justify-content: space-evenly;
 }
 
@@ -145,7 +145,8 @@ color:#999999;
   flex-shrink: 0;
   border-radius: 7px;
   background: #333;  
-  padding: 15px 20px ;
+  padding: 13px 20px ;
+  /* padding-bottom: 15px; */
   /* height: 100vh; */
   /* position: relative; Ensures absolute children can be positioned within */
   overflow: visible; /* Allow dropdowns to escape the container */
@@ -167,7 +168,7 @@ color:#999999;
   margin-bottom: 10px;
   overflow-y: scroll;
   overflow-x:hidden; 
-  border-radius: 7px;
+  /* border-radius: 7px; */
 
   /* height: calc(100vh - 200px);  */
   /* position: relative; Keep elements within bounds but still allow overflow */
@@ -237,13 +238,13 @@ color:#999999;
   display: flex;
   flex-direction: column;
   width: 100%;
-  margin-bottom: 20px;
+  margin-bottom: 30px;
 }
 
 .inputColumn {
   display: flex;
   flex-direction: column;
-  margin-top: 10px;
+  margin-bottom: 20px;
   /* margin: 20px 0; */
   /* align-items: center; */
 

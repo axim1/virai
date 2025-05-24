@@ -59,7 +59,7 @@ const PricingSection = () => {
     <div className="pricing-section">
       <div style={{margin:'32px 0px'}}>
         <p className="p1">AI-powered creative toolkit for</p>
-        <p className="p2">individuals & teams.</p>
+        <p className="p2">individuals & teams</p>
         <button className='topButton'>Start your 7-day free trial</button>
       </div>
 

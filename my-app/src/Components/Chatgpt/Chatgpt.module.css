@@ -1,0 +1,84 @@
+/* Chatgpt.module.css */
+
+/* .chatContainer { */
+
+    /* background-color: #f9fafb; */
+    /* border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    height: 100%;
+
+  } */
+  /* Chatgpt.module.css */
+
+.chatContainer {
+    /* padding: 100px; */
+    max-width: 800px;
+    margin: 100px auto;
+    /* background-color: #121212; */
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    min-height: 80vh;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .chatMessages {
+    flex: 1;
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background: #1e1e1e;
+    border-radius: 8px;
+    overflow-y: auto;
+    border: 1px solid #333;
+  }
+  
+  .message {
+    margin-bottom: 1.2rem;
+    line-height: 1.6;
+  }
+  
+  .user {
+    color: #60a5fa; /* Light blue for user */
+    font-weight: bold;
+  }
+  
+  .assistant {
+    color: #34d399; /* Green for assistant */
+    font-weight: bold;
+  }
+  
+  .inputArea {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+  }
+  
+  .inputField {
+    flex: 1;
+    padding: 0.75rem;
+    background-color: #1e1e1e;
+    border: 1px solid #333;
+    border-radius: 8px;
+    color: #f3f4f6;
+    font-size: 1rem;
+  }
+  
+  .inputField::placeholder {
+    color: #9ca3af;
+  }
+  
+  .sendButton {
+    padding: 0.75rem 1.5rem;
+    background-color: #2563eb;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .sendButton:hover {
+    background-color: #1d4ed8;
+  }
+  
