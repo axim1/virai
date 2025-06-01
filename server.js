@@ -10,6 +10,11 @@ const app = express();
 const FormData = require('form-data');
 const { v4: uuidv4 } = require('uuid'); // Import UUID
 const { OpenAI } = require('openai');
+const imageEnhancementRoutes = require('./routes/serverless_apis');
+const sketchToImageServerless = require('./routes/serverless_sketch_to_image');
+const d3Serverless = require('./routes/3d-model-generator');
+const t2i = require('./routes/text-to-image');
+
 
 require('dotenv').config();
 const fs = require('fs');
@@ -39,10 +44,14 @@ app.use(passport.session());
 app.use(express.json());
 
 app.use(express.urlencoded({ extended: true }));
-app.use(cors());
+app.use(cors({ origin: '*' }));
 const { isStringObject } = require("util/types");
 
 const uri = "mongodb+srv://asim6832475:1234@cluster0.ukza83p.mongodb.net/?retryWrites=true&w=majority";
+app.use('/api/sl', imageEnhancementRoutes);
+app.use('/api/serverless', sketchToImageServerless);
+app.use('/api/serverless', d3Serverless);
+app.use('/api/serverless', t2i);
 
 const clientOptions = { serverApi: { version: '1', strict: true, deprecationErrors: true } };
     // First API call to get the access token

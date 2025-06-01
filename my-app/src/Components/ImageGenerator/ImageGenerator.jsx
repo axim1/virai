@@ -114,6 +114,178 @@ function ImageGenerator({ onGenerateImage }) {
     }
   };
 
+
+  const handleRunpod3DGeneration = async (formData) => {
+    try {
+      // Step 1: Submit job
+      const initRes = await axios.post(`${apiUrl}api/serverless/generate-3d-model`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+  
+      const jobId = initRes.data.job_id;
+      if (!jobId) throw new Error('No job ID received from server');
+  
+      const endTime = Date.now() + 240000; // 4-minute timeout
+  
+      // Step 2: Poll job status
+      const pollForResult = async () => {
+        return new Promise((resolve, reject) => {
+          const interval = setInterval(async () => {
+            if (Date.now() > endTime) {
+              clearInterval(interval);
+              reject(new Error('GLB generation timed out'));
+              return;
+            }
+  
+            try {
+              const statusRes = await axios.get(`${apiUrl}api/serverless/3d-model-status/${jobId}`);
+  
+              if (statusRes.status === 202) return;
+  
+              if (statusRes.status === 200 && statusRes.data.glb_base64) {
+                clearInterval(interval);
+                resolve(statusRes.data.glb_base64);
+              }
+            } catch (err) {
+              if (err.response?.status === 202) return;
+              clearInterval(interval);
+              reject(err);
+            }
+          }, 3000); // poll every 3s
+        });
+      };
+  
+      const glbBase64 = await pollForResult();
+      const blob = base64ToBlob(glbBase64, 'model/gltf-binary');
+      const url = URL.createObjectURL(blob);
+      setGeneratedModelUrl(url);
+    } catch (err) {
+      console.error('RunPod 3D generation failed:', err);
+      throw err;
+    } finally {
+      clearTimeout(retrieveTimeoutRef.current);
+      setIsRetrieving(false);
+      setIsLoading(false);
+    }
+  };
+  
+// New handler for sketch-to-image (RunPod serverless)
+const handleSketchToImageServerless = async (formData) => {
+  try {
+    // Step 1: Submit the sketch image
+    const initRes = await axios.post(`${apiUrl}api/serverless/sketch-to-image-serverless`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+
+    const jobId = initRes.data.job_id;
+    if (!jobId) throw new Error('No job_id received from server');
+
+    const endTime = Date.now() + 100000; // 100 sec timeout
+
+    // Step 2: Polling logic
+    const pollResult = async () => {
+      return new Promise((resolve, reject) => {
+        const intervalId = setInterval(async () => {
+          if (Date.now() > endTime) {
+            clearInterval(intervalId);
+            return reject(new Error('Timeout while waiting for sketch-to-image result'));
+          }
+
+          try {
+            const pollRes = await axios.get(`${apiUrl}api/serverless/sketch-to-image-status/${jobId}`, {
+              params: { userId }
+            });
+
+            if (pollRes.status === 202) return; // still processing
+
+            if (pollRes.status === 200 && pollRes.data.imageUrls) {
+              clearInterval(intervalId);
+              resolve(pollRes.data.imageUrls);
+            }
+            
+          } catch (err) {
+            if (err.response && err.response.status === 202) return;
+            clearInterval(intervalId);
+            reject(err);
+          }
+        }, 3000);
+      });
+    };
+
+    const imageUrls = await pollResult();
+    setGeneratedImages(imageUrls);
+    onGenerateImage(imageUrls);
+  } catch (err) {
+    console.error('Sketch-to-image (serverless) error:', err);
+    throw err;
+  }
+};
+
+const handleTextToImageServerless = async () => {
+  try {
+    const payload = {
+      userId,
+      prompt: promptText,
+      negative_prompt: negativePromptText,
+      width: imageWidth,
+      height: imageHeight,
+      num_images: selectedNumImages,
+      steps: 25,
+      guidance_scale: scale,
+      seed: Math.floor(Math.random() * 1000000000),
+      scheduler: 'normal',
+      clip_skip: 0,
+      style: styleType,
+      safetensor: false,
+      model_xl: false,
+      revert_extra: null
+    };
+
+    const initRes = await axios.post(`${apiUrl}api/serverless/text-to-image-serverless`, payload);
+    const jobId = initRes.data?.job_id;
+    if (!jobId) throw new Error('No job_id returned from server');
+
+    const endTime = Date.now() + 240000; // 4 min timeout
+
+    const pollResult = async () => {
+      return new Promise((resolve, reject) => {
+        const interval = setInterval(async () => {
+          if (Date.now() > endTime) {
+            clearInterval(interval);
+            return reject(new Error('Timeout while waiting for text-to-image result'));
+          }
+
+          try {
+            const pollRes = await axios.get(`${apiUrl}api/serverless/text-to-image-status/${jobId}`);
+            if (pollRes.status === 202) return;
+
+            if (pollRes.status === 200 && pollRes.data.imageUrls) {
+              clearInterval(interval);
+              resolve(pollRes.data.imageUrls);
+            }
+          } catch (err) {
+            if (err.response && err.response.status === 202) return;
+            clearInterval(interval);
+            reject(err);
+          }
+        }, 3000);
+      });
+    };
+
+    const imageUrls = await pollResult();
+    setGeneratedImages(imageUrls);
+    onGenerateImage(imageUrls);
+  } catch (err) {
+    console.error('Text-to-image (serverless) error:', err);
+    throw err;
+  } finally {
+    clearTimeout(retrieveTimeoutRef.current);
+    setIsRetrieving(false);
+    setIsLoading(false);
+  }
+};
+
+
   function base64ToBlob(base64, mime) {
     const byteCharacters = atob(base64);
     const byteArrays = [];
@@ -223,12 +395,19 @@ retrieveTimeoutRef.current = setTimeout(() => {
       if (apiType === 'video-generation') {
         await handleVideoGeneration(formData);
       } else if (apiType === 'object-creation') {
-        await handleObjectCreation(formData);
+        await handleRunpod3DGeneration(formData);
       } else if (apiType === 'image-enhancement') {
         await handleImageEnhancement(formData);
-      } else {
+      } else if (apiType === 'sketch-to-image') {
+        await handleSketchToImageServerless(formData);
+
+      } 
+     else if (apiType === 'text-to-image') {
+      await handleTextToImageServerless();  // <-- ADD THIS
+    }else {
         // Handle other image generation types
         const response = await axios.post(`${apiUrl}${apiType}`, formData, {
+      
           headers: { 'Content-Type': 'multipart/form-data' },
           responseType: 'json'
         });
@@ -254,10 +433,10 @@ setIsRetrieving(false);
   const handleImageEnhancement = async (formData) => {
     try {
       // Step 1: Submit the initial request
-      const initResponse = await axios.post(`${apiUrl}image-enhancement`, formData, {
+      const initResponse = await axios.post(`${apiUrl}api/sl/image-enhancement`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
-      
+      console.log(initResponse)
       if (!initResponse.data.uuid) {
         throw new Error('No UUID received from server');
       }
