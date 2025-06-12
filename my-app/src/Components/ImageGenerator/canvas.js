@@ -1,6 +1,14 @@
 import React, { useRef, useState, useEffect } from 'react';
 import styles from './ImageGenerator.module.css';
 
+// Import the icons
+import tticon1 from '../../assets/vector_icons/crop-01 1.svg';
+import tticon2 from '../../assets/vector_icons/edit-01 1.svg';
+import tticon3 from '../../assets/vector_icons/resize-01 1.svg';
+import tticon4 from '../../assets/vector_icons/share-01 1.svg';
+import tticon5 from '../../assets/vector_icons/download-01 1.svg';
+import tticon6 from '../../assets/vector_icons/delete-01 1.svg';
+
 const CanvasInpainting = (props) => {
   const imageCanvasRef = useRef(null);
   const maskCanvasRef = useRef(null);
@@ -14,6 +22,9 @@ const CanvasInpainting = (props) => {
   const [displaySize, setDisplaySize] = useState({ width: 500, height: 500 });
   const [scaleFactor, setScaleFactor] = useState(1);
   const [brushSize, setBrushSize] = useState(20);
+
+  // Array of toolbar icons
+  const tticons = [tticon1, tticon2, tticon3, tticon4, tticon5, tticon6];
 
   useEffect(() => {
     if (!props.uploadedImage || !imageCanvasRef.current || !maskCanvasRef.current || !previewCanvasRef.current) return;
@@ -301,24 +312,113 @@ const CanvasInpainting = (props) => {
   };
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', width: '100%', height: '100%' }}>
-      <div style={{ marginTop: '10px' }}>
-        <label style={{ fontFamily: 'Poppins' }}>Brush Size: {brushSize}px</label>
-        <input type="range" min="5" max="100" value={brushSize} onChange={(e) => setBrushSize(parseInt(e.target.value))} />
+    <div style={{ 
+      display: 'flex', 
+      justifyContent: 'center', 
+      alignItems: 'center', 
+      flexDirection: 'column', 
+      width: '100%', 
+      height: '100%',
+      fontFamily: 'Poppins',
+      padding: '20px'
+    }}>
+      {/* Controls Container */}
+      <div style={{ 
+        width: '100%',
+        marginBottom: '20px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '15px'
+      }}>
+        {/* Brush Size Control */}
+        <div style={{ 
+          display: 'flex', 
+          flexDirection: 'column',
+          gap: '8px'
+        }}>
+          <label style={{ 
+            color: '#FFF',
+            fontSize: '14px',
+            fontWeight: '400'
+          }}>
+            Brush Size: {brushSize}px
+          </label>
+          <input 
+            type="range" 
+            min="5" 
+            max="100" 
+            value={brushSize} 
+            onChange={(e) => setBrushSize(parseInt(e.target.value))}
+            style={{
+              width: '100%',
+              maxWidth: '300px',
+              accentColor: '#2E8B57'
+            }}
+          />
+        </div>
+
+        {/* Drawing Mode Selector */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px'
+        }}>
+          <label style={{ 
+            color: '#FFF',
+            fontSize: '14px',
+            fontWeight: '400'
+          }}>
+            Mode:
+          </label>
+          <select 
+            value={drawMode} 
+            onChange={(e) => setDrawMode(e.target.value)}
+            style={{
+              padding: '8px 12px',
+              borderRadius: '7px',
+              border: '1px solid #2E8B57',
+              backgroundColor: 'rgba(46, 139, 87, 0.1)',
+              color: '#FFF',
+              fontFamily: 'Poppins',
+              fontSize: '14px',
+              cursor: 'pointer',
+              outline: 'none'
+            }}
+          >
+            <option value="brush">Brush</option>
+            <option value="circle">Circle</option>
+            <option value="rectangle">Rectangle</option>
+          </select>
+        </div>
       </div>
 
+      {/* Canvas Container */}
       <div style={{
         position: 'relative',
-        border: '1px solid #ccc',
+        border: '1px solid rgba(46, 139, 87, 0.3)',
+        borderRadius: '8px',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
         width: displaySize.width,
         height: displaySize.height,
         touchAction: 'none',
+        backgroundColor: 'rgba(46, 139, 87, 0.05)'
       }}>
-        <canvas ref={imageCanvasRef} style={{ position: 'absolute', left: 0, top: 0, width: '100%', height: '100%', backgroundColor: 'white' }} />
-        <canvas ref={maskCanvasRef}
+        <canvas 
+          ref={imageCanvasRef} 
+          style={{ 
+            position: 'absolute', 
+            left: 0, 
+            top: 0, 
+            width: '100%', 
+            height: '100%', 
+            backgroundColor: 'white',
+            borderRadius: '8px'
+          }} 
+        />
+        <canvas 
+          ref={maskCanvasRef}
           style={{
             position: 'absolute',
             left: 0,
@@ -329,13 +429,15 @@ const CanvasInpainting = (props) => {
             width: '100%',
             height: '100%',
             touchAction: 'none',
+            borderRadius: '8px'
           }}
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
           onMouseLeave={handleMouseUp}
         />
-        <canvas ref={previewCanvasRef}
+        <canvas 
+          ref={previewCanvasRef}
           style={{
             position: 'absolute',
             left: 0,
@@ -345,37 +447,9 @@ const CanvasInpainting = (props) => {
             width: '100%',
             height: '100%',
             touchAction: 'none',
+            borderRadius: '8px'
           }}
         />
-      </div>
-
-      <br />
-      <div style={{ display: 'flex', gap: '12px', marginTop: '12px' }}>
-        <button onClick={clearMask} className={styles.downloadButton}>Clear Mask</button>
-        <button onClick={saveCombinedImage} className={styles.downloadButton}>Save Image</button>
-        <div style={{
-          marginTop: '10px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '10px',
-          fontFamily: 'Poppins',
-          fontSize: '14px'
-        }}>
-          <label style={{ fontFamily: 'Poppins' }}>Mode:</label>
-          <select style={{
-            padding: '6px 10px',
-            borderRadius: '6px',
-            border: '1px solid #ccc',
-            backgroundColor: '#f9f9f9',
-            fontFamily: 'Poppins',
-            fontSize: '14px',
-            cursor: 'pointer'
-          }} value={drawMode} onChange={(e) => setDrawMode(e.target.value)}>
-            <option value="brush">Brush</option>
-            <option value="circle">Circle</option>
-            <option value="rectangle">Rectangle</option>
-          </select>
-        </div>
       </div>
     </div>
   );

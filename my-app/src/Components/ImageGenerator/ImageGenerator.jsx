@@ -80,6 +80,7 @@ function ImageGenerator({ onGenerateImage }) {
   const [imageHeight, setImageHeight] = useState(512);
   const [strength, setStrength] = useState(0.75);
   const [ModOrRep,setModOrRep] = useState('Replace') // state for image enhancement to check if image is to be modified or replaced
+  const [isImageUploaded, setIsImageUploaded] = useState(false);
   
 
   useEffect(() => {
@@ -481,7 +482,7 @@ setIsRetrieving(false);
               clearInterval(intervalId);
               reject(error);
             }
-          }, 3000); // Poll every 3 seconds
+          }, 3000);
         });
       };
       
@@ -625,17 +626,18 @@ setIsRetrieving(false);
   };
   
   const handleImageUpload = (event) => {
-    if (apiType === 'image-enhancement') {
-      const file = event.target.files[0];
-      if (file) {
+    const file = event.target.files[0];
+    if (file) {
+      const previewUrl = URL.createObjectURL(file);
+      if (apiType === 'image-enhancement') {
         const img = new Image();
         img.onload = () => {
-          setUploadedImage(img); // Set the fully loaded image
+          setUploadedImage(img);
         };
-        img.src = URL.createObjectURL(file); // Convert to a URL
+        img.src = previewUrl;
+      } else {
+        setUploadedImage(file);
       }
-    } else {
-      setUploadedImage(event.target.files[0]);
     }
   };
   const formatApiType = (apiType) => {
@@ -794,7 +796,7 @@ setIsRetrieving(false);
 
 
             {/* Upload Image */}
-            {(apiType === 'sketch-to-image' || apiType === 'object-creation' || apiType === 'video-generation' || apiType === 'image-enhancement')&&
+            {(apiType === 'sketch-to-image' || apiType === 'object-creation' || apiType === 'video-generation' || apiType === 'image-enhancement') &&
             
               <div className={styles.inputRow}>
                 <div className={styles.inputColumn}>
@@ -804,15 +806,36 @@ setIsRetrieving(false);
                       type="file"
                       className={styles.uploadInput}
                       onChange={handleImageUpload}
+                      accept="image/*"
                     />
-                    <span className={styles.uploadPlaceholder}>UPLOAD IMAGE</span>
+                    {uploadedImage ? (
+                      <img 
+                        src={uploadedImage instanceof File ? URL.createObjectURL(uploadedImage) : uploadedImage.src} 
+                        alt="Preview" 
+                        className={styles.uploadPreview}
+                      />
+                    ) : (
+                      <span className={styles.uploadPlaceholder}>UPLOAD IMAGE</span>
+                    )}
                   </label>
                 </div>
-        
-
               </div>
             }
-
+            {(apiType === 'image-enhancement') &&
+            <div style={{ display: 'flex', gap: '10px',marginBottom:'30px' }}>
+  <button
+    className={`${styles.numButton} ${ModOrRep === 'Replace' ? styles.activeButton : ''}`}
+    onClick={() => setModOrRep('Replace')}
+  >
+    Replace    
+  </button>
+  <button
+    className={`${styles.numButton} ${ModOrRep === 'Modify' ? styles.activeButton : ''}`}
+    onClick={() => setModOrRep('Modify')}
+  >
+    Modify    
+  </button>
+</div>}
 
 <div style={{width:250}}></div>
             {/* Prompt input */}
@@ -870,22 +893,8 @@ setIsRetrieving(false);
             </div>}
             
 
-            <br />
+      
 
-            <div style={{ display: 'flex', gap: '10px' }}>
-  <button
-    className={`${styles.numButton} ${ModOrRep === 'Replace' ? styles.activeButton : ''}`}
-    onClick={() => setModOrRep('Replace')}
-  >
-    Replace    
-  </button>
-  <button
-    className={`${styles.numButton} ${ModOrRep === 'Modify' ? styles.activeButton : ''}`}
-    onClick={() => setModOrRep('Modify')}
-  >
-    Modify    
-  </button>
-</div>
 
 
 
@@ -1015,7 +1024,34 @@ setIsRetrieving(false);
 
 
 
+{/* Guidance Scale Slider */}
+<div className={styles.inputColumn}>
+  <p className={styles.label} style={{ margin: '0px' }}>Guidance Scale: {scale}</p>
+  <input
+    type="range"
+    min="1"
+    max="20"
+    step="0.1"
+    value={scale}
+    onChange={(e) => setScale(parseFloat(e.target.value))}
+    className={styles.slider}
+  />
+</div>
 
+{/* Strength Slider */}
+<div className={styles.inputColumn}>
+  <p className={styles.label} style={{ margin: '0px'}}>Strength: {strength}</p>
+  <input
+    type="range"
+    style={{color:'#3b7d23'}}
+    min="0"
+    max="1"
+    step="0.01"
+    value={strength}
+    onChange={(e) => setStrength(parseFloat(e.target.value))}
+    className={styles.slider}
+  />
+</div>
 
             {/* Negative prompt */}
 
@@ -1043,6 +1079,7 @@ setIsRetrieving(false);
               </div>
             </div>}
             
+
 
 
 
@@ -1099,16 +1136,35 @@ setIsRetrieving(false);
         {/* </div> */}
           <div className={styles.topToolBar}>
             <div style={{}}>{formatApiType(apiType)}</div>
-
             <div>
               <div className={styles.topToolBarIcons}>
                 {tticons.map((iconUrl, index) => (
                   <div key={index} style={{ width: "100%" }}>
                     <button
-                      // onClick={() => handleApiTypeChange(apiTypes[index])} // Set API Type
                       onClick={() => {
-                        if (index === 4) {
-                          handleDownloadAll(); // Only the 5th icon (index 4) triggers download
+                        switch(index) {
+                          case 0: // Crop
+                            // Add crop functionality
+                            break;
+                          case 1: // Edit
+                            // Add edit functionality
+                            break;
+                          case 2: // Resize
+                            // Add resize functionality
+                            break;
+                          case 3: // Share
+                            // Add share functionality
+                            break;
+                          case 4: // Download
+                            handleDownloadAll();
+                            break;
+                          case 5: // Delete
+                            if (apiType === 'image-enhancement' && canvasRef.current) {
+                              canvasRef.current.clearMask();
+                            }
+                            break;
+                          default:
+                            break;
                         }
                       }}
                       style={{
@@ -1127,12 +1183,8 @@ setIsRetrieving(false);
                         src={iconUrl}
                         alt={`icon-${index}`}
                         className={styles.toolBarIcon}
-                        style={{
-                          // filter: "brightness(0) saturate(100%) invert(32%) sepia(49%) saturate(433%) hue-rotate(97deg) brightness(95%) contrast(92%)" : "brightness(0) saturate(100%) invert(60%)", // Highlight active icon
-                        }}
                       />
                     </button>
-                    {/* {index !== icons.length - 1 && <div className={styles.dividerHorizontal} />} */}
                   </div>
                 ))}
               </div>
@@ -1140,40 +1192,47 @@ setIsRetrieving(false);
           </div>
 
           <div className={styles.imageContainer}>
-  {apiType === 'object-creation' && generatedModelUrl && (
-    <ModelViewer modelPath={generatedModelUrl} />
-  )}
+            {apiType === 'image-enhancement' && uploadedImage ? (
+              <CanvasInpainting 
+                uploadedImage={uploadedImage}
+                key={uploadedImage?.src || Date.now()}
+                canvasRef={canvasRef}
+              />
+            ) : (
+              <>
+                {apiType === 'object-creation' && generatedModelUrl && (
+                  <ModelViewer modelPath={generatedModelUrl} />
+                )}
 
-  {apiType === 'video-generation' && generatedVideoUrl && (
-    <div className={styles.generatedVideoContainer}>
-      <video controls className={styles.generatedVideo}>
-        <source src={generatedVideoUrl} type="video/mp4" />
-        Your browser does not support the video tag.
-      </video>
-      {/* <a
-        href={generatedVideoUrl}
-        download="generated_video.mp4"
-        className={styles.downloadButton}
-      >
-        Download Video
-      </a> */}
-    </div>
-  )}
-  {apiType === 'image-enhancement' && uploadedImage && (
-    <CanvasInpainting uploadedImage ={uploadedImage}
-    key={uploadedImage?.src || Date.now()}
-    canvasRef={canvasRef}/>
-  )}
+                {apiType === 'video-generation' && generatedVideoUrl && (
+                  <div className={styles.generatedVideoContainer}>
+                    <video controls className={styles.generatedVideo}>
+                      <source src={generatedVideoUrl} type="video/mp4" />
+                      Your browser does not support the video tag.
+                    </video>
+                  </div>
+                )}
 
-  {apiType !== 'object-creation' && apiType !== 'video-generation' && generatedImages.length > 0 && (
-   <div className={`${styles.generatedImagesGrid} ${styles['grid-' + selectedNumImages]}`}>
-   {generatedImages.slice(0, selectedNumImages).map((url, index) => (
-     <img key={index} src={url}  alt={`Generated ${index}`} />
-   ))}
- </div>
- 
-  )}
-</div>
+{apiType !== 'object-creation' && apiType !== 'video-generation' && (
+  <>
+    {generatedImages.length > 0 ? (
+      <div className={`${styles.generatedImagesGrid} ${styles['grid-' + selectedNumImages]}`}>
+        {generatedImages.slice(0, selectedNumImages).map((url, index) => (
+          <img key={index} src={url} alt={`Generated ${index}`} />
+        ))}
+      </div>
+    ) : (
+      <div className={styles.emptyState}>
+        <h2>✨ Get Started</h2>
+        <p>Upload an image or write a prompt to generate visuals with AI.</p>
+      </div>
+    )}
+  </>
+)}
+
+              </>
+            )}
+          </div>
 
         </div>
       </div>
