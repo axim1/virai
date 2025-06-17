@@ -183,7 +183,7 @@ const ImageGallery = () => {
                                 modelUrl: image.image
                             });
                         }}
-                        style={{ cursor: 'pointer', maxWidth: '150px', maxHeight: '100%' }}
+                        style={{ cursor: 'pointer' }}
                     />
                 </div>
             );
