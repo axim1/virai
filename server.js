@@ -1755,10 +1755,75 @@ app.get("/api/user/:userId", async (req, res) => {
 
 
 
+const imageRequestQueue = new Queue(async (task, cb) => {
+  try {
+    const { filter, page = 1, limit = 8, userId } = task;
+
+    console.log("✅ Backend: /api/images was hit");
+    console.log("filter", filter);
+
+    const query = {};
+    let sort = {};
+
+    // Filter logic
+    if (filter === "Owned by Me" && userId) {
+      query.userId = userId;
+    }
+
+    // Sort logic
+    switch (filter) {
+      case "Newest":
+        sort = { createdAt: -1 };
+        break;
+      case "Oldest":
+        sort = { createdAt: 1 };
+        break;
+      case "Most Liked":
+        sort = { likes: -1 };
+        break;
+      case "Most Viewed":
+        sort = { views: -1 };
+        break;
+      case "Trending":
+        sort = { likes: -1, views: -1 };
+        break;
+      default:
+        // Fallback: treat filter as keyword search
+        if (filter) {
+          query.description = { $regex: filter, $options: 'i' };
+        }
+    }
+
+    const images = await GeneratedImage.find(query)
+      .sort(sort)
+      .skip((page - 1) * limit)
+      .limit(Number(limit));
+
+    const imageUrls = images.map(img => ({
+      _id: img._id,
+      image: `data:image/png;base64,${img.image.toString('base64')}`,
+      likes: img.likes || 0,
+      views: img.views || 0,
+      fires: img.fires || 0,
+      shares: img.shares || 0,
+      owner: img.owner || {},
+    }));
+
+    console.log("result", { images: imageUrls });
+
+    cb(null, { images: imageUrls });
+  } catch (error) {
+    console.error("❌ Queue error:", error);
+    cb(error);
+  }
+});
+
 app.get('/api/images', async (req, res) => {
   try {
+    console.log('✅ Backend: /api/images was hit');
+
     const { filter, page = 1, limit = 8, userId } = req.query;
-    
+    console.log("filter", filter)
     // Add request to queue
     imageRequestQueue.push({ filter, page, limit, userId }, (err, result) => {
       if (err) {
@@ -1768,6 +1833,7 @@ app.get('/api/images', async (req, res) => {
           message: err.message 
         });
       }
+      console.log("result")
       res.json(result);
     });
   } catch (error) {
