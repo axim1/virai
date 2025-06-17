@@ -7,7 +7,8 @@ import view from '../../assets/vector_icons/view.svg';
 import download from '../../assets/vector_icons/download.svg';
 import more from '../../assets/vector_icons/more.svg';
 import filterIcon from '../../assets/vector_icons/Filters 1.svg';
-
+import ModelViewer from '../ImageGenerator/ModelViewer';
+import placeholder3d from '../../assets/vector_icons/3D object generation-01 1.svg';
 const apiUrl = process.env.REACT_APP_API_URL;
 
 const ImageGallery = () => {
@@ -21,6 +22,8 @@ const ImageGallery = () => {
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
     const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState(null);
+    const [selectedModel, setSelectedModel] = useState(null);
     const limit = 8;
 
     useEffect(() => {
@@ -64,6 +67,12 @@ const ImageGallery = () => {
             console.log("📡 Fetching from:", url);
             const response = await fetch(url);
             const data = await response.json();
+            
+            console.log("📦 Received data:", {
+                totalImages: data.images.length,
+                firstImageType: data.images[0]?.type,
+                firstImageModelUrl: data.images[0]?.modelUrl
+            });
 
             if (data.images.length === 0) {
                 setHasMore(false);
@@ -74,6 +83,7 @@ const ImageGallery = () => {
             }
         } catch (error) {
             console.error("Error fetching images:", error);
+            setError(error.message);
         } finally {
             setIsLoading(false);
         }
@@ -99,13 +109,13 @@ const ImageGallery = () => {
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = filename || 'downloaded_image.png';
+            a.download = filename;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             window.URL.revokeObjectURL(url);
         } catch (error) {
-            console.error("Error downloading image:", error);
+            console.error("Error downloading:", error);
         }
     };
 
@@ -151,6 +161,59 @@ const ImageGallery = () => {
         console.log(`Searching for "${searchTerm}" in category "${category}"`);
     };
 
+    const renderContent = (image) => {
+        console.log("🎨 Rendering content for image:", {
+            id: image._id,
+            type: image.type,
+            hasModelUrl: !!image.modelUrl,
+            hasImage: !!image.image
+        });
+
+        if (image.type === '3d_model') {
+            return (
+                <div className={styles.modelContainer}>
+                    <img
+                        src={placeholder3d}
+                        alt={`3D Model ${image._id}`}
+                        className={styles.galleryImage}
+                        onClick={() => {
+                            handleView(image._id);
+                            setSelectedModel({
+                                ...image,
+                                modelUrl: image.image
+                            });
+                        }}
+                        style={{ cursor: 'pointer', maxWidth: '150px', maxHeight: '100%' }}
+                    />
+                </div>
+            );
+        }
+
+        return (
+            <img
+                src={image.image}
+                alt={`Generated ${image._id}`}
+                className={styles.galleryImage}
+                onClick={() => {
+                    handleView(image._id);
+                    const newTab = window.open();
+                    if (newTab) {
+                        newTab.document.write(`
+                            <html>
+                                <head><title>Image</title></head>
+                                <body style="margin: 0; display: flex; align-items: center; justify-content: center; height: 100vh; background:black">
+                                    <img src="${image.image}" style="max-width: 100%; height: auto;" />
+                                </body>
+                            </html>
+                        `);
+                        newTab.document.close();
+                    }
+                }}
+                style={{ cursor: 'pointer' }}
+            />
+        );
+    };
+
     return (
         <div className={styles.gallery}>
             <p className={styles.p3}>Gallery</p>
@@ -190,29 +253,7 @@ const ImageGallery = () => {
             <div className={styles.imagesContainer}>
                 {images.map((image, index) => (
                     <div key={`${image._id}-${index}`} className={styles.imageItem}>
-                        <img
-                            src={image.image}
-                            alt={image.alt || 'Gallery image'}
-                            className={styles.image}
-                            onClick={() => {
-                                handleView(image._id);
-                                const newTab = window.open();
-                                if (newTab) {
-                                    newTab.document.write(`
-                                        <html>
-                                            <head><title>Image</title></head>
-                                            <body style="margin: 0; display: flex; align-items: center; justify-content: center; height: 100vh; background:black">
-                                                <img src="${image.image}" style="max-width: 100%; height: auto;" />
-                                            </body>
-                                        </html>
-                                    `);
-                                    newTab.document.close();
-                                } else {
-                                    console.error("Failed to open new tab. Check browser pop-up settings.");
-                                }
-                            }}
-                            style={{ cursor: 'pointer' }}
-                        />
+                        {renderContent(image)}
                         <div className={styles.overlay}>
                             <div className={styles.actions}>
                                 <div style={{ display: 'flex', height: '100%', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -232,7 +273,7 @@ const ImageGallery = () => {
                                         <img src={view} alt="View" />
                                         {loggedIn && <span>{image.views}</span>}
                                     </button>
-                                    <button className={styles.download} onClick={() => handleDownload(image.image, `image_${image._id}.png`)}>
+                                    <button className={styles.download} onClick={() => handleDownload(image.type === '3d_model' ? image.modelUrl : image.image, `image_${image._id}.${image.type === '3d_model' ? 'glb' : 'png'}`)}>
                                         <img src={download} alt="Download" />
                                     </button>
                                     <button className={styles.more}>
@@ -255,6 +296,17 @@ const ImageGallery = () => {
                     </div>
                 ))}
             </div>
+
+            {selectedModel && (
+                <div className={styles.modal} onClick={() => setSelectedModel(null)}>
+                    <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
+                        <button className={styles.closeButton} onClick={() => setSelectedModel(null)}>×</button>
+                        <div className={styles.modelViewerContainer}>
+                            <ModelViewer modelPath={selectedModel.modelUrl} />
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {isLoading && (
                 <div className={styles.loadingIndicator}>

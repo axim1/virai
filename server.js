@@ -32,6 +32,22 @@ const session = require("express-session");
 const passport = require("passport");
 require("./passport-config"); // Load the Passport config
 
+// Middleware
+
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+
+app.use(cors({ origin: '*' }));
+const { isStringObject } = require("util/types");
+// Serve static files
+app.use('/api/models', (req, res, next) => {
+  console.log('📦 [MODEL-SERVE] Request for model:', {
+    path: req.path,
+    method: req.method,
+    url: req.url
+  });
+  next();
+}, express.static('public/models'));
 
 app.use(session({
   secret: "your-session-secret",
@@ -41,13 +57,7 @@ app.use(session({
 
 app.use(passport.initialize());
 app.use(passport.session());
-app.use(express.json());
 
-app.use(express.urlencoded({ extended: true }));
-app.use(cors({ origin: '*' }));
-const { isStringObject } = require("util/types");
-
-const uri = "mongodb+srv://asim6832475:1234@cluster0.ukza83p.mongodb.net/?retryWrites=true&w=majority";
 app.use('/api/sl', imageEnhancementRoutes);
 app.use('/api/serverless', sketchToImageServerless);
 app.use('/api/serverless', d3Serverless);
@@ -57,7 +67,7 @@ const clientOptions = { serverApi: { version: '1', strict: true, deprecationErro
     // First API call to get the access token
 const clientId = 'l77443c07411ca4cfbbaf5498a11dfadde';
 const clientSecret = 'daeb8027bc5e4e61a890550c10cf4cb7';
-
+const uri = "mongodb+srv://asim6832475:1234@cluster0.ukza83p.mongodb.net/?retryWrites=true&w=majority";
 mongoose.connect(uri, clientOptions)
   .then(() => console.log("Connected to MongoDB"))
   .catch(error => console.error("Error connecting to MongoDB:", error));
@@ -1794,22 +1804,57 @@ const imageRequestQueue = new Queue(async (task, cb) => {
         }
     }
 
+    console.log("🔍 Query:", query);
+    console.log("📊 Sort:", sort);
+
     const images = await GeneratedImage.find(query)
       .sort(sort)
       .skip((page - 1) * limit)
       .limit(Number(limit));
 
-    const imageUrls = images.map(img => ({
-      _id: img._id,
-      image: `data:image/png;base64,${img.image.toString('base64')}`,
-      likes: img.likes || 0,
-      views: img.views || 0,
-      fires: img.fires || 0,
-      shares: img.shares || 0,
-      owner: img.owner || {},
-    }));
+    console.log("📦 Found images:", images.length);
+    console.log("📝 First image type:", images[0]?.type);
+    console.log("🔗 First image modelUrl:", images[0]?.modelUrl);
 
-    console.log("result", { images: imageUrls });
+    const imageUrls = images.map(img => {
+      let imageData;
+      if (img.type === '3d_model') {
+        // For 3D models, ensure we're sending the raw GLB data
+        imageData = `data:model/gltf-binary;base64,${img.image.toString('base64')}`;
+        console.log(`📦 Processing 3D model ${img._id}:`, {
+          size: img.image.length,
+          type: img.type
+        });
+      } else {
+        // For regular images
+        imageData = `data:image/png;base64,${img.image.toString('base64')}`;
+      }
+
+      const processed = {
+        _id: img._id,
+        type: img.type || 'image',
+        image: imageData,
+        likes: img.likes || 0,
+        views: img.views || 0,
+        fires: img.fires || 0,
+        shares: img.shares || 0,
+        owner: img.owner || {},
+        createdAt: img.createdAt
+      };
+
+      console.log(`🖼️ Processing ${img.type === '3d_model' ? 'model' : 'image'} ${img._id}:`, {
+        type: processed.type,
+        hasImage: !!processed.image,
+        imageSize: img.image?.length
+      });
+      return processed;
+    });
+
+    console.log("✅ Final result:", { 
+      totalImages: imageUrls.length,
+      firstImageType: imageUrls[0]?.type,
+      firstImageModelUrl: imageUrls[0]?.modelUrl
+    });
 
     cb(null, { images: imageUrls });
   } catch (error) {
@@ -1833,7 +1878,7 @@ app.get('/api/images', async (req, res) => {
           message: err.message 
         });
       }
-      console.log("result")
+      // console.log("result")
       res.json(result);
     });
   } catch (error) {

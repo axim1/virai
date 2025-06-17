@@ -36,8 +36,8 @@ import AiRepIcon from'../../assets/vector_icons/AI Replacement-01 1.svg'
 import Dropdown from './Dropdown.js';
 
 const apiUrl = process.env.REACT_APP_API_URL;
-const username = JSON.parse(localStorage.getItem('user')) || {};
-const userId = '672f8fa5d0f99f32389f2ac0';
+const user = JSON.parse(localStorage.getItem('user')) || {};
+const userId = user._id || '672f8fa5d0f99f32389f2ac0'; // Fallback to default ID if not logged in
 
 function ImageGenerator({ onGenerateImage }) {
   const navigate = useNavigate();
@@ -139,7 +139,9 @@ function ImageGenerator({ onGenerateImage }) {
             }
   
             try {
-              const statusRes = await axios.get(`${apiUrl}api/serverless/3d-model-status/${jobId}`);
+              const statusRes = await axios.get(`${apiUrl}api/serverless/3d-model-status/${jobId}`, {
+                params: { userId } // Use the userId from above
+              });
   
               if (statusRes.status === 202) return;
   

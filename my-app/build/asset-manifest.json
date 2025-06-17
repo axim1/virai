@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/static/css/main.ede4ad7f.css",
-    "main.js": "/static/js/main.99b95b72.js",
+    "main.css": "/static/css/main.3d212190.css",
+    "main.js": "/static/js/main.f3ef121c.js",
     "static/js/787.cfd8f164.chunk.js": "/static/js/787.cfd8f164.chunk.js",
     "static/media/Hero BG.png": "/static/media/Hero BG.847286e837c213d66b00.png",
     "static/media/texttoimage (4).png": "/static/media/texttoimage (4).7f76f6057bce6db902d0.png",
@@ -15,6 +15,7 @@
     "static/media/texttoimage (2).png": "/static/media/texttoimage (2).07f604e30c778e65812c.png",
     "static/media/texture (1).png": "/static/media/texture (1).95dcbe3cb0f747aeb1c8.png",
     "static/media/pricing-01 1.svg": "/static/media/pricing-01 1.806ef036cd51ec316dda244f88d8ad19.svg",
+    "static/media/3D object generation-01 1.svg": "/static/media/3D object generation-01 1.bd759ef034a530190f100ed311aaffa2.svg",
     "static/media/Filters 1.svg": "/static/media/Filters 1.09d27386f3a30f3f4a1483d6ac70c039.svg",
     "static/media/delete-01 1.svg": "/static/media/delete-01 1.3c08eb8b30a2ea7811b6282b7e7487ac.svg",
     "static/media/instagram 1.svg": "/static/media/instagram 1.5e7f5105f9934495aca29dd767696c09.svg",
@@ -52,12 +53,12 @@
     "static/media/Sketch to image-01.svg": "/static/media/Sketch to image-01.41de6ec2776c515fa0e1a14358011467.svg",
     "static/media/Arrow 2.svg": "/static/media/Arrow 2.01b5823e49650031b7d84bc82aaf4de5.svg",
     "static/media/Arrow_gold.svg": "/static/media/Arrow_gold.b043bcb8c54501ec8b6c326aed8e6435.svg",
-    "main.ede4ad7f.css.map": "/static/css/main.ede4ad7f.css.map",
-    "main.99b95b72.js.map": "/static/js/main.99b95b72.js.map",
+    "main.3d212190.css.map": "/static/css/main.3d212190.css.map",
+    "main.f3ef121c.js.map": "/static/js/main.f3ef121c.js.map",
     "787.cfd8f164.chunk.js.map": "/static/js/787.cfd8f164.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.ede4ad7f.css",
-    "static/js/main.99b95b72.js"
+    "static/css/main.3d212190.css",
+    "static/js/main.f3ef121c.js"
   ]
 }

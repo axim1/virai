@@ -7,10 +7,12 @@ const ModelViewer = ({ modelPath }) => {
   const containerRef = useRef();
 
   useEffect(() => {
-    if (!containerRef.current) return;
+    if (!containerRef.current || !modelPath) return;
+
+    console.log('🎮 ModelViewer mounted with path:', modelPath);
 
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xf0f0f0);
+    scene.background = new THREE.Color(0x1a1a1a);
 
     const camera = new THREE.PerspectiveCamera(
       75,
@@ -52,13 +54,16 @@ const ModelViewer = ({ modelPath }) => {
     loader.load(
       modelPath,
       (gltf) => {
+        console.log('✅ Model loaded successfully');
         const model = gltf.scene;
         model.scale.set(1, 1, 1);
         scene.add(model);
       },
-      undefined,
+      (progress) => {
+        console.log('📦 Loading progress:', (progress.loaded / progress.total * 100).toFixed(2) + '%');
+      },
       (error) => {
-        console.error('Error loading model:', error);
+        console.error('❌ Error loading model:', error);
       }
     );
 
@@ -79,7 +84,9 @@ const ModelViewer = ({ modelPath }) => {
 
     return () => {
       window.removeEventListener('resize', handleResize);
-      containerRef.current.removeChild(renderer.domElement);
+      if (containerRef.current) {
+        containerRef.current.removeChild(renderer.domElement);
+      }
       renderer.dispose();
     };
   }, [modelPath]);
@@ -89,7 +96,8 @@ const ModelViewer = ({ modelPath }) => {
       ref={containerRef}
       style={{
         width: '100%',
-        height: '500px',
+        height: '100%',
+        borderRadius: '10px',
         position: 'relative',
         overflow: 'hidden',
       }}
