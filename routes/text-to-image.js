@@ -1,6 +1,6 @@
 const express = require('express');
 const axios = require('axios');
-const { User } = require('../models');
+const { User, GeneratedImage } = require('../models');
 const router = express.Router();
 
 const RUNPOD_ENDPOINT = "https://api.runpod.ai/v2/q5rsf2wvu67m43/run";
@@ -127,6 +127,13 @@ router.get('/text-to-image-status/:job_id', async (req, res) => {
         imageCount: output.images.length 
       });
       const imageUrls = output.images.map(img => `data:image/png;base64,${img}`);
+      // Save to DB if userId is provided
+      if (req.query.userId) {
+        for (const img of output.images) {
+          const buffer = Buffer.from(img, 'base64');
+          await GeneratedImage.create({ userId: req.query.userId, image: buffer });
+        }
+      }
       return res.status(200).json({ imageUrls });
     }
 

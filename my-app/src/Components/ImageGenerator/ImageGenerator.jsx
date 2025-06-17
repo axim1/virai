@@ -257,7 +257,9 @@ const handleTextToImageServerless = async () => {
           }
 
           try {
-            const pollRes = await axios.get(`${apiUrl}api/serverless/text-to-image-status/${jobId}`);
+            const pollRes = await axios.get(`${apiUrl}api/serverless/text-to-image-status/${jobId}`, {
+              params: { userId }
+            });
             if (pollRes.status === 202) return;
 
             if (pollRes.status === 200 && pollRes.data.imageUrls) {
@@ -458,8 +460,8 @@ setIsRetrieving(false);
             }
             
             try {
-              const response = await axios.get(`${apiUrl}check-image/${imageUuid}`, {
-                params: { userId: userId }
+              const response = await axios.get(`${apiUrl}api/sl/image-enhancement-status/${imageUuid}`, {
+                params: { userId }
               });
               
               // If status is 200, image is ready
@@ -1223,8 +1225,8 @@ setIsRetrieving(false);
       </div>
     ) : (
       <div className={styles.emptyState}>
-        <h2>✨ Get Started</h2>
-        <p>Upload an image or write a prompt to generate visuals with AI.</p>
+        <h2>Get Started</h2>
+        <p>Upload an image or write a prompt to generate visuals with VirtuartAI.</p>
       </div>
     )}
   </>

@@ -139,6 +139,13 @@ router.get('/sketch-to-image-status/:job_id', async (req, res) => {
         imageCount: output.images.length
       });
       const formattedImages = output.images.map(img => `data:image/png;base64,${img}`);
+      // Save to DB if userId is provided
+      if (req.query.userId) {
+        for (const img of output.images) {
+          const buffer = Buffer.from(img, 'base64');
+          await GeneratedImage.create({ userId: req.query.userId, image: buffer });
+        }
+      }
       return res.status(200).json({ imageUrls: formattedImages });
     }
 

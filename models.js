@@ -187,7 +187,8 @@ const GeneratedImageSchema = new mongoose.Schema({
   shares: { type: Number, default: 0 },
   views: { type: Number, default: 0 },
   createdAt: { type: Date, default: Date.now },
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  type: { type: String, enum: ['image', '3d_model', 'enhanced_image'], default: 'image' }
 });
 
 const GeneratedImage = mongoose.model('GeneratedImage', GeneratedImageSchema);

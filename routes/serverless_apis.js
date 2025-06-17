@@ -117,4 +117,56 @@ router.post('/image-enhancement', upload.fields([
   }
 });
 
+router.get('/image-enhancement-status/:job_id', async (req, res) => {
+  const { job_id } = req.params;
+  console.log('🔍 [IMAGE-ENHANCEMENT-STATUS] Checking status for job:', { jobId: job_id });
+
+  try {
+    const statusResponse = await axios.get(`${RUNPOD_ENDPOINT}/status/${job_id}`, {
+      headers: { Authorization: RUNPOD_API_KEY }
+    });
+
+    const { status, output } = statusResponse.data;
+    console.log('📊 [IMAGE-ENHANCEMENT-STATUS] Status received:', { jobId: job_id, status });
+
+    if (status === 'IN_PROGRESS' || status === 'IN_QUEUE') {
+      console.log('⏳ [IMAGE-ENHANCEMENT-STATUS] Job still processing:', { jobId: job_id, status });
+      return res.status(202).json({ status });
+    }
+
+    if (status === 'COMPLETED' && output?.images?.length > 0) {
+      console.log('✅ [IMAGE-ENHANCEMENT-STATUS] Job completed successfully:', {
+        jobId: job_id,
+        imageCount: output.images.length
+      });
+      const imageUrls = output.images.map(img => `data:image/png;base64,${img}`);
+      // Save to DB if userId is provided
+      if (req.query.userId) {
+        for (const img of output.images) {
+          const buffer = Buffer.from(img, 'base64');
+          await GeneratedImage.create({ userId: req.query.userId, image: buffer });
+        }
+      }
+      return res.status(200).json({ imageUrls });
+    }
+
+    console.warn('⚠️ [IMAGE-ENHANCEMENT-STATUS] Job completed but no images found:', {
+      jobId: job_id,
+      status,
+      outputKeys: Object.keys(output || {})
+    });
+    return res.status(500).json({
+      error: 'Job completed but no output images found.',
+      rawOutput: output,
+    });
+  } catch (err) {
+    console.error('❌ [IMAGE-ENHANCEMENT-STATUS] Error:', {
+      jobId: job_id,
+      error: err.message,
+      response: err.response?.data
+    });
+    return res.status(500).json({ error: 'Server error', details: err.message });
+  }
+});
+
 module.exports = router;

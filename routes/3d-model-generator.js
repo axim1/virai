@@ -3,6 +3,7 @@ const multer = require('multer');
 const fs = require('fs');
 const axios = require('axios');
 const router = express.Router();
+const { GeneratedImage } = require('../models');
 
 const upload = multer({ dest: 'uploads/' });
 
@@ -98,6 +99,11 @@ router.get('/3d-model-status/:job_id', async (req, res) => {
         jobId: job_id,
         filesCount: output.files.length 
       });
+      // Save to DB if userId is provided
+      if (req.query.userId) {
+        const buffer = Buffer.from(output.files[0].base64, 'base64');
+        await GeneratedImage.create({ userId: req.query.userId, image: buffer });
+      }
       return res.status(200).json({
         glb_base64: output.files[0].base64,
         message: "3D model generation completed."
