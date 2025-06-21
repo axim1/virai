@@ -196,7 +196,21 @@ const handleSketchToImageServerless = async (formData) => {
 
           try {
             const pollRes = await axios.get(`${apiUrl}api/serverless/sketch-to-image-status/${jobId}`, {
-              params: { userId }
+              params: {
+  userId,
+  prompt: promptText,
+  negative_prompt: negativePromptText,
+  width: imageWidth,
+  height: imageHeight,
+  steps: 25,
+  guidance_scale: scale,
+
+  scheduler: 'normal',
+  clip_skip: 0,
+  style: styleType,
+  model_xl: false
+}
+
             });
 
             if (pollRes.status === 202) return; // still processing
@@ -260,7 +274,21 @@ const handleTextToImageServerless = async () => {
 
           try {
             const pollRes = await axios.get(`${apiUrl}api/serverless/text-to-image-status/${jobId}`, {
-              params: { userId }
+             params: {
+  userId,
+  prompt: promptText,
+  negative_prompt: negativePromptText,
+  width: imageWidth,
+  height: imageHeight,
+  steps: 25,
+  guidance_scale: scale,
+
+  scheduler: 'normal',
+  clip_skip: 0,
+  style: styleType,
+  model_xl: false
+}
+
             });
             if (pollRes.status === 202) return;
 
@@ -435,87 +463,82 @@ setIsRetrieving(false);
   };
   
   // New function for handling image enhancement with polling
-  const handleImageEnhancement = async (formData) => {
-    try {
-      // Step 1: Submit the initial request
-      const initResponse = await axios.post(`${apiUrl}api/sl/image-enhancement`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
-      console.log(initResponse)
-      if (!initResponse.data.uuid) {
-        throw new Error('No UUID received from server');
-      }
-      
-      const imageUuid = initResponse.data.uuid;
-      
-      // Step 2: Poll for results
-      const endTime = Date.now() + 100000; // 100 seconds timeout
-      
-      // Create a polling function that returns a promise
-      const pollForResult = () => {
-        return new Promise((resolve, reject) => {
-          const intervalId = setInterval(async () => {
-            if (Date.now() >= endTime) {
-              clearInterval(intervalId);
-              reject(new Error('Request Timeout: Image could not be retrieved in time.'));
-              return;
-            }
-            
-            try {
-              const response = await axios.get(`${apiUrl}api/sl/image-enhancement-status/${imageUuid}`, {
-                params: { userId }
-              });
-              
-              // If status is 200, image is ready
-              if (response.status === 200) {
-                clearInterval(intervalId);
-                
-                const imageUrls = Array.isArray(response.data.imageUrls)
-                  ? response.data.imageUrls
-                  : [response.data.imageUrls];
-                
-                resolve(imageUrls);
-              }
-              // If status is 202, image is still processing, continue polling
-            } catch (error) {
-              if (error.response && error.response.status === 202) {
-                // Still processing, continue polling
-                return;
-              }
-              
-              clearInterval(intervalId);
-              reject(error);
-            }
-          }, 3000);
-        });
-      };
-      
-      // Start polling and wait for results
-      const imageUrls = await pollForResult();
-      console.log(imageUrls[0])
-      const base64Data = imageUrls[0].replace(/^data:image\/\w+;base64,/, '');
-const mimeType = imageUrls[0].match(/^data:(image\/\w+);base64/)[1];
-const byteCharacters = atob(base64Data);
-const byteNumbers = new Array(byteCharacters.length);
-for (let i = 0; i < byteCharacters.length; i++) {
-  byteNumbers[i] = byteCharacters.charCodeAt(i);
-}
-const byteArray = new Uint8Array(byteNumbers);
-const blob = new Blob([byteArray], { type: mimeType });
+const handleImageEnhancement = async (formData) => {
+  try {
+    const initResponse = await axios.post(`${apiUrl}api/sl/image-enhancement`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
 
-// Create a fully loaded Image object from the blob
-const imageObjectUrl = URL.createObjectURL(blob);
-const img = new Image();
-img.onload = () => {
-  setUploadedImage(img);
+    const jobId = initResponse.data?.job_id;  // ✅ use job_id directly
+    if (!jobId) throw new Error('No job_id received from server');
+
+    const endTime = Date.now() + 100000;
+
+    const pollForResult = () => {
+      return new Promise((resolve, reject) => {
+        const intervalId = setInterval(async () => {
+          console.log(`📡 Polling status for job ${jobId}...`);
+
+          if (Date.now() >= endTime) {
+            clearInterval(intervalId);
+            console.error('⏱️ Timeout: No result after 100 seconds.');
+            reject(new Error('Timeout while polling image enhancement'));
+            return;
+          }
+
+          try {
+            const response = await axios.get(`${apiUrl}api/sl/image-enhancement-status/${jobId}`, {
+           params: {
+  userId,
+  prompt: promptText,
+  negative_prompt: negativePromptText,
+  width: imageWidth,
+  height: imageHeight,
+  steps: 25,
+  guidance_scale: scale,
+
+  scheduler: 'normal',
+  clip_skip: 0,
+  style: styleType,
+  model_xl: false
+},
+            });
+
+            if (response.status === 202) return; // Still processing
+            if (response.status === 200 && response.data?.imageUrls?.length > 0) {
+              clearInterval(intervalId);
+              console.log('✅ Enhancement completed. Images returned.');
+              resolve(response.data.imageUrls);
+            }
+          } catch (error) {
+            if (error.response?.status === 202) return; // Still in progress
+            clearInterval(intervalId);
+            console.error('❌ Error polling enhancement status:', error);
+            reject(error);
+          }
+        }, 3000);
+      });
+    };
+
+    const imageUrls = await pollForResult();
+
+    const base64 = imageUrls[0].replace(/^data:image\/\w+;base64,/, '');
+    const mime = imageUrls[0].match(/^data:(image\/\w+);base64/)[1];
+    const byteChars = atob(base64);
+    const byteNums = Array.from(byteChars).map(char => char.charCodeAt(0));
+    const blob = new Blob([new Uint8Array(byteNums)], { type: mime });
+
+    const objectUrl = URL.createObjectURL(blob);
+    const img = new Image();
+    img.onload = () => setUploadedImage(img);
+    img.src = objectUrl;
+
+  } catch (error) {
+    console.error('💥 Error during image enhancement:', error);
+    throw error;
+  }
 };
-img.src = imageObjectUrl; // just take first if array
-      
-    } catch (error) {
-      console.error('Error during image enhancement:', error);
-      throw error;
-    }
-  };
+
   
   // Existing video generation handler (kept for reference)
   const handleVideoGeneration = async (formData) => {

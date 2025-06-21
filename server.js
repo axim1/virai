@@ -1839,13 +1839,29 @@ const imageRequestQueue = new Queue(async (task, cb) => {
         fires: img.fires || 0,
         shares: img.shares || 0,
         owner: img.owner || {},
-        createdAt: img.createdAt
+        createdAt: img.createdAt,
+
+            // Optional fields — fallback to defaults if not present
+    prompt: img.prompt || '',
+    negativePrompt: img.negativePrompt || '',
+    width: img.width || '',
+    height: img.height || '',
+    steps: img.steps || '',
+    guidanceScale: img.guidanceScale || '',
+    seed: img.seed || null,
+    scheduler: img.scheduler || 'normal',
+    clipSkip: img.clipSkip || 0,
+    style: img.style || 'default',
+    model: img.model || 'default',
+    modelUrl: img.modelUrl || null
+
       };
 
       console.log(`🖼️ Processing ${img.type === '3d_model' ? 'model' : 'image'} ${img._id}:`, {
         type: processed.type,
         hasImage: !!processed.image,
-        imageSize: img.image?.length
+        imageSize: img.image?.length,
+        prompt: processed.prompt
       });
       return processed;
     });

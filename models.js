@@ -178,11 +178,36 @@ subscriptionSchema.virtual('users', {
 
 
 
+// const GeneratedImageSchema = new mongoose.Schema({
+//   image: Buffer,
+//   title: String,
+//   description: String,
+//   category: String,
+//   likes: { type: Number, default: 0 },
+//   shares: { type: Number, default: 0 },
+//   views: { type: Number, default: 0 },
+//   createdAt: { type: Date, default: Date.now },
+//   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+//   type: { type: String, enum: ['image', '3d_model', 'enhanced_image'], default: 'image' },
+//   modelUrl: { type: String, default: null }
+// });
 const GeneratedImageSchema = new mongoose.Schema({
   image: Buffer,
+  imageUrl: String, // base64 or external URL if stored on S3 or similar
+  prompt: String,
+  negativePrompt: String,
+  width: Number,
+  height: Number,
+  steps: Number,
+  guidanceScale: Number,
+  seed: Number,
+  scheduler: String,
+  clipSkip: Number,
+  style: String,
+  model: String, // or model_xl: Boolean
+  category: String,
   title: String,
   description: String,
-  category: String,
   likes: { type: Number, default: 0 },
   shares: { type: Number, default: 0 },
   views: { type: Number, default: 0 },

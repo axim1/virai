@@ -1,190 +1,111 @@
-.gallery{
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    margin-top: 70px;
-    padding: 32px;
-    width: 100%;
+/* Updated ImageGallery.module.css with react-masonry-css support and randomized placeholder sizes */
 
-
+.gallery {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  margin-top: 100px;
 }
 
-.p2{
-  max-width: 776px;
-  margin-left: 32px;
-  margin-right: 32px;
-  color: #999;
-text-align: center;
-font-family: Poppins;
-font-size: 36px;
-font-style: normal;
-font-weight: 300;
-line-height: 36px; /* 100% */
-text-transform: capitalize;
-text-align: center;
-}
-.p3{
-  max-width: 776px;
-  margin-left: 32px;
-  margin-right: 32px;
-  margin-bottom: 50px;
-  color: #2E8B57;
-  font-family: Poppins;
-  font-size: 50px;
-  font-style: normal;
-  font-weight: 700;
-  line-height: 50px;
-  text-transform: uppercase;
+.p3 {
   text-align: center;
-}
-.imagesContainer {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); /* Ensures full width */
-  gap: 30px;
-  width: 100%;
-  max-width: 1370px;
-  margin: 30px auto; /* Centers the container */
-  /* padding: 0 15px; */
+  font-size: 48px;
+  font-weight: bold;
+  color: #2E8B57;
+  margin-bottom: 2rem;
+  font-style: poppin;
 }
 
-
-/* Ensures a max of 4 per row on large screens */
-@media (min-width: 1025px) {
-  .imagesContainer {
-    grid-template-columns: repeat(4, 1fr);
-  }
+.filterBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #1e1e1e;
+  border-radius: 8px;
+  height: 70px;
+  margin-bottom: 2rem;
+  padding-right: 20px;
 }
 
-/* Medium screens (Tablets) - 2 per row */
-@media (max-width: 1024px) {
-  .imagesContainer {
-    grid-template-columns: repeat(2, 1fr);
-  }
+.filterItems {
+  display: flex;
+  flex-wrap: wrap;
 }
 
-/* Small screens (Mobile) - 1 per row */
-@media (max-width: 600px) {
-  .imagesContainer {
-    grid-template-columns: repeat(1, 1fr);
-  }
+.filterItem {
+  background: transparent;
+  color: white;
+  height: 70px;
+  font-size: 16px;
+  border: none;
+  padding: 0.5rem 1.5rem;
+  cursor: pointer;
+  border-right: 1px solid #000;
 }
 
+.activeFilter {
+  color: #2E8B57;
+}
 
+.rightIconCont {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: white;
+}
+
+.selectedFilterDiv {
+  font-size: 18px;
+  color: #2E8B57;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid #333;
+  padding-bottom: 0.5rem;
+}
+
+/* === Masonry Layout with react-masonry-css === */
+.masonryGrid {
+  display: flex;
+  margin-left: -1.2rem; /* gutter size offset */
+  width: auto;
+}
+
+.masonryColumn {
+  padding-left: 1.2rem; /* gutter size */
+  background-clip: padding-box;
+}
+
+.masonryColumn > .imageItem {
+  margin-bottom: 1.5rem;
+}
 
 .imageItem {
-    width: 320px;
-    height: 400px;
-    flex-shrink: 0;
-    position: relative;
-    overflow: hidden;
-    border-radius: 20px;
-    background: #1a1a1a;
+  background: #1a1a1a;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  transition: transform 0.3s, box-shadow 0.3s;
+  overflow: hidden;
+  position: relative;
 }
 
-.image {
-  width: 100%;  /* Ensures it takes the full width of its container */
-  height: 100%; /* Ensures it takes the full height */
-  object-fit: cover; 
+.imageItem:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
+}
+
+.galleryImage {
+  width: 100%;
+  height: auto;
   display: block;
-  transition: transform 0.3s ease;
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.00) 0%, #000 77.1%);
+  object-fit: cover;
 }
 
-.imageItem:hover .image {
-  transform: scale(1.05);
-}
-
-/* Overlay to darken image and show buttons */
-.overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  /* background: rgba(0, 0, 0, 0.6);
-   */
-
-   background: rgba(0, 0, 0, 0.50);
-   display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: flex-end;
-  padding: 32px 15px;
-  
-  opacity: 1;
-  transition: opacity 0.3s ease;
-}
-
-/* .imageItem:hover .overlay {
-  opacity: 1;
-} */
-.activeFilter {
-  background-color: #fff;
-  color: #000;
-}
-
-/* Action buttons aligned to right */
-.actions {
-
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 8px;
-  height: 100%;
-}
-.overlay {
-  pointer-events: none; /* Makes overlay non-interactable */
-}
-
-.actions, .userInfo {
-  pointer-events: auto; /* Keeps buttons clickable */
-}
-.selectedFilterDiv{
-margin:30px 0;
-width:100%;
-max-width: 1370px;
-  color: #2E8B57;
-font-family: Poppins;
-font-size: 20px;
-font-style: normal;
-font-weight: 400;
-line-height: normal;
-border-bottom: 1px solid #333;
-}
-.like,
-.fire,
-.view,
-.download,
-.share,
-.more {
-  background: none;
-  border: none;
-  color: white;
-  font-size: 20px;
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  gap:3px;
-  color: #999;
-  text-align: center;
-  font-family: Poppins;
-  font-size: 12px;
-  font-style: normal;
-  font-weight: 500;
-  line-height: normal;
-  text-transform: capitalize;
-
-}
-
-/* Bottom Section with Logo and Username */
 .userInfo {
-  /* display: block; */
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  gap: 0.5rem;
   position: absolute;
-  bottom: 16px;
-  left: 14px;
-  align-items: flex-start;
-  gap: 8px;
+  bottom: 0;
+  width: 100%;
 }
 
 .logo {
@@ -195,470 +116,154 @@ border-bottom: 1px solid #333;
 }
 
 .userName {
-margin-left: 10px;
-
-  color: #FFF;
-text-align: center;
-font-family: Poppins;
-font-size: 14px;
-font-style: normal;
-font-weight: 400;
-line-height: normal;
-text-transform: capitalize;
-}
-.filterBar{
-    border-radius: 7px;
-    background: #333;
-    max-width: 1370px;
-    min-height: 70px;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    width: 100%;
-    margin: 10px 0px;
-    /* flex-shrink: 0; */
-}
-.filterItems{
-    display: flex;
-    flex-direction: row;
-}
-
-
-.filterItem{
- background:none;
- border: none;
- cursor: pointer;
- border-right: 1px solid  #000;
- width: 153px;
-height: 70px;
-/* ;    */
-display:flex;
-align-items: center;
-justify-content: center;
-color: #FFF;
-text-align: center;
-font-family: Poppins;
-font-size: 20px;
-font-style: normal;
-font-weight: 400;
-line-height: normal;
-text-transform: capitalize;
-}
-.rightIconCont{
-display: flex;
-gap: 8px;
-    width: 153px;
-    height: 70px;
-    color: #FFF;
-    align-items: center;
-    justify-content: center;
-
-text-align: center;
-font-family: Poppins;
-font-size: 20px;
-font-style: normal;
-font-weight: 400;
-line-height: normal;
-text-transform: capitalize;
-}
-.filterIcon{
-    width: 27px;
-height: 22px;
-flex-shrink: 0;
-aspect-ratio: 27/22;
-}
-
-/* Dropdown Styles for Small Screens */
-@media screen and (max-width: 1023px) {
-
-  /* .imagesContainer {
-
-    grid-template-columns: repeat(2, 1fr);
-
-  
-  } */
-    .filterItems {
-        display: none;
-    }
-
-    .filterDropdownContainer {
-        position: relative;
-        width: 100%;
-        text-align: left;
-    }
-
-    .filterDropdownButton {
-        background:none;
-        border: none;
-        cursor: pointer;
-        border-right: 1px solid  #000;
-        width: 200px;
-        height: 70px;
-        flex-shrink: 0;
-       
-       /* ;    */
-       display:flex;
-       align-items: center;
-       justify-content: center;
-       color: #FFF;
-       text-align: center;
-       font-family: Poppins;
-       font-size: 20px;
-       font-style: normal;
-       font-weight: 400;
-       line-height: normal;
-       text-transform: capitalize;
-    }
-
-    .filterDropdownMenu {
-        position: absolute;
-        top: 100%;
-        left: 0;
-        width: 100%;
-        background: #333;
-        list-style: none;
-        padding: 0;
-        margin: 5px 0;
-        border-radius: 5px;
-        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
-        display: flex;
-        flex-direction: column;
-        z-index: 2000;
-    }
-
-    .filterDropdownItem {
-        padding: 12px;
-        color: white;
-        cursor: pointer;
-        text-align: left;
-        font-size: 18px;
-    }
-
-    .filterDropdownItem:hover {
-        background: #555;
-    }
-
-}
-
-
-
-
-
-
-
-
-
-.searchContainer {
-    
-    display: flex;
-    align-items: center;
-    width: 100%;
-    max-width: 1370px;
-    height: 70px;
-    border-radius: 50px;
-    margin-bottom: 50px;
-    overflow: hidden;
-    background-color: transparent;
-    /* color: white; */
-    font-family: Arial, sans-serif;
-  }
-  
-  .dropdownButton {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap:10px;
-    background-color: #9e9e9e;
-    color: black;
-    padding: 0 20px;
-    height: 100%;
-    min-width: 160px;
-    font-weight: bold;
-    cursor: pointer;
-    user-select: none;
-
-
-    width: 263px;
-height: 70px;
-flex-shrink: 0;
-color: #000;
-text-align: center;
-font-family: Poppins;
-font-size: 20px;
-font-style: normal;
-font-weight: 400;
-line-height: 50px; /* 250% */
-text-transform: uppercase;
-  }
-  
-  .dropdownArrow {
-    margin-left: 10px;
-    font-size: 12px;
-  }
-  
-  .inputWrapper {
-    position: relative;
-    flex: 1;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    padding: 10px;
-    background-color: transparent;
-    border-radius: 50px;
-    border-top-left-radius: 0px;
-    border-bottom-left-radius: 0px;
-    background: transparent;
-    border: 2px solid #999,
-  }
-  
-  .searchInput {
-    width: 100%;
-    height: 100%;
-    padding: 0 20px;
-    padding-right: 120px; 
-    font-size: 16px;
-    border: none;
-    outline: none;
-    background: transparent;
-    background-color: transparent;
-    /* color: white; */
-  }
-  .searchButtonSml,
-  .searchButton {
-    position: absolute;
-     right: 10px;
-   /* height: 40px; */
-    /* padding: 0 30px; */
-
-    width: 224px;
-    height: 50px;
-    flex-shrink: 0;
-    border: none;
-    cursor: pointer;
-
-    transition: background-color 0.3s;
-
-
-    color: #FFF;
-    text-align: center;
-    font-family: Poppins;
-    font-size: 20px;
-    font-style: normal;
-    font-weight: 500;
-    line-height: 50px; /* 250% */
-    text-transform: uppercase;
-    border-radius: 100px;
-    background: #2E8B57;
-  }
-  .searchButtonSml{
-    display: none;
-  }
-  
-  .searchButton:hover {
-    background-color: #3e8e41;
-  }
-  
-  /* Make the search bar responsive */
-  @media (max-width: 600px) {
-    /* .imagesContainer {
-
-      grid-template-columns: repeat(1, 1fr);
-  
-    
-    } */
-    .searchButton{
-      display: none;
-
-    }
-    .searchButtonSml{
-      display: unset;
-      width: 50px;
-      height: 50px;
-    }
-    .imageItem{
-      min-width: 100%;
-      height: auto;
-      aspect-ratio: 3.2/4;
-    }
-    /* .searchContainer {
-      flex-direction: column;
-      height: auto;
-      border-radius: 15px;
-    } */
-    
-    .dropdownButton {
-      /* width: 70%; */
-      max-width: 210px;
-
-    }
-    
-    /* .inputWrapper {
-      width: 100%;
-    } */
-    
-    .searchButton {
-      position: relative;
-      right: auto;
-      width: 100%;
-      border-radius: 0;
-    }
-  }
-
-
-.pagination{
-  display: flex;
-  justify-content: space-between;
-  max-width: 1370px;
-  width: 100%;
-}
-  .nextPageButton{
-    border: none;
-    width: 200px;
-height: 40px;
-flex-shrink: 0;
-border-radius: 100px;
-background: #2E8B57;
-color: #FFF;
-font-family: Poppins;
-font-size: 16px;
-font-style: normal;
-font-weight: 400;
-line-height: normal;
-text-transform: capitalize;
-  }
-  .noOfPages{
-    width: 40px;
-    height: 40px;
-    flex-shrink: 0;
-    color: #FFF;
-font-family: Poppins;
-font-size: 16px;
-font-style: normal;
-font-weight: 400;
-line-height: normal;
-text-transform: capitalize;
-border-radius: 7px;
-background: #333;
-text-align: center;
-display: flex;
-align-items: center;
-justify-content: center;
-
-  }
-  .totalPages{
-    color: #FFF;
-font-family: Poppins;
-font-size: 16px;
-font-style: normal;
-font-weight: 400;
-line-height: normal;
-text-transform: capitalize;
-
-  }
-.prevButton{
-  border: none;
-
-  width: 30px;
-  height: 40px;
-  flex-shrink: 0;
-  border-top-left-radius: 7px;
-border-bottom-left-radius: 7px;
-background: #2E8B57;
-align-items: start;
-}
-.nextButton{
-  border: none;
-
-  width: 30px;
-height: 40px;
-flex-shrink: 0;
-border-top-right-radius: 7px;
-border-bottom-right-radius: 7px;
-
-background: #2E8B57;
-}
-
-
-.loadMoreButton {
-  background-color: transparent;
-  color: #2E8B57;
-  /* padding: 0.8rem 2rem; */
-  font-size: 25px;
-  font-family: Poppins;
-  font-weight: 400;
-  line-height: normal;
-  text-transform: capitalize;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  /* transition: background-color 0.3s ease; */
-}
-.loadMoreButton:hover {
-  color: #246b45;
-}
-
-.modelContainer {
-    width: 100%;
-    height: 100%;
-    min-height: 300px;
-    background: #1a1a1a;
-    position: relative;
-    overflow: hidden;
-    border-radius: 20px;
-}
-
-.modelContainer canvas {
-    width: 100% !important;
-    height: 100% !important;
-    border-radius: 20px;
-}
-
-.galleryImage {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 20px;
-    transition: transform 0.3s ease;
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
 }
 
 .modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.8);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.85);
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-.modalContent {
-    position: relative;
-    width: 90%;
-    height: 90%;
-    background-color: #000;
-    border-radius: 8px;
-    padding: 20px;
+.actions {
+  display: flex;
+  justify-content: flex-start;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.actions button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #ccc;
+  font-size: 14px;
+}
+
+.actions img {
+  width: 24px;
+  height: 24px;
 }
 
 .closeButton {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background: none;
-    border: none;
-    color: white;
-    font-size: 24px;
-    cursor: pointer;
-    z-index: 1001;
+  position: absolute;
+  top: 10px;
+  right: 14px;
+  font-size: 32px;
+  color: white;
+  background: none;
+  border: none;
+  cursor: pointer;
 }
 
-.modelViewerContainer {
-    width: 100%;
-    height: 100%;
-    display: flex;
+.loadMoreButton {
+  font-size: 20px;
+  background: transparent;
+  border: none;
+  color: #2E8B57;
+  cursor: pointer;
+}
+
+.endMessage {
+  color: #aaa;
+  font-size: 16px;
+  text-align: center;
+  margin-top: 1.5rem;
+}
+
+.modalContent {
+  position: relative;
+  background: #0e0e0e;
+  border-radius: 10px;
+  max-width: 75vw;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+@media (min-width: 900px) {
+  .modalContent {
+    flex-direction: row;
     justify-content: center;
-    align-items: center;
+  }
+}
+
+.modalImageWrapper {
+  flex: 1 1 60%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modalImage {
+  width: 100%;
+  object-fit: contain;
+}
+
+.imageMetadata {
+  flex: 1 1 20%;
+  display: flex;
+  justify-content: space-between;
+  flex-direction: column;
+  color: #eee;
+  padding: 1.05rem;
+  overflow-y: auto;
+  margin-top: 1.5rem;
+}
+
+@media (min-width: 900px) {
+  .imageMetadata {
+    margin-top: 0;
+  }
+}
+
+.imageMetadata h3 {
+  font-size: 20px;
+  color: #2E8B57;
+  margin-bottom: 1rem;
+}
+
+.imageMetadata ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.imageMetadata li {
+  font-size: 14px;
+  margin-bottom: 8px;
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+.imagePlaceholder {
+  width: 100%;
+  background: #2e2e2e;
+  /* border-radius: 8px;   */
+  animation: pulse 1.5s infinite ease-in-out;
+}
+
+.imagePlaceholder:nth-child(n) {
+  height: 180px;
+}
+
+.imagePlaceholder:nth-child(n+1) {
+  height: 240px;
+}
+
+.imagePlaceholder:nth-child(n+2) {
+  height: 300px;
+}
+
+@keyframes pulse {
+  0% { background-color: #2e2e2e; }
+  50% { background-color: #3a3a3a; }
+  100% { background-color: #2e2e2e; }
 }

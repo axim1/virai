@@ -124,16 +124,41 @@ router.get('/text-to-image-status/:job_id', async (req, res) => {
     if (status === 'COMPLETED' && output?.images?.length > 0) {
       console.log('✅ [TEXT-TO-IMAGE-STATUS] Job completed successfully:', { 
         job_id, 
-        imageCount: output.images.length 
+        imageCount: output.images.length ,
+        prompt:req.query.prompt
+
       });
       const imageUrls = output.images.map(img => `data:image/png;base64,${img}`);
       // Save to DB if userId is provided
+      // if (req.query.userId) {
+      //   for (const img of output.images) {
+      //     const buffer = Buffer.from(img, 'base64');
+      //     await GeneratedImage.create({ userId: req.query.userId, image: buffer });
+      //   }
+      // }
       if (req.query.userId) {
-        for (const img of output.images) {
-          const buffer = Buffer.from(img, 'base64');
-          await GeneratedImage.create({ userId: req.query.userId, image: buffer });
-        }
-      }
+  for (const img of output.images) {
+    const buffer = Buffer.from(img, 'base64');
+    await GeneratedImage.create({
+      userId: req.query.userId,
+      image: buffer,
+      imageUrl: `data:image/png;base64,${img}`,
+      prompt: req.query.prompt,
+      negativePrompt: req.query.negative_prompt,
+      width: parseInt(req.query.width),
+      height: parseInt(req.query.height),
+      steps: parseInt(req.query.steps),
+      guidanceScale: parseFloat(req.query.guidance_scale),
+      // seed: parseInt(req.query.seed),
+      scheduler: req.query.scheduler,
+      clipSkip: parseInt(req.query.clip_skip),
+      style: req.query.style,
+      model: req.query.model_xl ? 'XL' : 'default',
+      type: 'image' // or enhance dynamically if needed
+    });
+  }
+}
+
       return res.status(200).json({ imageUrls });
     }
 

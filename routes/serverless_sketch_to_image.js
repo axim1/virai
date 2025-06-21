@@ -143,7 +143,23 @@ router.get('/sketch-to-image-status/:job_id', async (req, res) => {
       if (req.query.userId) {
         for (const img of output.images) {
           const buffer = Buffer.from(img, 'base64');
-          await GeneratedImage.create({ userId: req.query.userId, image: buffer });
+          await GeneratedImage.create({
+                        userId: req.query.userId,
+            image: buffer,
+            imageUrl: `data:image/png;base64,${img}`,
+            prompt: req.query.prompt || '',
+            negativePrompt: req.query.negative_prompt || '',
+            width: parseInt(req.query.width) || 512,
+            height: parseInt(req.query.height) || 512,
+            steps: parseInt(req.query.steps) || 25,
+            guidanceScale: parseFloat(req.query.guidance_scale) || 7.5,
+            seed: parseInt(req.query.seed) || Math.floor(Math.random() * 1000000000),
+            scheduler: req.query.scheduler || 'normal',
+            clipSkip: parseInt(req.query.clip_skip) || 0,
+            style: req.query.style || 'default',
+            model: req.query.model_xl === 'true' ? 'XL' : 'default',
+            type: 'image'
+           });
         }
       }
       return res.status(200).json({ imageUrls: formattedImages });
