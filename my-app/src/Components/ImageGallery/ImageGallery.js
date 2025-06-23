@@ -157,6 +157,7 @@ const ImageGallery = () => {
     600: 1,
   };
 
+//   test
   return (
     <div className={styles.gallery}>
       <p className={styles.p3}>Gallery</p>
