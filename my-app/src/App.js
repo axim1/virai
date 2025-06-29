@@ -22,13 +22,42 @@ function App() {
   const [triggerShrink, setTriggerShrink] = useState(false); // State to trigger hero section shrink
   const [activeSection, setActiveSection] = useState('home');
   // const scrollToSection = location.state?.scrollToSection;
+  // useEffect(() => {
+  //   const storedUser = localStorage.getItem("user");
+  //   if (storedUser) {
+  //     setUserState(JSON.parse(storedUser));
+  //     setLoggedIn(true);
+  //   }
+  // }, []);
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      setUserState(JSON.parse(storedUser));
-      setLoggedIn(true);
+  const fetchAndUpdateUser = async () => {
+    const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+
+    if (!storedUser || !storedUser._id) {
+      console.warn("No user in localStorage");
+      return;
     }
-  }, []);
+
+    try {
+      const res = await fetch(`${process.env.REACT_APP_API_URL}api/user/${storedUser._id}`);
+      const data = await res.json();
+
+      if (data.user) {
+        const updatedUser = { ...storedUser, ...data.user };
+        setUserState(updatedUser);
+        setLoggedIn(true);
+        localStorage.setItem("user", JSON.stringify(updatedUser));
+      } else {
+        console.warn("User data not returned from backend");
+      }
+    } catch (error) {
+      console.error("Error refreshing user:", error);
+    }
+  };
+
+  fetchAndUpdateUser();
+}, []);
+
 
   // Function to trigger hero shrink effect when "AI Tools" is clicked
   // const handleAIToolsClick = () => {

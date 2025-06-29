@@ -166,15 +166,25 @@ const Navbar = ({ loggedIn,  setLoggedIn = () => {}, onHomeClick,activeLink,setA
 
               {dropdownOpen && (
                 <div className={styles.userDropdown}>
-                  <div style={{display:'flex', flexDirection:'row', justifyContent:'space-between',padding: '24px'}}>
+                  <div style={{display:'flex', flexDirection:'row', justifyContent:'space-between',padding: '14px'}}>
                  <div>
                   <div><strong>{user.fname} {user.lname}</strong></div>
                   <div style={{
                     color:'#999999'
                   }}>{user.email}</div>
                  </div>
-                  <div className={styles.coins} style={{width:'50px', height:'50px'}}>
-                <img src={coinIcon}/>{user.no_of_images_left}
+                  <div className={styles.coins} style={{maxWidth:'200px', maxHeight:'50px'}}>
+              
+              <div style={{display:'flex', flexDirection:'row', alignItems:'center', justifyContent:'center', height:'100%',width:'100%'}}>
+                             <div style={{height:'16px', width:'22px'}}> <img src={coinIcon}/> 
+                </div>
+                                          <div style={{fontSize:'14px'}}> 
+                {user.no_of_images_left} 
+                </div>
+              </div>
+               
+        
+                  <div className={styles.subscriptionPlanText}> {user.subscription.name}</div> 
               </div>
               </div>
                   {/* <div><strong>Images Left:</strong> {user.no_of_images_left}</div> */}

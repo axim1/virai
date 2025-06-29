@@ -22,6 +22,7 @@
     /* border-radius: 8px; */
     padding: 1rem;
   }
+
   
   form {
     /* width: 400px; */
@@ -139,10 +140,11 @@
     max-width: 800px;
     background: #1a1a1a;
     border-radius: 12px;
-    padding: 30px 20px;
+    padding: 30px 0px;
     margin-bottom: 30px;
     display: flex;
     flex-direction: column;
+    
     align-items: center;
     font-family: 'Poppins', sans-serif;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
@@ -155,6 +157,7 @@
     height: 100px;
     border-radius: 50%;
     object-fit: cover;
+    
     border: 3px solid #2E8B57;
     background-color: #444;
     margin-bottom: 12px;
@@ -162,7 +165,10 @@
   
   .profile-text {
     width: 100%;
+    margin-top:20px;
+    background-color: #0e0e0e;
     display: flex;
+    padding: 10px;
     /* margin: 20px 0px; */
     justify-content: space-evenly;
   }
