@@ -686,8 +686,9 @@ setIsRetrieving(false);
     "image-to-sketch",
     "sketch-to-image",
     "image-enhancement",
+     "inpainting",
     "video-generation",
-    "inpainting",
+   
     "object-creation"
   ];
 

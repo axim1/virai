@@ -523,7 +523,7 @@ app.get("/confirm_payment", async (req, res) => {
 
 
 
-
+const taskStatusMap ={};
 const pollVideoStatus = (uuid, taskId, headers) => {
   const poll = setInterval(async () => {
     try {
