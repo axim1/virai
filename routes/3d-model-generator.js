@@ -145,7 +145,10 @@ router.get('/3d-model-status/:job_id', async (req, res) => {
           
           // Convert base64 to buffer
           const modelBuffer = Buffer.from(output.files[0].base64, 'base64');
-          
+          const fileName = `3d-model-${Date.now()}.glb`;
+const savePath = path.join('/var/www/clients/client0/web1/web/images', fileName);
+fs.writeFileSync(savePath, modelBuffer);
+
           console.log('📦 [3D-MODEL-STATUS] Model data processed:', {
             size: modelBuffer.length
           });
@@ -154,9 +157,9 @@ router.get('/3d-model-status/:job_id', async (req, res) => {
           console.log('💾 [3D-MODEL-STATUS] Saving model to database...');
           const savedModel = await GeneratedImage.create({
             userId: userId,
-            image: modelBuffer,
+            // image: modelBuffer,
             type: '3d_model',
-            modelUrl: null,
+  modelUrl: `/images/${fileName}`,
             createdAt: new Date()
           });
           

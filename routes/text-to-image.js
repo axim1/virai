@@ -151,7 +151,7 @@ router.get('/text-to-image-status/:job_id', async (req, res) => {
     console.log('image url : ', fileName)
     await GeneratedImage.create({
       userId: req.query.userId,
-      image: buffer,
+      // image: buffer,
       // imageUrl: `data:image/png;base64,${img}`,
       imageUrl: `/images/${fileName}`,
 

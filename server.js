@@ -818,22 +818,133 @@ app.get("/api/user/:userId", async (req, res) => {
 
 
 
+// const imageRequestQueue = new Queue(async (task, cb) => {
+//   try {
+//     const { filter, page = 1, limit = 8, userId } = task;
+
+//     console.log("✅ Backend: /api/images was hit");
+//     console.log("filter", filter);
+
+//     const query = {};
+//     let sort = {};
+
+//     // Filter logic
+//     if (filter === "Owned by Me" && userId) {
+//       query.userId = userId;
+//     }
+
+//     // Sort logic
+//     switch (filter) {
+//       case "Newest":
+//         sort = { createdAt: -1 };
+//         break;
+//       case "Oldest":
+//         sort = { createdAt: 1 };
+//         break;
+//       case "Most Liked":
+//         sort = { likes: -1 };
+//         break;
+//       case "Most Viewed":
+//         sort = { views: -1 };
+//         break;
+//       case "Trending":
+//         sort = { likes: -1, views: -1 };
+//         break;
+//       default:
+//         // Fallback: treat filter as keyword search
+//         if (filter) {
+//           query.description = { $regex: filter, $options: 'i' };
+//         }
+//     }
+
+//     console.log("🔍 Query:", query);
+//     console.log("📊 Sort:", sort);
+
+//     const images = await GeneratedImage.find(query)
+//       .sort(sort)
+//       .skip((page - 1) * limit)
+//       .limit(Number(limit));
+
+//     console.log("📦 Found images:", images.length);
+//     console.log("📝 First image type:", images[0]?.type);
+//     console.log("🔗 First image modelUrl:", images[0]?.modelUrl);
+
+//     const imageUrls = images.map(img => {
+//       let imageData;
+//       if (img.type === '3d_model') {
+//         // For 3D models, ensure we're sending the raw GLB data
+//         imageData = `data:model/gltf-binary;base64,${img.image.toString('base64')}`;
+//         console.log(`📦 Processing 3D model ${img._id}:`, {
+//           size: img.image.length,
+//           type: img.type
+//         });
+//       } else {
+//         // For regular images
+//         imageData = `data:image/png;base64,${img.image.toString('base64')}`;
+//       }
+
+//       const processed = {
+//         _id: img._id,
+//         type: img.type || 'image',
+//         image: imageData,
+//         likes: img.likes || 0,
+//         views: img.views || 0,
+//         fires: img.fires || 0,
+//         shares: img.shares || 0,
+//         owner: img.owner || {},
+//         createdAt: img.createdAt,
+
+//             // Optional fields — fallback to defaults if not present
+//     prompt: img.prompt || '',
+//     negativePrompt: img.negativePrompt || '',
+//     width: img.width || '',
+//     height: img.height || '',
+//     steps: img.steps || '',
+//     guidanceScale: img.guidanceScale || '',
+//     seed: img.seed || null,
+//     scheduler: img.scheduler || 'normal',
+//     clipSkip: img.clipSkip || 0,
+//     style: img.style || 'default',
+//     model: img.model || 'default',
+//     modelUrl: img.modelUrl || null
+
+//       };
+
+//       console.log(`🖼️ Processing ${img.type === '3d_model' ? 'model' : 'image'} ${img._id}:`, {
+//         type: processed.type,
+//         hasImage: !!processed.image,
+//         imageSize: img.image?.length,
+//         prompt: processed.prompt
+//       });
+//       return processed;
+//     });
+
+//     console.log("✅ Final result:", { 
+//       totalImages: imageUrls.length,
+//       firstImageType: imageUrls[0]?.type,
+//       firstImageModelUrl: imageUrls[0]?.modelUrl
+//     });
+
+//     cb(null, { images: imageUrls });
+//   } catch (error) {
+//     console.error("❌ Queue error:", error);
+//     cb(error);
+//   }
+// });
+
+
 const imageRequestQueue = new Queue(async (task, cb) => {
   try {
     const { filter, page = 1, limit = 8, userId } = task;
-
     console.log("✅ Backend: /api/images was hit");
-    console.log("filter", filter);
 
     const query = {};
     let sort = {};
 
-    // Filter logic
     if (filter === "Owned by Me" && userId) {
       query.userId = userId;
     }
 
-    // Sort logic
     switch (filter) {
       case "Newest":
         sort = { createdAt: -1 };
@@ -851,39 +962,28 @@ const imageRequestQueue = new Queue(async (task, cb) => {
         sort = { likes: -1, views: -1 };
         break;
       default:
-        // Fallback: treat filter as keyword search
         if (filter) {
           query.description = { $regex: filter, $options: 'i' };
         }
     }
-
-    console.log("🔍 Query:", query);
-    console.log("📊 Sort:", sort);
 
     const images = await GeneratedImage.find(query)
       .sort(sort)
       .skip((page - 1) * limit)
       .limit(Number(limit));
 
-    console.log("📦 Found images:", images.length);
-    console.log("📝 First image type:", images[0]?.type);
-    console.log("🔗 First image modelUrl:", images[0]?.modelUrl);
+    const backendUrl = process.env.BACKEND_URL || "http://localhost:8000";
 
     const imageUrls = images.map(img => {
       let imageData;
+
       if (img.type === '3d_model') {
-        // For 3D models, ensure we're sending the raw GLB data
-        imageData = `data:model/gltf-binary;base64,${img.image.toString('base64')}`;
-        console.log(`📦 Processing 3D model ${img._id}:`, {
-          size: img.image.length,
-          type: img.type
-        });
+        imageData = `${backendUrl}/vpsimages/${img.imageUrl}`;  // .glb
       } else {
-        // For regular images
-        imageData = `data:image/png;base64,${img.image.toString('base64')}`;
+        imageData = `${backendUrl}/vpsimages/${img.imageUrl}`;  // .png/.jpg
       }
 
-      const processed = {
+      return {
         _id: img._id,
         type: img.type || 'image',
         image: imageData,
@@ -894,35 +994,19 @@ const imageRequestQueue = new Queue(async (task, cb) => {
         owner: img.owner || {},
         createdAt: img.createdAt,
 
-            // Optional fields — fallback to defaults if not present
-    prompt: img.prompt || '',
-    negativePrompt: img.negativePrompt || '',
-    width: img.width || '',
-    height: img.height || '',
-    steps: img.steps || '',
-    guidanceScale: img.guidanceScale || '',
-    seed: img.seed || null,
-    scheduler: img.scheduler || 'normal',
-    clipSkip: img.clipSkip || 0,
-    style: img.style || 'default',
-    model: img.model || 'default',
-    modelUrl: img.modelUrl || null
-
+        prompt: img.prompt || '',
+        negativePrompt: img.negativePrompt || '',
+        width: img.width || '',
+        height: img.height || '',
+        steps: img.steps || '',
+        guidanceScale: img.guidanceScale || '',
+        seed: img.seed || null,
+        scheduler: img.scheduler || 'normal',
+        clipSkip: img.clipSkip || 0,
+        style: img.style || 'default',
+        model: img.model || 'default',
+        modelUrl: img.modelUrl || null,
       };
-
-      console.log(`🖼️ Processing ${img.type === '3d_model' ? 'model' : 'image'} ${img._id}:`, {
-        type: processed.type,
-        hasImage: !!processed.image,
-        imageSize: img.image?.length,
-        prompt: processed.prompt
-      });
-      return processed;
-    });
-
-    console.log("✅ Final result:", { 
-      totalImages: imageUrls.length,
-      firstImageType: imageUrls[0]?.type,
-      firstImageModelUrl: imageUrls[0]?.modelUrl
     });
 
     cb(null, { images: imageUrls });
@@ -931,6 +1015,7 @@ const imageRequestQueue = new Queue(async (task, cb) => {
     cb(error);
   }
 });
+
 
 app.get('/api/images', async (req, res) => {
   try {
