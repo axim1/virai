@@ -136,13 +136,23 @@ router.get('/text-to-image-status/:job_id', async (req, res) => {
       //     await GeneratedImage.create({ userId: req.query.userId, image: buffer });
       //   }
       // }
+
+
+
       if (req.query.userId) {
   for (const img of output.images) {
     const buffer = Buffer.from(img, 'base64');
+
+    const fileName = `image-${Date.now()}.png`;
+    const savePath = path.join('/var/www/clients/client0/web1/web/images', fileName);
+    fs.writeFileSync(savePath, buffer);
+    console.log('image url : ', fileName)
     await GeneratedImage.create({
       userId: req.query.userId,
       image: buffer,
-      imageUrl: `data:image/png;base64,${img}`,
+      // imageUrl: `data:image/png;base64,${img}`,
+      imageUrl: `/images/${fileName}`,
+
       prompt: req.query.prompt,
       negativePrompt: req.query.negative_prompt,
       width: parseInt(req.query.width),
