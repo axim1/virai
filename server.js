@@ -36,6 +36,7 @@ require("./passport-config"); // Load the Passport config
 
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+app.use('/vpsimages', express.static(path.join(__dirname, '../images')));
 
 app.use(cors({ origin: '*' }));
 const { isStringObject } = require("util/types");
@@ -805,27 +806,6 @@ app.get("/api/user/:userId", async (req, res) => {
       return res.status(404).send({ message: "User not found" });
     }
 
-    // const userData = {
-    //   fname: user.fname,
-    //   lname: user.lname,
-    //   email: user.email,
-    //   no_of_images_left: user.no_of_images_left,
-    //   subscription: user.subscription
-    //     ? {
-    //       // ... other subscription properties
-    //       name: user.subscription.name,
-    //       priceMonthly: user.subscription.priceMonthly,
-    //       priceYearly: user.subscription.priceYearly,
-    //       generatedImages: user.subscription.generatedImages,
-    //       generationSpeed: user.subscription.generationSpeed,
-    //       videoGenerations: user.subscription.videoGenerations,
-    //       licenseType: user.subscription.licenseType,
-    //       privacy: user.subscription.privacy,
-    //     }
-    //     : null,
-    // };
-    // const user = await User.findById(userId).populate("subscription");
-    // if (!user) return res.status(404).send({ message: "User not found" });
 
     res.send({ user });
 
