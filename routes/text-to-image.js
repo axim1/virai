@@ -2,6 +2,8 @@ const express = require('express');
 const axios = require('axios');
 const { User, GeneratedImage } = require('../models');
 const router = express.Router();
+const path = require('path');
+const fs = require('fs'); // if not already imported
 
 const RUNPOD_ENDPOINT = "https://api.runpod.ai/v2/q5rsf2wvu67m43/run";
 const RUNPOD_STATUS_BASE = "https://api.runpod.ai/v2/q5rsf2wvu67m43/status";
