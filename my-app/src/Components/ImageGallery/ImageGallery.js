@@ -59,6 +59,7 @@ const ImageGallery = () => {
       }
       const response = await fetch(url);
       const data = await response.json();
+      console.log('all images',data.images)
       if (data.images.length === 0) {
         setHasMore(false);
       } else {

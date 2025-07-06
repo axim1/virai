@@ -36,7 +36,7 @@ require("./passport-config"); // Load the Passport config
 
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
-app.use('/vpsimages', express.static(path.join(__dirname, '../images')));
+app.use('/images', express.static(path.join(__dirname, '../images')));
 
 app.use(cors({ origin: '*' }));
 const { isStringObject } = require("util/types");
@@ -776,25 +776,25 @@ app.get("/topimages/:userId", async (req, res) => {
 
 
 
-app.get("/images/:userId", async (req, res) => {
-  const userId = req.params.userId;
-  console.log(userId)
-  try {
-    const user = await User.findById(userId).populate('generatedImages');
+// app.get("/images/:userId", async (req, res) => {
+//   const userId = req.params.userId;
+//   console.log(userId)
+//   try {
+//     const user = await User.findById(userId).populate('generatedImages');
 
-    if (!user) {
-      console.log("User not found. UserId:", userId);
-      res.status(404).send({ message: "User not found" });
-      return;
-    }
+//     if (!user) {
+//       console.log("User not found. UserId:", userId);
+//       res.status(404).send({ message: "User not found" });
+//       return;
+//     }
 
-    const imageUrls = user.generatedImages.map((image) => `data:image/jpeg;base64,${image.image.toString('base64')}`);
-    res.send({ images: imageUrls });
-  } catch (error) {
-    console.error("Error fetching images:", error);
-    res.status(500).send({ message: "Internal server error" });
-  }
-});
+//     const imageUrls = user.generatedImages.map((image) => `data:image/jpeg;base64,${image.image.toString('base64')}`);
+//     res.send({ images: imageUrls });
+//   } catch (error) {
+//     console.error("Error fetching images:", error);
+//     res.status(500).send({ message: "Internal server error" });
+//   }
+// });
 app.get("/api/user/:userId", async (req, res) => {
   const userId = req.params.userId;
   console.log("tjos ", userId)
@@ -978,9 +978,9 @@ const imageRequestQueue = new Queue(async (task, cb) => {
       let imageData;
 
       if (img.type === '3d_model') {
-        imageData = `${backendUrl}/vpsimages/${img.imageUrl}`;  // .glb
+        imageData = `${backendUrl}${img.imageUrl}`;  // .glb
       } else {
-        imageData = `${backendUrl}/vpsimages/${img.imageUrl}`;  // .png/.jpg
+        imageData = `${backendUrl}${img.imageUrl}`;  // .png/.jpg
       }
 
       return {
