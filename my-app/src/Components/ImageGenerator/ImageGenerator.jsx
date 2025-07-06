@@ -546,7 +546,7 @@ const handleImageEnhancement = async (formData) => {
       const res = await axios.post(`${apiUrl}generate-video`, formData);
       const videoUuid = res.data.uuid;
   
-      const endTime = Date.now() + 240000;
+      const endTime = Date.now() + 1940000;
   
       const pollInterval = setInterval(async () => {
         if (Date.now() > endTime) {
