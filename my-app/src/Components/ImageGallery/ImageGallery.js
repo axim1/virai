@@ -132,24 +132,62 @@ const ImageGallery = () => {
     }
   };
 
+
+
   const renderContent = image => {
-    if (image.type === '3d_model') {
-      return (
-        <div className={styles.modelContainer} onClick={() => setSelectedModel({ ...image, modelUrl: image.image })}>
-          <img src={placeholder3d} alt={`3D Model ${image._id}`} className={styles.galleryImage} style={{ cursor: 'pointer' }} />
-        </div>
-      );
-    }
+  if (image.type === '3d_model') {
     return (
-      <img
+      <div className={styles.modelContainer} onClick={() => setSelectedModel({ ...image, modelUrl: image.image })}>
+        <img src={placeholder3d} alt={`3D Model ${image._id}`} className={styles.galleryImage} style={{ cursor: 'pointer' }} />
+      </div>
+    );
+  }
+
+  if (image.type === 'video') {
+    return (
+      <video
         src={image.image}
-        alt={`Generated ${image._id}`}
         className={styles.galleryImage}
+        controls={false}
+        muted
+        loop
         onClick={() => setSelectedImage(image)}
         style={{ cursor: 'pointer' }}
       />
     );
-  };
+  }
+
+  return (
+    <img
+      src={image.image}
+      alt={`Generated ${image._id}`}
+      className={styles.galleryImage}
+      onClick={() => setSelectedImage(image)}
+      style={{ cursor: 'pointer' }}
+    />
+  );
+};
+
+
+
+  // const renderContent = image => {
+  //   if (image.type === '3d_model') {
+  //     return (
+  //       <div className={styles.modelContainer} onClick={() => setSelectedModel({ ...image, modelUrl: image.image })}>
+  //         <img src={placeholder3d} alt={`3D Model ${image._id}`} className={styles.galleryImage} style={{ cursor: 'pointer' }} />
+  //       </div>
+  //     );
+  //   }
+  //   return (
+  //     <img
+  //       src={image.image}
+  //       alt={`Generated ${image._id}`}
+  //       className={styles.galleryImage}
+  //       onClick={() => setSelectedImage(image)}
+  //       style={{ cursor: 'pointer' }}
+  //     />
+  //   );
+  // };
 
   const breakpointColumnsObj = {
     default: 4,
@@ -212,9 +250,20 @@ const ImageGallery = () => {
         <div className={styles.modal} onClick={() => setSelectedImage(null)}>
           <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
             <button className={styles.closeButton} onClick={() => setSelectedImage(null)}>&times;</button>
-            <div className={styles.modalImageWrapper}>
-              <img src={selectedImage.image} alt="Full View" className={styles.modalImage} />
-            </div>
+              <div className={styles.modalImageWrapper}>
+                {selectedImage.type === 'video' ? (
+                  <video
+                    src={selectedImage.image}
+                    controls
+                    autoPlay
+                    loop
+                    className={styles.modalImage}
+                  />
+                ) : (
+                  <img src={selectedImage.image} alt="Full View" className={styles.modalImage} />
+                )}
+              </div>
+
             <div className={styles.imageMetadata}>
               <div>
                 <h3>Image Details</h3>
