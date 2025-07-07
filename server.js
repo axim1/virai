@@ -33,6 +33,7 @@ const passport = require("passport");
 require("./passport-config"); // Load the Passport config
 
 // Middleware
+const IMAGES_DIR = path.join(__dirname, '../images'); // or wherever you serve from
 
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
@@ -538,16 +539,72 @@ const pollVideoStatus = (uuid, taskId, headers) => {
         clearInterval(poll);
         const fileId = queryRes.data.file_id;
 
-        const fileRes = await axios.get(
-          `https://api.minimaxi.chat/v1/files/retrieve?file_id=${fileId}`,
-          { headers }
-        );
+        // const fileRes = await axios.get(
+        //   `https://api.minimaxi.chat/v1/files/retrieve?file_id=${fileId}`,
+        //   { headers }
+        // );
 
-        taskStatusMap[uuid] = {
-          taskId,
-          downloadUrl: fileRes.data.file.download_url,
-          status: 'ready',
-        };
+        // taskStatusMap[uuid] = {
+        //   taskId,
+        //   downloadUrl: fileRes.data.file.download_url,
+        //   status: 'ready',
+        // };
+        const fileRes = await axios.get(
+  `https://api.minimaxi.chat/v1/files/retrieve?file_id=${fileId}`,
+  { headers }
+);
+
+const videoUrl = fileRes.data.file.download_url;
+const videoFilename = `video-${Date.now()}.mp4`;
+const videoPath = path.join(IMAGES_DIR, videoFilename);
+console.log('video path: ', videoPath)
+// Download and save the video locally
+const writer = fs.createWriteStream(videoPath);
+const videoStream = await axios({
+  method: 'get',
+  url: videoUrl,
+  responseType: 'stream'
+});
+videoStream.data.pipe(writer);
+
+writer.on('finish', async () => {
+  const relativePath = `/images/${videoFilename}`;
+  const fullVideoUrl = `${process.env.BACKEND_URL}${relativePath}`;
+
+  try {
+    const newVideoEntry = new GeneratedImage({
+      type: 'video',
+      imageUrl: relativePath,
+      prompt: taskStatusMap[uuid].prompt || 'Video generated from prompt',
+      userId: taskStatusMap[uuid].userId || null, // Must be passed earlier in payload
+    });
+
+    await newVideoEntry.save();
+
+    taskStatusMap[uuid] = {
+      taskId,
+      downloadUrl: fullVideoUrl,
+      status: 'ready',
+      dbId: newVideoEntry._id
+    };
+  } catch (err) {
+    console.error('Failed to save video entry to DB:', err);
+    taskStatusMap[uuid] = {
+      taskId,
+      status: 'error'
+    };
+  }
+});
+
+
+writer.on('error', (err) => {
+  console.error('Video save failed:', err);
+  taskStatusMap[uuid] = {
+    taskId,
+    status: 'error'
+  };
+});
+
       } else if (['Fail', 'Unknown'].includes(status)) {
         clearInterval(poll);
         taskStatusMap[uuid] = { taskId, status: 'error' };
@@ -602,7 +659,12 @@ app.post('/generate-video', upload.single('image'), async (req, res) => {
     console.log(submitRes)
     // Save taskId in memory or database keyed by a UUID
     const videoUuid = uuidv4();
-    taskStatusMap[videoUuid] = { taskId, status: 'pending' };
+taskStatusMap[videoUuid] = {
+  taskId,
+  status: 'pending',
+  userId: req.body.userId || null,
+  prompt
+};
 
     // Begin polling in background
     pollVideoStatus(videoUuid, taskId, headers);
