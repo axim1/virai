@@ -213,7 +213,7 @@ const GeneratedImageSchema = new mongoose.Schema({
   views: { type: Number, default: 0 },
   createdAt: { type: Date, default: Date.now },
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  type: { type: String, enum: ['image', '3d_model', 'enhanced_image'], default: 'image' },
+  type: { type: String, enum: ['image', '3d_model', 'enhanced_image','video'], default: 'image' },
   modelUrl: { type: String, default: null }
 });
 
