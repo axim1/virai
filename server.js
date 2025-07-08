@@ -1003,9 +1003,17 @@ const imageRequestQueue = new Queue(async (task, cb) => {
     const query = {};
     let sort = {};
 
-    if (filter === "Owned by Me" && userId) {
-      query.userId = userId;
-    }
+    // if (filter === "Owned by Me" && userId) {
+    //   query.userId = userId;
+    // }
+if (filter === "Owned by Me" && userId) {
+  if (mongoose.isValidObjectId(userId)) {
+    query.userId = new mongoose.Types.ObjectId(userId);
+    console.log('owner but me');
+  } else {
+    return cb(new Error('Invalid userId'));
+  }
+}
 
     switch (filter) {
       case "Newest":
@@ -1095,7 +1103,7 @@ app.get('/api/images', async (req, res) => {
     console.log('✅ Backend: /api/images was hit');
 
     const { filter, page = 1, limit = 8, userId } = req.query;
-    console.log("filter", filter)
+    console.log("filter", filter, userId)
     // Add request to queue
     imageRequestQueue.push({ filter, page, limit, userId }, (err, result) => {
       if (err) {

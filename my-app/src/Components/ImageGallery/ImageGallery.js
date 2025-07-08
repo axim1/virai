@@ -60,15 +60,22 @@ const [loadError, setLoadError] = useState(false);
   setLoadError(false); // reset before new attempt
 
   let url = `${apiUrl}api/images?filter=${filter}&page=${pageNum}&limit=${limit}`;
-  if (filter === 'Owned by Me' && user?._id) {
-    url += `&userId=${user._id}`;
+  if (filter === 'Owned by Me') {
+const storedUser = JSON.parse(localStorage.getItem('user'));
+
+  if (storedUser && storedUser._id) {
+    url += `&userId=${storedUser._id}`;
+    console.log('✅ URL:', url);
+  } else {
+    console.warn('⚠️ User ID missing');
+  }
   }
 
   const response = await fetch(url);
   if (!response.ok) throw new Error("Server responded with error");
 
   const data = await response.json();
-
+console.log('data',data)
   if (data.images.length === 0) {
     setHasMore(false);
   } else {
