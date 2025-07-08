@@ -1,5 +1,5 @@
 // ImageGallery.jsx with react-masonry-css
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback,useRef } from 'react';
 import Masonry from 'react-masonry-css';
 import styles from './ImageGallery.module.css';
 import like from '../../assets/vector_icons/like.svg';
@@ -12,8 +12,12 @@ import filterIcon from '../../assets/vector_icons/Filters 1.svg';
 import ModelViewer from '../ImageGenerator/ModelViewer';
 import placeholder3d from '../../assets/vector_icons/3D object generation-01 1.svg';
 const apiUrl = process.env.REACT_APP_API_URL;
+const API_BASE = process.env.REACT_APP_API_URL;
 
 const ImageGallery = () => {
+  const loaderRef = useRef(null);
+const [loadError, setLoadError] = useState(false);
+
   const [user, setUser] = useState(null);
   const [loggedIn, setLoggedIn] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -52,26 +56,33 @@ const ImageGallery = () => {
 
   const fetchImages = useCallback(async (pageNum = 1, append = false) => {
     try {
-      setIsLoading(true);
-      let url = `${apiUrl}api/images?filter=${filter}&page=${pageNum}&limit=${limit}`;
-      if (filter === 'Owned by Me' && user?._id) {
-        url += `&userId=${user._id}`;
-      }
-      const response = await fetch(url);
-      const data = await response.json();
-      console.log('all images',data.images)
-      if (data.images.length === 0) {
-        setHasMore(false);
-      } else {
-        setHasMore(data.images.length === limit);
-        setImages(prev => (append ? [...prev, ...data.images] : data.images));
-        setPage(pageNum);
-      }
-    } catch (error) {
-      setError(error.message);
-    } finally {
-      setIsLoading(false);
-    }
+  setIsLoading(true);
+  setLoadError(false); // reset before new attempt
+
+  let url = `${apiUrl}api/images?filter=${filter}&page=${pageNum}&limit=${limit}`;
+  if (filter === 'Owned by Me' && user?._id) {
+    url += `&userId=${user._id}`;
+  }
+
+  const response = await fetch(url);
+  if (!response.ok) throw new Error("Server responded with error");
+
+  const data = await response.json();
+
+  if (data.images.length === 0) {
+    setHasMore(false);
+  } else {
+    setHasMore(data.images.length === limit);
+    setImages(prev => (append ? [...prev, ...data.images] : data.images));
+    setPage(pageNum);
+  }
+} catch (error) {
+  setError(error.message);
+  setLoadError(true); // this disables auto-load
+} finally {
+  setIsLoading(false);
+}
+
   }, [filter, user, limit]);
 
   useEffect(() => {
@@ -86,6 +97,28 @@ const ImageGallery = () => {
     setPage(1);
     setHasMore(true);
   };
+
+
+
+useEffect(() => {
+  if (isLoading || !hasMore || loadError) return;
+
+  const observer = new IntersectionObserver(
+    entries => {
+      if (entries[0].isIntersecting) {
+        fetchImages(page + 1, true);
+      }
+    },
+    { threshold: 1 }
+  );
+
+  const current = loaderRef.current;
+  if (current) observer.observe(current);
+
+  return () => {
+    if (current) observer.unobserve(current);
+  };
+}, [isLoading, hasMore, page, fetchImages, loadError]);
 
   const handleDownload = async (imageUrl, filename) => {
     try {
@@ -195,7 +228,11 @@ const ImageGallery = () => {
     900: 2,
     600: 1,
   };
-
+  const getProfilePicUrl = (picPath) => {
+    if (!picPath) return "https://via.placeholder.com/100x100.png?text=User";
+    const filename = picPath.split("\\").pop().split("/").pop(); // Handle both slashes
+    return `${API_BASE}api/uploads/profilepic/${filename}?t=${Date.now()}`;
+  };
 //   test
   return (
     <div className={styles.gallery}>
@@ -237,7 +274,8 @@ const ImageGallery = () => {
               <>
                 {renderContent(image)}
                 <div className={styles.userInfo}>
-                  <img src={image.owner?.profilePic || image.logo} className={styles.logo} alt="User Profile" />
+                  <img           src={getProfilePicUrl(image.owner?.profilePic || '')}
+ className={styles.logo} alt="User Profile" />
                   <span className={styles.userName}>{image.owner?.name || 'Anonymous'}</span>
                 </div>
               </>
@@ -305,13 +343,26 @@ const ImageGallery = () => {
           </div>
         </div>
       )}
-      {!isLoading && hasMore && (
+      {/* {!isLoading && hasMore && (
         <div style={{ textAlign: 'center', margin: '2rem 0' }}>
           <button onClick={() => fetchImages(page + 1, true)} className={styles.loadMoreButton}>
             Load More
           </button>
         </div>
-      )}
+      )} */}
+{loadError ? (
+  <div style={{ textAlign: 'center', margin: '2rem 0' }}>
+    <p style={{ color: 'red' }}>⚠️ Error loading images.</p>
+    <button onClick={() => fetchImages(page + 1, true)} className={styles.loadMoreButton}>
+      Try Again
+    </button>
+  </div>
+) : (
+  <div ref={loaderRef} style={{ height: '50px', textAlign: 'center' }}>
+    {isLoading && <p>Loading more images...</p>}
+  </div>
+)}
+
 
       {!hasMore && images.length > 0 && (
         <div className={styles.endMessage}>

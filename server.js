@@ -1029,10 +1029,12 @@ const imageRequestQueue = new Queue(async (task, cb) => {
         }
     }
 
-    const images = await GeneratedImage.find(query)
-      .sort(sort)
-      .skip((page - 1) * limit)
-      .limit(Number(limit));
+const images = await GeneratedImage.find(query)
+  .sort(sort)
+  .skip((page - 1) * limit)
+  .limit(Number(limit))
+  .populate('userId', 'fname lname profilePic'); // Only populate needed fields
+
 
     const backendUrl = process.env.BACKEND_URL || "http://localhost:8000";
 
@@ -1053,7 +1055,16 @@ const imageRequestQueue = new Queue(async (task, cb) => {
         views: img.views || 0,
         fires: img.fires || 0,
         shares: img.shares || 0,
-        owner: img.owner || {},
+        owner: img.userId
+  ? {
+      name: `${img.userId.fname} ${img.userId.lname}`,
+      profilePic: img.userId.profilePic || null,
+    }
+  : {
+      name: 'Anonymous',
+      profilePic: null,
+    },
+
         createdAt: img.createdAt,
 
         prompt: img.prompt || '',

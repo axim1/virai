@@ -93,13 +93,48 @@ const Profile = () => {
   return (
     <div className="userProfile">
       <div className="profile-summary">
-        <img
-          src={previewUrl || getProfilePicUrl(profilePicFilename)}
-          alt="User Profile"
-          className="profile-pic"
-        />
-        <h2>{form.fname} {form.lname}</h2>
+        <div className="left-profile-container">
+        <div className="profile-pic-container">
+          <label htmlFor="profilePic" className="edit-icon-label">
+            <img
+              src={previewUrl || getProfilePicUrl(profilePicFilename)}
+              alt="User Profile"
+              className="profile-pic"
+            />
+            <div className="edit-icon-wrapper">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="white"       // ✅ This sets the stroke color
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="edit-icon"
+              >
+                <path d="M12 20h9" />
+                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" />
+              </svg>
+            </div>
+
+          </label>
+          <input
+            type="file"
+            id="profilePic"
+            name="profilePic"
+            accept="image/*"
+            onChange={handleChange}
+            style={{ display: "none" }}
+          />
+
+          
+        </div>
+</div>
         <div className="profile-text">
+                  <h2>{form.fname} {form.lname}</h2>
+
           <p><strong></strong> {form.email}</p>
           <p><strong>Subscription:</strong> {storedUser?.subscription.name || "Free"}</p>
           <div className='coins'>
@@ -150,7 +185,7 @@ const Profile = () => {
           className="form-container"
         />
 
-        <label htmlFor="profilePic" style={{ padding: '10px' }} className="form-container upload-label">
+        {/* <label htmlFor="profilePic" style={{ padding: '10px' }} className="form-container upload-label">
           Upload Profile Picture
         </label>
         <input
@@ -160,7 +195,7 @@ const Profile = () => {
           name="profilePic"
           accept="image/*"
           onChange={handleChange}
-        />
+        /> */}
 
         {form.userType === "company" && (
           <>
