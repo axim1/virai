@@ -695,11 +695,11 @@ function ImageGenerator({ onGenerateImage }) {
   const iconMeta = [
     { icon: icon1, label: 'Text to Image' },
     { icon: icon3, label: 'Sketch to Image' },
-    { icon: icon4, label: 'Image Expansion' },
+    { icon: icon4, label: 'Image Enhancement' },
     { icon: icon6, label: 'Video Generation' },
     { icon: icon7, label: '3D Object Generation' },
     { icon: icon2, label: 'Image to Sketch' },
-    { icon: icon5, label: 'Image Enhancement' }
+    { icon: icon5, label: 'Image Expansion' }
   ];
 
   const utilityMeta = [
@@ -713,11 +713,11 @@ function ImageGenerator({ onGenerateImage }) {
    const topToolNames = [
      'Text to Image',
      'Sketch to Image',
-     'Image Expansion',
+     'Image Enhancement',
      'Video Generation',
      '3D Object',
      'Image to Sketch',
-     'Image Enhancement'
+     'Image Expansion'
    ];
    const bottomToolNames = ['Pricing', 'FAQ', 'Support'];
 
