@@ -935,7 +935,7 @@ text-transform: capitalize;
   }
   .rightSection{
     min-height: 510px;
-    max-width: 550px;
+    /* max-width: 550px; */
     /* height: 510px; */
 /*  */
   }
@@ -1041,6 +1041,8 @@ border: none;
   flex: 1;
 }
 @media (max-width: 1060px) {
+
+  
   .generatorContainer {
     /* flex-direction: column; Stack the containers vertically */
     align-items: flex-start;
@@ -1049,10 +1051,10 @@ border: none;
     /* width: 100%; */
 
   }
-  .leftToolBar {
+  /* .leftToolBar {
     max-width: 50px;
     height: 510px;
-  }
+  } */
 
   .topInputContainer {
     width: 100%; /* Full width on tablets */
@@ -1068,6 +1070,7 @@ border: none;
 .leftToolBarTop {
   max-height: 100%;
 }
+ 
   .imageContainer {
     width: 100%;
     background-color: #2e2e2e;
@@ -1079,7 +1082,18 @@ border: none;
   }
   .rightSection{
     width: 100%;
-    /* min-width: 500px; */
+    min-width: 400px;
+  }
+
+    .topInputContainer,
+  .rightSection {
+    width: 100%;
+    /* max-width: 100%; */
+    height: auto;
+  }
+
+  .topInputContainer {
+    order: 1;
   }
 }
 .dropdown-mobile{

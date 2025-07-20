@@ -677,7 +677,9 @@ const topToolNames = [
   'Video Generation',
   '3D Object Generation',
   'Image to Sketch',
-  'Image Expansion'
+  'Image Expansion',
+        'Pricing', 'FAQ', 'Support'
+
 ];
 
 const formatApiType = (apiType) => {
@@ -703,13 +705,13 @@ const formatApiType = (apiType) => {
   //     ) // Capitalize the first letter of the first word
   //     .join(' '); // Join the words back with spaces
   // }
-  const isMobile = window.innerWidth <= 1024;
+  const isMobile = window.innerWidth <= 1060;
 
   const icons = isMobile ? [icon1, icon3, icon4, icon6, icon7, icon2, icon5, icon8, icon9, icon10] : [icon1, icon3, icon4, icon6, icon7, icon2, icon5];
   const iconsbottom = isMobile ? [] : [icon8, icon9, icon10];
   const tticons = [tticon1, tticon2, tticon3, tticon4, tticon5, tticon6];
 
-  const apiTypes = [
+  const apiTypes =[
     "text-to-image",
     "sketch-to-image",
     "image-enhancement",
@@ -1217,14 +1219,15 @@ Coming soon ...
 
         <div className={styles.rightSection}>
           {/* <div className='dropdown-mobile'> */}
-          <Dropdown
-            apiType={formatApiType(apiType)}
-            apiTypes={apiTypes}
-            icons={icons}
-            iconsbottom={iconsbottom}
-            handleApiTypeChange={handleApiTypeChange}
+<Dropdown
+  apiType={apiType} // ✅ raw string like 'text-to-image'
+  apiTypes={apiTypes}
+  formatApiType={formatApiType}
+  icons={icons}
+  iconsbottom={iconsbottom}
+  handleApiTypeChange={handleApiTypeChange}
+/>
 
-          />
           {/* </div> */}
           <div className={styles.topToolBar}>
             <div style={{}}>{formatApiType(apiType)}</div>
