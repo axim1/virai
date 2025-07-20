@@ -667,14 +667,42 @@ function ImageGenerator({ onGenerateImage }) {
       }
     }
   };
-  const formatApiType = (apiType) => {
-    return apiType
-      .split('-') // Split the string by hyphens
-      .map((word, index) =>
-        index === 0 ? word.charAt(0).toUpperCase() + word.slice(1) : word
-      ) // Capitalize the first letter of the first word
-      .join(' '); // Join the words back with spaces
-  }
+
+
+
+const topToolNames = [
+  'Text to Image',
+  'Sketch to Image',
+  'Image Enhancement',
+  'Video Generation',
+  '3D Object Generation',
+  'Image to Sketch',
+  'Image Expansion'
+];
+
+const formatApiType = (apiType) => {
+  const apiTypes = [
+    "text-to-image",
+    "sketch-to-image",
+    "image-enhancement",
+    "video-generation",
+    "object-creation",
+    "image-to-sketch",
+    "inpainting",
+  ];
+  const index = apiTypes.indexOf(apiType);
+  return index !== -1 ? topToolNames[index] : apiType;
+};
+
+
+  // const formatApiType = (apiType) => {
+  //   return apiType
+  //     .split('-') // Split the string by hyphens
+  //     .map((word, index) =>
+  //       index === 0 ? word.charAt(0).toUpperCase() + word.slice(1) : word
+  //     ) // Capitalize the first letter of the first word
+  //     .join(' '); // Join the words back with spaces
+  // }
   const isMobile = window.innerWidth <= 1024;
 
   const icons = isMobile ? [icon1, icon3, icon4, icon6, icon7, icon2, icon5, icon8, icon9, icon10] : [icon1, icon3, icon4, icon6, icon7, icon2, icon5];
@@ -689,36 +717,26 @@ function ImageGenerator({ onGenerateImage }) {
     "object-creation",
     "image-to-sketch",
     "inpainting",
-
-
   ];
-  const iconMeta = [
-    { icon: icon1, label: 'Text to Image' },
-    { icon: icon3, label: 'Sketch to Image' },
-    { icon: icon4, label: 'Image Enhancement' },
-    { icon: icon6, label: 'Video Generation' },
-    { icon: icon7, label: '3D Object Generation' },
-    { icon: icon2, label: 'Image to Sketch' },
-    { icon: icon5, label: 'Image Expansion' }
-  ];
+  // const iconMeta = [
+  //   { icon: icon1, label: 'Text to Image' },
+  //   { icon: icon3, label: 'Sketch to Image' },
+  //   { icon: icon4, label: 'Image Enhancement' },
+  //   { icon: icon6, label: 'Video Generation' },
+  //   { icon: icon7, label: '3D Object Generation' },
+  //   { icon: icon2, label: 'Image to Sketch' },
+  //   { icon: icon5, label: 'Image Expansion' }
+  // ];
 
-  const utilityMeta = [
-    { icon: icon8, label: 'Pricing' },
-    { icon: icon9, label: 'FAQ' },
-    { icon: icon10, label: 'Support' }
-  ];
+  // const utilityMeta = [
+  //   { icon: icon8, label: 'Pricing' },
+  //   { icon: icon9, label: 'FAQ' },
+  //   { icon: icon10, label: 'Support' }
+  // ];
 
 
    // right before your return:
-   const topToolNames = [
-     'Text to Image',
-     'Sketch to Image',
-     'Image Enhancement',
-     'Video Generation',
-     '3D Object',
-     'Image to Sketch',
-     'Image Expansion'
-   ];
+
    const bottomToolNames = ['Pricing', 'FAQ', 'Support'];
 
   return (
@@ -1171,6 +1189,8 @@ function ImageGenerator({ onGenerateImage }) {
           </div>
 
           <div className={styles.generateButtonCont}>
+{apiType !== 'image-to-sketch' && apiType !== 'inpainting' ? (
+
             <button
               className={styles.generateButton}
               onClick={handleGenerateClick}
@@ -1180,7 +1200,18 @@ function ImageGenerator({ onGenerateImage }) {
 
               {isLoading ? (isRetrieving ? 'Retrieving...' : 'Generating...') : 'Generate'}
 
+            </button>):(
+                          <button
+              className={styles.generateButton}
+              style={{backgroundColor:'gray'}}
+              onClick={handleGenerateClick}
+              disabled={true}
+            >
+              <img src={genIcon} alt="" className={styles.genIcon} />
+
+Coming soon ...
             </button>
+            )}
           </div>
         </div>
 
