@@ -25,6 +25,23 @@ const Profile = () => {
   const [formErrors, setFormErrors] = useState({});
   const [previewUrl, setPreviewUrl] = useState(null);
   const [profilePicFilename, setProfilePicFilename] = useState(storedUser?.profilePic || "");
+const handleAutoRenewToggle = async () => {
+  try {
+    const response = await fetch(`${API_BASE}api/updateAutoRenew`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId, autoRenew: !storedUser.autoRenew }),
+    });
+    const result = await response.json();
+    if (result.success) {
+      const updatedUser = { ...storedUser, autoRenew: !storedUser.autoRenew };
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+      window.location.reload();
+    }
+  } catch (err) {
+    alert("Failed to update auto-renewal preference.");
+  }
+};
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -230,6 +247,16 @@ const Profile = () => {
         <button type="submit" className="updateButton">
           UPDATE PROFILE
         </button>
+<div className="toggle-renewal">
+  <label>
+    <input
+      type="checkbox"
+      checked={storedUser?.autoRenew}
+      onChange={handleAutoRenewToggle}
+    />
+    Auto-Renew Subscription
+  </label>
+</div>
 
         <NavLink to="/gen" style={{ color: "#2E8B57" }} className="mt-3 d-block text-center">
           Go back to Dashboard

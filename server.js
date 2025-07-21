@@ -13,6 +13,9 @@ const { OpenAI } = require('openai');
 const imageEnhancementRoutes = require('./routes/serverless_apis');
 const sketchToImageServerless = require('./routes/serverless_sketch_to_image');
 const d3Serverless = require('./routes/3d-model-generator');
+const paymentRoutes = require('./routes/paymentRoutes');
+require('./cron/recurringBillingJob');
+
 const t2i = require('./routes/text-to-image');
 const Queue = require('better-queue');
 
@@ -64,11 +67,11 @@ app.use('/api/sl', imageEnhancementRoutes);
 app.use('/api/serverless', sketchToImageServerless);
 app.use('/api/serverless', d3Serverless);
 app.use('/api/serverless', t2i);
+app.use('/api', paymentRoutes); // Prefix route
 
 const clientOptions = { serverApi: { version: '1', strict: true, deprecationErrors: true } };
     // First API call to get the access token
-const clientId = 'l77443c07411ca4cfbbaf5498a11dfadde';
-const clientSecret = 'daeb8027bc5e4e61a890550c10cf4cb7';
+
 const uri = "mongodb+srv://asim6832475:1234@cluster0.ukza83p.mongodb.net/?retryWrites=true&w=majority";
 mongoose.connect(uri, clientOptions)
   .then(() => console.log("Connected to MongoDB"))
@@ -352,177 +355,6 @@ app.get("/api/uploads/profilepic/:filename", (req, res) => {
   });
 });
 // const { v4: uuidv4 } = require('uuid');
-
-app.post('/api/getPaymentUrl', async (req, res) => {
-  try {
-    const { email, amount, subscriptionName } = req.body;
-    console.log(email, amount, subscriptionName)
-    // Find the user and requested subscription
-    const user = await User.findOne({ email: email });
-    const subscription = await Subscription.findOne({ name: subscriptionName.toUpperCase() });
-
-    if (!user) {
-      return res.status(404).json({ message: "User not found." });
-    }
-
-    if (!subscription) {
-      return res.status(404).json({ message: "Requested subscription not found." });
-    }
-
-    // Get access token
-    const tokenResponse = await axios.post(
-      'https://api.tatrabanka.sk/tatrapayplus/sandbox/auth/oauth/v2/token',
-      new URLSearchParams({
-        client_id: clientId,
-        client_secret: clientSecret,
-        grant_type: 'client_credentials',
-        scope: 'TATRAPAYPLUS',
-      }),
-      { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
-    );
-
-    const accessToken = tokenResponse.data.access_token;
-
-    // Initiate payment
-    const paymentResponse = await axios.post(
-      'https://api.tatrabanka.sk/tatrapayplus/sandbox/v1/payments',
-      {
-        basePayment: {
-          instructedAmount: {
-            amountValue: amount,
-            currency: 'EUR',
-          },
-          endToEnd: {
-            variableSymbol: '1',
-            specificSymbol: '2',
-            constantSymbol: '3',
-          },
-        },
-        userData: {
-          firstName: user.fname,
-          lastName: user.lname,
-          email: user.email,
-          externalApplicantId: '1111',
-          phone: '+421901123456',
-        },
-        bankTransfer: {
-          remittanceInformationUnstructured: 'the message',
-        },
-        cardDetail: {
-
-          cardHolder: `${user.fname} ${user.lname}`,
-          isPreAuthorization: false,
-
-        },
-     
-      },
-      {
-        headers: {
-          'X-Request-ID': uuidv4(),
-          'IP-Address': '136.226.198.81',
-          'Redirect-URI': 'http://virtuartai.com/confirm_payment',
-          'Preferred-Method': 'CARD_PAY',
-          'Accept-Language': 'en',
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-          Authorization: `Bearer ${accessToken}`,
-        },
-      }
-    );
-
-    const { tatraPayPlusUrl, paymentId } = paymentResponse.data;
-
-     console.log(tatraPayPlusUrl)
-   // Update user with paymentId, requested subscription, and pending status
-    await User.findByIdAndUpdate(user._id, {
-      paymentId: paymentId,
-      paymentStatus: 'PENDING',
-      requestedSubscription: subscription._id,
-    });
-    res.json({ tatraPayPlusUrl });
-  } catch (error) {
-    console.error('Error in getPaymentUrl:', error);
-    res.status(500).json({ error: 'An error occurred while processing your request.' });
-  }
-});
-
-
-
-app.get("/confirm_payment", async (req, res) => {
-  try {
-    const { paymentId, paymentMethod, error, errorId } = req.query;
-
-    if (!paymentId) {
-      return res.status(400).json({ message: "Missing paymentId query parameter." });
-    }
-
-    if (error && errorId) {
-      console.error(`Technical error occurred: ${error} (Error ID: ${errorId})`);
-      await User.findOneAndUpdate({ paymentId }, { paymentStatus: 'FAILED' });
-      return res.status(500).json({
-        message: "Payment processing encountered a technical error.",
-        error,
-        errorId,
-      });
-    }
-
-    // Get access token
-    const tokenResponse = await axios.post(
-      'https://api.tatrabanka.sk/tatrapayplus/sandbox/auth/oauth/v2/token',
-      new URLSearchParams({
-        client_id: clientId,
-        client_secret: clientSecret,
-        grant_type: 'client_credentials',
-        scope: 'TATRAPAYPLUS',
-      }),
-      { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
-    );
-
-    const accessToken = tokenResponse.data.access_token;
-
-    // Check payment status
-    const paymentStatusResponse = await axios.get(
-      `https://api.tatrabanka.sk/tatrapayplus/sandbox/v1/payments/${paymentId}/status`,
-      {
-        headers: {
-          'X-Request-ID': uuidv4(),
-          'IP-Address': '136.226.198.81',
-          'Accept': 'application/json',
-          'Authorization': `Bearer ${accessToken}`,
-        },
-      }
-    );
-
-    const { authorizationStatus } = paymentStatusResponse.data;
-
-    if (authorizationStatus === "PAY_METHOD_SELECTED") {
-      const user = await User.findOne({ paymentId }).populate('requestedSubscription');
-
-      if (!user || !user.requestedSubscription) {
-        return res.status(404).json({ message: "User or requested subscription not found." });
-      }
-      const subscription = await Subscription.findOne({ _id: user.requestedSubscription._id });
-      console.log(subscription)
-      // Update user subscription
-      await User.findByIdAndUpdate(user._id, {
-        no_of_images_left:user.no_of_images_left + subscription.generatedImages,
-        subscription: subscription._id,
-        paymentStatus: 'COMPLETED',
-        subscription_date: new Date(),
-        requestedSubscription: null,
-      });
-
-      return res.redirect(`http://virtuartai.com/?status=success&user=${user._id}`);
-    } else {
-      await User.findOneAndUpdate({ paymentId }, { paymentStatus: 'FAILED' });
-      return res.redirect(`http://virtuartai.com/?status=failed&authorizationStatus=${authorizationStatus}`);
-    }
-  } catch (error) {
-    console.error("Error in confirm_payment:", error.message);
-    res.status(500).json({ message: "Internal server error.", error: error.message });
-  }
-});
-
 
 
 const taskStatusMap ={};

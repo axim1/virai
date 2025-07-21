@@ -5,104 +5,51 @@ const { Schema } = mongoose;
 
 // User model
 const userSchema = new Schema({
-  fname: {
-    type: String,
-    required: true,
-  },
-  lname: {
-    type: String,
-    required: true,
-  },
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-  },
-  password: {
-    type: String,
-    required: true,
-  },
-  phone: {
-    type: String,
-    required: true,
-  },
-  userType: {
-    type: String,
-    enum: ['individual', 'company'],
-    default: 'individual',
-    required: true
-  },
-  companyName: {
-    type: String,
-    default: null,
-  },
-  address: {
-    type: String,
-    default: null,
-  },
-  vatNumber: {
-    type: String,
-    default: null,
-  },
-  profilePic: {
-    type: String, // Store the file path or URL
-    default: null,
-  },
-  no_of_images_left: {
+  fname: { type: String, required: true },
+  lname: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  phone: { type: String, required: true },
+  userType: { type: String, enum: ['individual', 'company'], default: 'individual', required: true },
+  companyName: { type: String, default: null },
+  address: { type: String, default: null },
+  vatNumber: { type: String, default: null },
+  profilePic: { type: String, default: null },
+
+  // Resource tracking
+    no_of_images_left: {
     type: Number,
     required: true,
     default: 0,
   },
-  subscribed_monthly: {
-    type: Boolean,
-    required: true,
-    default: false,
-  },
-  subscribed_yearly: {
-    type: Boolean,
-    required: true,
-    default: false,
-  },
-  subscription: {
-    type: Schema.Types.ObjectId,
-    ref: 'Subscription',
-  },
-  requestedSubscription: {
-    type: Schema.Types.ObjectId,
-    ref: 'Subscription', // Points to the requested subscription
-    default: null,
-  },
-  subscription_date: {
-    type: Date,
-    default: null,
-  },
-  paymentId: {
-    type: String,
-    default: null,
-  },
+  imagesLeft: { type: Number, default: 0 },
+  videosLeft: { type: Number, default: 0 },
+  modelsLeft: { type: Number, default: 0 },
+  coins: { type: Number, default: 0 },
+
+  subscribed_monthly: { type: Boolean, default: false },
+  subscribed_yearly: { type: Boolean, default: false },
+
+  subscription: { type: Schema.Types.ObjectId, ref: 'Subscription' },
+  requestedSubscription: { type: Schema.Types.ObjectId, ref: 'Subscription', default: null },
+  subscription_date: { type: Date, default: null },
+  paymentId: { type: String, default: null },
   paymentStatus: {
     type: String,
     default: 'PENDING',
     enum: ['PENDING', 'PAY_METHOD_SELECTED', 'COMPLETED', 'FAILED'],
   },
 
-
-  
-  googleId: {
-    type: String,
-    unique: true,
-    sparse: true,
-  },
-  // authProvider: {
-  //   type: String,
-  //   enum: ['local', 'google'],
-  //   default: 'local',
-  // },
+  googleId: { type: String, unique: true, sparse: true },
   appleId: { type: String, unique: true, sparse: true },
-authProvider: { type: String },
+  authProvider: { type: String },
+  autoRenew: { type: Boolean, default: false },
 
-  
+  billingCycle: { type: String, enum: ['monthly', 'yearly'], default: 'monthly' },
+nextBillingDate: { type: Date, default: null }, // for cron-based triggers
+
 });
+
 
 
 
@@ -117,39 +64,16 @@ userSchema.virtual('generatedImages', {
 
 // Subscription model
 const subscriptionSchema = new Schema({
-  name: {
-    type: String,
-    required: true,
-    unique: true,
-  },
-  priceMonthly: {
-    type: Number,
-    required: true,
-  },
-  priceYearly: {
-    type: Number,
-    required: true,
-  },
-  generatedImages: {
-    type: Number,
-    required: true,
-  },
-  generationSpeed: {
-    type: String,
-    required: true,
-  },
-  videoGenerations: {
-    type: Number,
-    required: true,
-  },
-  licenseType: {
-    type: String,
-    required: true,
-  },
-  privacy: {
-    type: String,
-    required: true,
-  },
+  name: { type: String, required: true, unique: true },
+  priceMonthly: { type: Number, required: true },
+  priceYearly: { type: Number, required: true },
+  generatedImages: { type: Number, required: true },
+  videoGenerations: { type: Number, required: true },
+  models3d: { type: Number, required: true },
+  generationSpeed: { type: String, required: true },
+  licenseType: { type: String, required: true },
+  privacy: { type: String, required: true },
+  coins: { type: Number, required: true }, // NEW
 });
 
 const Subscription = mongoose.model('Subscription', subscriptionSchema);
