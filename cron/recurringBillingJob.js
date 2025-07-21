@@ -3,7 +3,7 @@ const cron = require("node-cron");
 const nodemailer = require("nodemailer");
 const axios = require("axios");
 const { v4: uuidv4 } = require("uuid");
-const { User, Subscription } = require("../models/UserModel");
+const { User, Subscription } = require("../models");
 
 const BASE_URL = process.env.BASE_URL || "http://virtuartai.com";
 const TATRA_AUTH_URL = "https://api.tatrabanka.sk/tatrapayplus/sandbox/auth/oauth/v2/token";
