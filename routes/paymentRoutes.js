@@ -178,7 +178,7 @@ router.post('/getPaymentUrl', async (req, res) => {
                     'X-Request-ID': uuidv4(),
                     'IP-Address': '136.226.198.81',
                     // 'Redirect-URI': `${process.env.BACKEND_URL || 'http://virtuartai.com'}/api/confirm_payment`,
-                    'Redirect-URI': 'http://virtuartai.com/confirm_payment',
+                    'Redirect-URI': 'http://virtuartai.com/api/confirm_payment',
                     'Preferred-Method': 'CARD_PAY',
                     'Accept-Language': 'en',
                     'Content-Type': 'application/json',
