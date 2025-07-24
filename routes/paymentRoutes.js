@@ -104,10 +104,10 @@ router.post('/getPaymentUrl', async (req, res) => {
                 autoRenew: false,
                 nextBillingDate: null,
                 // Set free plan resources
-                no_of_images_left: subscription.generatedImages,
-                imagesLeft: subscription.generatedImages,
-                videosLeft: subscription.videoGenerations,
-                modelsLeft: subscription.models3d,
+                no_of_images_left: subscription.generatedImages || 0,
+                imagesLeft: subscription.generatedImages || 0,
+                videosLeft: subscription.videoGenerations || 0,
+                modelsLeft: subscription.models3d || 0,
                 coins: user.coins || 0, // Keep existing coins
             });
 
@@ -279,12 +279,12 @@ router.get('/confirm_payment', async (req, res) => {
                 // UPGRADE: New billing period starts NOW, reset resources to new plan allocation
                 updateFields = {
                     ...updateFields,
-                    no_of_images_left: newSub.generatedImages, // Reset to new plan allocation
-                    imagesLeft: newSub.generatedImages,
-                    videosLeft: newSub.videoGenerations,
-                    modelsLeft: newSub.models3d,
+                    no_of_images_left: newSub.generatedImages || 0, // Reset to new plan allocation
+                    imagesLeft: newSub.generatedImages || 0,
+                    videosLeft: newSub.videoGenerations || 0,
+                    modelsLeft: newSub.models3d || 0,
                     // Keep existing coins and add new plan coins
-                    $inc: { coins: newSub.coins }
+                    $inc: { coins: newSub.coins || 0 }
                 };
                 console.log(`✅ UPGRADE: New billing period started, resources reset to ${newSub.name} allocation`);
             } else if (changeType === 'renew') {
@@ -292,11 +292,11 @@ router.get('/confirm_payment', async (req, res) => {
                 updateFields = {
                     ...updateFields,
                     $inc: {
-                        no_of_images_left: newSub.generatedImages, // Add to existing resources
-                        imagesLeft: newSub.generatedImages,
-                        videosLeft: newSub.videoGenerations,
-                        modelsLeft: newSub.models3d,
-                        coins: newSub.coins
+                        no_of_images_left: newSub.generatedImages || 0, // Add to existing resources
+                        imagesLeft: newSub.generatedImages || 0,
+                        videosLeft: newSub.videoGenerations || 0,
+                        modelsLeft: newSub.models3d || 0,
+                        coins: newSub.coins || 0
                     }
                 };
                 console.log(`✅ RENEW: New billing period started, resources added to existing ${newSub.name} allocation`);
@@ -304,10 +304,10 @@ router.get('/confirm_payment', async (req, res) => {
                 // DOWNGRADE: Keep existing resources if higher, set new billing cycle
                 updateFields = {
                     ...updateFields,
-                    no_of_images_left: Math.max(user.no_of_images_left || 0, newSub.generatedImages),
-                    imagesLeft: Math.max(user.imagesLeft || 0, newSub.generatedImages),
-                    videosLeft: Math.max(user.videosLeft || 0, newSub.videoGenerations),
-                    modelsLeft: Math.max(user.modelsLeft || 0, newSub.models3d),
+                    no_of_images_left: Math.max(user.no_of_images_left || 0, newSub.generatedImages || 0),
+                    imagesLeft: Math.max(user.imagesLeft || 0, newSub.generatedImages || 0),
+                    videosLeft: Math.max(user.videosLeft || 0, newSub.videoGenerations || 0),
+                    modelsLeft: Math.max(user.modelsLeft || 0, newSub.models3d || 0),
                     // Keep existing coins
                 };
                 console.log(`✅ DOWNGRADE: Resources preserved, new billing cycle set`);
@@ -315,11 +315,11 @@ router.get('/confirm_payment', async (req, res) => {
                 // NEW SUBSCRIPTION: Set full resources
                 updateFields = {
                     ...updateFields,
-                    no_of_images_left: newSub.generatedImages,
-                    imagesLeft: newSub.generatedImages,
-                    videosLeft: newSub.videoGenerations,
-                    modelsLeft: newSub.models3d,
-                    $inc: { coins: newSub.coins }
+                    no_of_images_left: newSub.generatedImages || 0,
+                    imagesLeft: newSub.generatedImages || 0,
+                    videosLeft: newSub.videoGenerations || 0,
+                    modelsLeft: newSub.models3d || 0,
+                    $inc: { coins: newSub.coins || 0 }
                 };
                 console.log(`✅ NEW SUBSCRIPTION: Full resources allocated for ${newSub.name}`);
             }
@@ -389,10 +389,10 @@ router.post('/changeSubscription', async (req, res) => {
                 nextBillingDate: null,
                 subscription_date: new Date(),
                 // Keep existing resources if higher than free plan
-                no_of_images_left: Math.max(user.no_of_images_left || 0, newSubscription.generatedImages),
-                imagesLeft: Math.max(user.imagesLeft || 0, newSubscription.generatedImages),
-                videosLeft: Math.max(user.videosLeft || 0, newSubscription.videoGenerations),
-                modelsLeft: Math.max(user.modelsLeft || 0, newSubscription.models3d),
+                no_of_images_left: Math.max(user.no_of_images_left || 0, newSubscription.generatedImages || 0),
+                imagesLeft: Math.max(user.imagesLeft || 0, newSubscription.generatedImages || 0),
+                videosLeft: Math.max(user.videosLeft || 0, newSubscription.videoGenerations || 0),
+                modelsLeft: Math.max(user.modelsLeft || 0, newSubscription.models3d || 0),
                 // Keep existing coins
             });
 
@@ -411,10 +411,10 @@ router.post('/changeSubscription', async (req, res) => {
                 nextBillingDate: calculateNextBillingDate(billingCycle),
                 subscription_date: new Date(),
                 // Keep existing resources if they're higher than new subscription limits
-                no_of_images_left: Math.max(user.no_of_images_left || 0, newSubscription.generatedImages),
-                imagesLeft: Math.max(user.imagesLeft || 0, newSubscription.generatedImages),
-                videosLeft: Math.max(user.videosLeft || 0, newSubscription.videoGenerations),
-                modelsLeft: Math.max(user.modelsLeft || 0, newSubscription.models3d),
+                no_of_images_left: Math.max(user.no_of_images_left || 0, newSubscription.generatedImages || 0),
+                imagesLeft: Math.max(user.imagesLeft || 0, newSubscription.generatedImages || 0),
+                videosLeft: Math.max(user.videosLeft || 0, newSubscription.videoGenerations || 0),
+                modelsLeft: Math.max(user.modelsLeft || 0, newSubscription.models3d || 0),
                 // Keep existing coins
             });
 
