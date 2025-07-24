@@ -17,6 +17,26 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+// Helper function to format phone number for Tatra Bank API
+function formatPhoneNumber(phone) {
+  if (!phone) return '+421901123456'; // Default Slovak number
+  
+  // Remove all non-digit characters
+  const cleanPhone = phone.replace(/\D/g, '');
+  
+  // If it starts with 0, assume it's Slovak and replace with +421
+  if (cleanPhone.startsWith('0')) {
+    return '+421' + cleanPhone.substring(1);
+  }
+  
+  // If it doesn't start with +, add +421 prefix
+  if (!phone.startsWith('+')) {
+    return '+421' + cleanPhone;
+  }
+  
+  return phone; // Already in correct format
+}
+
 cron.schedule("0 4 * * *", async () => {
   console.log("[CRON] Checking recurring subscriptions...");
 
@@ -47,6 +67,9 @@ cron.schedule("0 4 * * *", async () => {
 
       const accessToken = tokenResponse.data.access_token;
 
+      // Format phone number for API
+      const formattedPhone = formatPhoneNumber(user.phone);
+
       const paymentResponse = await axios.post(
         TATRA_PAYMENT_URL,
         {
@@ -59,7 +82,7 @@ cron.schedule("0 4 * * *", async () => {
             lastName: user.lname,
             email: user.email,
             externalApplicantId: "1111",
-            phone: user.phone,
+            phone: formattedPhone,
           },
           cardDetail: {
             cardHolder: `${user.fname} ${user.lname}`,
@@ -70,7 +93,7 @@ cron.schedule("0 4 * * *", async () => {
           headers: {
             "X-Request-ID": uuidv4(),
             "IP-Address": "136.226.198.81",
-            "Redirect-URI": `${BASE_URL}/confirm_payment?billingCycle=${user.billingCycle}&autoRenew=true`,
+            "Redirect-URI": `${BASE_URL}/api/confirm_payment?billingCycle=${user.billingCycle}&autoRenew=true`,
             "Preferred-Method": "CARD_PAY",
             Accept: "application/json",
             "Content-Type": "application/json",

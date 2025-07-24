@@ -17,7 +17,7 @@ const userSchema = new Schema({
   profilePic: { type: String, default: null },
 
   // Resource tracking
-    no_of_images_left: {
+  no_of_images_left: {
     type: Number,
     required: true,
     default: 0,
@@ -46,7 +46,10 @@ const userSchema = new Schema({
   autoRenew: { type: Boolean, default: false },
 
   billingCycle: { type: String, enum: ['monthly', 'yearly'], default: 'monthly' },
-nextBillingDate: { type: Date, default: null }, // for cron-based triggers
+  nextBillingDate: { type: Date, default: null }, // for cron-based triggers
+  
+  // Payment tracking fields
+  changeType: { type: String, enum: ['new', 'upgrade', 'downgrade', 'same'], default: null },
 
 });
 

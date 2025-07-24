@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
 import basestyle from "../Base.module.css";
 import "./Profile.css";
@@ -25,23 +25,122 @@ const Profile = () => {
   const [formErrors, setFormErrors] = useState({});
   const [previewUrl, setPreviewUrl] = useState(null);
   const [profilePicFilename, setProfilePicFilename] = useState(storedUser?.profilePic || "");
-const handleAutoRenewToggle = async () => {
-  try {
-    const response = await fetch(`${API_BASE}api/updateAutoRenew`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId, autoRenew: !storedUser.autoRenew }),
-    });
-    const result = await response.json();
-    if (result.success) {
-      const updatedUser = { ...storedUser, autoRenew: !storedUser.autoRenew };
-      localStorage.setItem("user", JSON.stringify(updatedUser));
-      window.location.reload();
+  const [subscriptions, setSubscriptions] = useState([]);
+  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
+  const [showCoinModal, setShowCoinModal] = useState(false);
+  const [selectedSubscription, setSelectedSubscription] = useState(null);
+  const [billingCycle, setBillingCycle] = useState(storedUser?.billingCycle || 'monthly');
+  const [coinPackages] = useState([
+    { coins: 100, price: 5, popular: false },
+    { coins: 250, price: 10, popular: true },
+    { coins: 500, price: 18, popular: false },
+    { coins: 1000, price: 30, popular: false }
+  ]);
+
+  // Fetch available subscriptions
+  useEffect(() => {
+    fetchSubscriptions();
+  }, []);
+
+  const fetchSubscriptions = async () => {
+    try {
+      const response = await fetch(`${API_BASE}subscriptions`);
+      const data = await response.json();
+      setSubscriptions(data.subscriptions || []);
+    } catch (error) {
+      console.error('Error fetching subscriptions:', error);
     }
-  } catch (err) {
-    alert("Failed to update auto-renewal preference.");
-  }
-};
+  };
+
+  const handleAutoRenewToggle = async () => {
+    try {
+      const response = await fetch(`${API_BASE}api/updateAutoRenew`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, autoRenew: !storedUser.autoRenew }),
+      });
+      const result = await response.json();
+      if (result.success) {
+        const updatedUser = { ...storedUser, autoRenew: !storedUser.autoRenew };
+        localStorage.setItem("user", JSON.stringify(updatedUser));
+        window.location.reload();
+      }
+    } catch (err) {
+      alert("Failed to update auto-renewal preference.");
+    }
+  };
+
+  const handleSubscriptionChange = async (newSubscription) => {
+    try {
+      const response = await fetch(`${API_BASE}api/changeSubscription`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          userId, 
+          newSubscriptionName: newSubscription.name,
+          billingCycle
+        }),
+      });
+      
+      const result = await response.json();
+      
+      if (result.requiresPayment) {
+        // For upgrades, redirect to payment
+        const paymentResponse = await fetch(`${API_BASE}api/getPaymentUrl`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: storedUser.email,
+            amount: result.amount,
+            subscriptionName: result.subscriptionName,
+            billingCycle: result.billingCycle,
+            autoRenew: storedUser.autoRenew
+          }),
+        });
+        
+        const paymentData = await paymentResponse.json();
+        if (paymentData.tatraPayPlusUrl) {
+          window.location.href = paymentData.tatraPayPlusUrl;
+        }
+      } else if (result.success) {
+        // Immediate change for downgrades
+        alert(result.message);
+        window.location.reload();
+      } else {
+        alert(result.message || 'Failed to change subscription');
+      }
+    } catch (error) {
+      console.error('Error changing subscription:', error);
+      alert('Failed to change subscription');
+    }
+    setShowSubscriptionModal(false);
+  };
+
+  const handleBuyCoins = async (coinPackage) => {
+    try {
+      const response = await fetch(`${API_BASE}api/buyCoins`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: storedUser.email,
+          amount: coinPackage.price,
+          coinAmount: coinPackage.coins
+        }),
+      });
+      
+      const result = await response.json();
+      
+      if (result.tatraPayPlusUrl) {
+        window.location.href = result.tatraPayPlusUrl;
+      } else {
+        alert('Failed to initiate coin purchase');
+      }
+    } catch (error) {
+      console.error('Error buying coins:', error);
+      alert('Failed to buy coins');
+    }
+    setShowCoinModal(false);
+  };
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -107,58 +206,366 @@ const handleAutoRenewToggle = async () => {
     return `${API_BASE}api/uploads/profilepic/${filename}?t=${Date.now()}`;
   };
 
+  const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    return new Date(dateString).toLocaleDateString();
+  };
+
+  const isLowOnResources = () => {
+    const images = storedUser?.no_of_images_left || storedUser?.imagesLeft || 0;
+    const videos = storedUser?.videosLeft || 0;
+    const models = storedUser?.modelsLeft || 0;
+    return images < 10 || videos < 2 || models < 1;
+  };
+
   return (
     <div className="userProfile">
       <div className="profile-summary">
         <div className="left-profile-container">
-        <div className="profile-pic-container">
-          <label htmlFor="profilePic" className="edit-icon-label">
-            <img
-              src={previewUrl || getProfilePicUrl(profilePicFilename)}
-              alt="User Profile"
-              className="profile-pic"
+          <div className="profile-pic-container">
+            <label htmlFor="profilePic" className="edit-icon-label">
+              <img
+                src={previewUrl || getProfilePicUrl(profilePicFilename)}
+                alt="User Profile"
+                className="profile-pic"
+              />
+              <div className="edit-icon-wrapper">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="white"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="edit-icon"
+                >
+                  <path d="M12 20h9" />
+                  <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" />
+                </svg>
+              </div>
+            </label>
+            <input
+              type="file"
+              id="profilePic"
+              name="profilePic"
+              accept="image/*"
+              onChange={handleChange}
+              style={{ display: "none" }}
             />
-            <div className="edit-icon-wrapper">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="white"       // ✅ This sets the stroke color
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="edit-icon"
-              >
-                <path d="M12 20h9" />
-                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" />
-              </svg>
-            </div>
-
-          </label>
-          <input
-            type="file"
-            id="profilePic"
-            name="profilePic"
-            accept="image/*"
-            onChange={handleChange}
-            style={{ display: "none" }}
-          />
-
-          
-        </div>
-</div>
-        <div className="profile-text">
-                  <h2>{form.fname} {form.lname}</h2>
-
-          <p><strong></strong> {form.email}</p>
-          <p><strong>Subscription:</strong> {storedUser?.subscription.name || "Free"}</p>
-          <div className='coins'>
-            <img src={coinIcon} alt="coins" /> {storedUser?.no_of_images_left}
           </div>
         </div>
+        <div className="profile-text">
+          <h2>{form.fname} {form.lname}</h2>
+          <p><strong></strong> {form.email}</p>
+          <div className="subscription-info">
+            <p><strong>Subscription:</strong> {storedUser?.subscription?.name || "Free"}</p>
+            <p><strong>Billing:</strong> {storedUser?.billingCycle || "monthly"} • Auto-renew: {storedUser?.autoRenew ? "On" : "Off"}</p>
+            {storedUser?.nextBillingDate && (
+              <p><strong>Next Billing:</strong> {formatDate(storedUser.nextBillingDate)}</p>
+            )}
+          </div>
+          <div className="resources-summary">
+            <div className='resource-item'>
+              <img src={coinIcon} alt="images" /> 
+              <span>{storedUser?.no_of_images_left || storedUser?.imagesLeft || 0} Images</span>
+            </div>
+            <div className='resource-item'>
+              <span>🎥 {storedUser?.videosLeft || 0} Videos</span>
+            </div>
+            <div className='resource-item'>
+              <span>🎨 {storedUser?.modelsLeft || 0} 3D Models</span>
+            </div>
+            <div className='resource-item'>
+              <span>🪙 {storedUser?.coins || 0} Coins</span>
+            </div>
+          </div>
+          
+          {/* Low resources warning */}
+          {isLowOnResources() && (
+            <div className="low-resources-warning" style={{
+              background: '#fff3cd',
+              border: '1px solid #ffeaa7',
+              borderRadius: '5px',
+              padding: '10px',
+              marginTop: '10px',
+              fontSize: '14px'
+            }}>
+              ⚠️ You're running low on resources. Consider upgrading your plan or buying coins.
+            </div>
+          )}
+        </div>
       </div>
+
+      {/* Subscription Management Section */}
+      <div className="subscription-management" style={{ marginBottom: '2rem', background: '#f8f9fa', padding: '20px', borderRadius: '10px' }}>
+        <h3>Subscription Management</h3>
+        <div className="subscription-actions" style={{ display: 'flex', gap: '1rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
+          <button 
+            onClick={() => setShowSubscriptionModal(true)}
+            className="subscription-btn"
+            style={{
+              padding: '10px 20px',
+              backgroundColor: '#007bff',
+              color: 'white',
+              border: 'none',
+              borderRadius: '5px',
+              cursor: 'pointer'
+            }}
+          >
+            Change Plan
+          </button>
+          
+          <button 
+            onClick={() => setShowCoinModal(true)}
+            className="subscription-btn"
+            style={{
+              padding: '10px 20px',
+              backgroundColor: '#28a745',
+              color: 'white',
+              border: 'none',
+              borderRadius: '5px',
+              cursor: 'pointer'
+            }}
+          >
+            Buy Coins
+          </button>
+        </div>
+
+        <div className="toggle-renewal" style={{ marginTop: '15px' }}>
+          <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+            <input
+              type="checkbox"
+              checked={storedUser?.autoRenew}
+              onChange={handleAutoRenewToggle}
+              style={{ marginRight: '8px' }}
+            />
+            Auto-Renew Subscription
+          </label>
+        </div>
+      </div>
+
+      {/* Subscription Change Modal */}
+      {showSubscriptionModal && (
+        <div className="modal-overlay" style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 1000
+        }}>
+          <div className="modal-content" style={{
+            backgroundColor: 'white',
+            padding: '2rem',
+            borderRadius: '10px',
+            maxWidth: '500px',
+            width: '90%',
+            maxHeight: '80vh',
+            overflowY: 'auto'
+          }}>
+            <h3>Change Subscription Plan</h3>
+            
+            <div className="billing-cycle-selector" style={{ marginBottom: '1rem' }}>
+              <label style={{ marginRight: '1rem' }}>
+                <input
+                  type="radio"
+                  name="billingCycle"
+                  value="monthly"
+                  checked={billingCycle === 'monthly'}
+                  onChange={(e) => setBillingCycle(e.target.value)}
+                  style={{ marginRight: '5px' }}
+                />
+                Monthly
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="billingCycle"
+                  value="yearly"
+                  checked={billingCycle === 'yearly'}
+                  onChange={(e) => setBillingCycle(e.target.value)}
+                  style={{ marginRight: '5px' }}
+                />
+                Yearly (Save 17%)
+              </label>
+            </div>
+
+            <div className="subscription-options">
+              {subscriptions.map((sub) => {
+                const price = billingCycle === 'yearly' ? sub.priceYearly : sub.priceMonthly;
+                const isCurrentSub = sub.name === storedUser?.subscription?.name;
+                
+                return (
+                  <div 
+                    key={sub._id} 
+                    className={`subscription-option ${isCurrentSub ? 'current' : ''}`}
+                    style={{
+                      border: `2px solid ${isCurrentSub ? '#007bff' : '#ddd'}`,
+                      borderRadius: '8px',
+                      padding: '1rem',
+                      marginBottom: '1rem',
+                      cursor: isCurrentSub ? 'default' : 'pointer',
+                      backgroundColor: isCurrentSub ? '#f8f9fa' : 'white'
+                    }}
+                    onClick={() => !isCurrentSub && setSelectedSubscription(sub)}
+                  >
+                    <h4>{sub.name} {isCurrentSub && '(Current)'}</h4>
+                    <p><strong>€{price}</strong> / {billingCycle}</p>
+                    <div style={{ fontSize: '14px', color: '#666' }}>
+                      <p>• {sub.generatedImages} images</p>
+                      <p>• {sub.videoGenerations} videos</p>
+                      <p>• {sub.models3d} 3D models</p>
+                      <p>• {sub.coins} coins</p>
+                      <p>• {sub.generationSpeed} generation</p>
+                      <p>• {sub.licenseType}</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="modal-actions" style={{ 
+              display: 'flex', 
+              gap: '1rem', 
+              justifyContent: 'flex-end',
+              marginTop: '2rem'
+            }}>
+              <button 
+                onClick={() => setShowSubscriptionModal(false)}
+                style={{
+                  padding: '10px 20px',
+                  backgroundColor: '#6c757d',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '5px',
+                  cursor: 'pointer'
+                }}
+              >
+                Cancel
+              </button>
+              
+              {selectedSubscription && (
+                <button 
+                  onClick={() => handleSubscriptionChange(selectedSubscription)}
+                  style={{
+                    padding: '10px 20px',
+                    backgroundColor: '#28a745',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '5px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Change to {selectedSubscription.name}
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Coin Purchase Modal */}
+      {showCoinModal && (
+        <div className="modal-overlay" style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 1000
+        }}>
+          <div className="modal-content" style={{
+            backgroundColor: 'white',
+            padding: '2rem',
+            borderRadius: '10px',
+            maxWidth: '500px',
+            width: '90%',
+            maxHeight: '80vh',
+            overflowY: 'auto'
+          }}>
+            <h3>Buy Coins</h3>
+            <p style={{ marginBottom: '1rem', color: '#666' }}>
+              Use coins to generate images, videos, or 3D models when you run out of your monthly allocation.
+            </p>
+            
+            <div className="coin-packages">
+              {coinPackages.map((pkg, index) => (
+                <div 
+                  key={index}
+                  className={`coin-package ${pkg.popular ? 'popular' : ''}`}
+                  style={{
+                    border: `2px solid ${pkg.popular ? '#28a745' : '#ddd'}`,
+                    borderRadius: '8px',
+                    padding: '1rem',
+                    marginBottom: '1rem',
+                    cursor: 'pointer',
+                    position: 'relative',
+                    backgroundColor: pkg.popular ? '#f8fff8' : 'white'
+                  }}
+                  onClick={() => handleBuyCoins(pkg)}
+                >
+                  {pkg.popular && (
+                    <div style={{
+                      position: 'absolute',
+                      top: '-10px',
+                      right: '10px',
+                      background: '#28a745',
+                      color: 'white',
+                      padding: '2px 8px',
+                      borderRadius: '12px',
+                      fontSize: '12px'
+                    }}>
+                      Most Popular
+                    </div>
+                  )}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                      <h4>🪙 {pkg.coins} Coins</h4>
+                      <p style={{ color: '#666', margin: 0 }}>
+                        €{(pkg.price / pkg.coins).toFixed(3)} per coin
+                      </p>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <strong style={{ fontSize: '18px' }}>€{pkg.price}</strong>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="modal-actions" style={{ 
+              display: 'flex', 
+              justifyContent: 'flex-end',
+              marginTop: '2rem'
+            }}>
+              <button 
+                onClick={() => setShowCoinModal(false)}
+                style={{
+                  padding: '10px 20px',
+                  backgroundColor: '#6c757d',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '5px',
+                  cursor: 'pointer'
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit}>
         <h1 className="mb-4">Edit your profile</h1>
@@ -202,18 +609,6 @@ const handleAutoRenewToggle = async () => {
           className="form-container"
         />
 
-        {/* <label htmlFor="profilePic" style={{ padding: '10px' }} className="form-container upload-label">
-          Upload Profile Picture
-        </label>
-        <input
-          type="file"
-          style={{ display: "none" }}
-          id="profilePic"
-          name="profilePic"
-          accept="image/*"
-          onChange={handleChange}
-        /> */}
-
         {form.userType === "company" && (
           <>
             <input
@@ -247,16 +642,6 @@ const handleAutoRenewToggle = async () => {
         <button type="submit" className="updateButton">
           UPDATE PROFILE
         </button>
-<div className="toggle-renewal">
-  <label>
-    <input
-      type="checkbox"
-      checked={storedUser?.autoRenew}
-      onChange={handleAutoRenewToggle}
-    />
-    Auto-Renew Subscription
-  </label>
-</div>
 
         <NavLink to="/gen" style={{ color: "#2E8B57" }} className="mt-3 d-block text-center">
           Go back to Dashboard
