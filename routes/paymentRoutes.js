@@ -495,7 +495,7 @@ router.post('/buyCoins', async (req, res) => {
                 headers: {
                     'X-Request-ID': uuidv4(),
                     'IP-Address': '136.226.198.81',
-                    'Redirect-URI': `${process.env.BACKEND_URL || 'http://virtuartai.com'}/api/confirm_coin_purchase`,
+                    'Redirect-URI': 'http://virtuartai.com/api/confirm_coin_purchase',
                     'Preferred-Method': 'CARD_PAY',
                     'Content-Type': 'application/json',
                     Accept: 'application/json',
