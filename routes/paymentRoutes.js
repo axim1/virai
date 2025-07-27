@@ -495,7 +495,7 @@ router.post('/buyCoins', async (req, res) => {
                 headers: {
                     'X-Request-ID': uuidv4(),
                     'IP-Address': '136.226.198.81',
-                    'Redirect-URI': `${process.env.BACKEND_URL || 'http://virtuartai.com'}/api/confirm_coin_purchase?email=${user.email}&coinAmount=${coinAmount}`,
+                    'Redirect-URI': `${process.env.BACKEND_URL || 'http://virtuartai.com'}/api/confirm_coin_purchase`,
                     'Preferred-Method': 'CARD_PAY',
                     'Content-Type': 'application/json',
                     Accept: 'application/json',
@@ -504,7 +504,15 @@ router.post('/buyCoins', async (req, res) => {
             }
         );
 
-        const { tatraPayPlusUrl } = paymentResponse.data;
+        const { tatraPayPlusUrl, paymentId } = paymentResponse.data;
+
+        // Store coin purchase information in user document for later retrieval
+        await User.findByIdAndUpdate(user._id, {
+            paymentId,
+            paymentStatus: 'PENDING',
+            pendingCoinPurchase: coinAmount // Store coin amount for confirmation
+        });
+
         res.json({ tatraPayPlusUrl });
     } catch (error) {
         console.error('Error buying coins:', error);
@@ -514,14 +522,22 @@ router.post('/buyCoins', async (req, res) => {
 
 router.get('/confirm_coin_purchase', async (req, res) => {
     try {
-        const { paymentId, email, coinAmount, error } = req.query;
+        const { paymentId, error, errorId } = req.query;
         
-        if (error) {
+        if (!paymentId) {
             return res.redirect(`${process.env.FRONTEND_URL || 'http://virtuartai.com'}/?status=coin_failed`);
         }
 
-        const user = await User.findOne({ email });
-        if (!user) return res.status(404).send("User not found");
+        if (error && errorId) {
+            console.error(`Coin purchase error: ${error} (Error ID: ${errorId})`);
+            await User.findOneAndUpdate({ paymentId }, { paymentStatus: 'FAILED', pendingCoinPurchase: null });
+            return res.redirect(`${process.env.FRONTEND_URL || 'http://virtuartai.com'}/?status=coin_failed`);
+        }
+
+        const user = await User.findOne({ paymentId });
+        if (!user || !user.pendingCoinPurchase) {
+            return res.redirect(`${process.env.FRONTEND_URL || 'http://virtuartai.com'}/?status=coin_failed`);
+        }
 
         // Get access token
         const tokenResponse = await axios.post(
@@ -553,11 +569,20 @@ router.get('/confirm_coin_purchase', async (req, res) => {
 
         if (authorizationStatus === "PAY_METHOD_SELECTED") {
             await User.findByIdAndUpdate(user._id, {
-                $inc: { coins: parseInt(coinAmount) }
+                $inc: { coins: parseInt(user.pendingCoinPurchase) },
+                paymentStatus: 'COMPLETED',
+                pendingCoinPurchase: null, // Clear pending purchase data
+                paymentId: null // Clear payment ID
             });
 
+            console.log(`✅ Coin purchase completed: +${user.pendingCoinPurchase} coins for user ${user.email}`);
             return res.redirect(`${process.env.FRONTEND_URL || 'http://virtuartai.com'}/?status=coin_success`);
         } else {
+            await User.findOneAndUpdate({ paymentId }, { 
+                paymentStatus: 'FAILED', 
+                pendingCoinPurchase: null,
+                paymentId: null 
+            });
             return res.redirect(`${process.env.FRONTEND_URL || 'http://virtuartai.com'}/?status=coin_failed`);
         }
     } catch (error) {

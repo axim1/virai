@@ -50,6 +50,7 @@ const userSchema = new Schema({
   
   // Payment tracking fields
   changeType: { type: String, enum: ['new', 'upgrade', 'downgrade', 'same'], default: null },
+  pendingCoinPurchase: { type: Number, default: null }, // Track coin purchases in progress
 
 });
 
