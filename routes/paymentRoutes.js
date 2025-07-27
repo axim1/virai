@@ -96,18 +96,18 @@ router.post('/getPaymentUrl', async (req, res) => {
                 });
             }
             
-            // For free plan, no payment needed - direct subscription
+            // For free plan, no payment needed - direct subscription (downgrade preserves resources)
             await User.findByIdAndUpdate(user._id, {
                 subscription: subscription._id,
                 subscriptionDate: new Date(),
                 billingCycle: 'monthly',
                 autoRenew: false,
                 nextBillingDate: null,
-                // Set free plan resources
-                no_of_images_left: subscription.generatedImages || 0,
-                imagesLeft: subscription.generatedImages || 0,
-                videosLeft: subscription.videoGenerations || 0,
-                modelsLeft: subscription.models3d || 0,
+                // Preserve existing resources if higher than free plan limits
+                no_of_images_left: Math.max(user.no_of_images_left || 0, subscription.generatedImages || 0),
+                imagesLeft: Math.max(user.imagesLeft || 0, subscription.generatedImages || 0),
+                videosLeft: Math.max(user.videosLeft || 0, subscription.videoGenerations || 0),
+                modelsLeft: Math.max(user.modelsLeft || 0, subscription.models3d || 0),
                 coins: user.coins || 0, // Keep existing coins
             });
 
@@ -276,17 +276,18 @@ router.get('/confirm_payment', async (req, res) => {
             };
 
             if (changeType === 'upgrade') {
-                // UPGRADE: New billing period starts NOW, reset resources to new plan allocation
+                // UPGRADE: New billing period starts NOW, ADD remaining quota to new plan allocation
                 updateFields = {
                     ...updateFields,
-                    no_of_images_left: newSub.generatedImages || 0, // Reset to new plan allocation
-                    imagesLeft: newSub.generatedImages || 0,
-                    videosLeft: newSub.videoGenerations || 0,
-                    modelsLeft: newSub.models3d || 0,
-                    // Keep existing coins and add new plan coins
-                    $inc: { coins: newSub.coins || 0 }
+                    $inc: {
+                        no_of_images_left: newSub.generatedImages || 0, // Add new plan allocation to existing
+                        imagesLeft: newSub.generatedImages || 0,
+                        videosLeft: newSub.videoGenerations || 0,
+                        modelsLeft: newSub.models3d || 0,
+                        coins: newSub.coins || 0
+                    }
                 };
-                console.log(`✅ UPGRADE: New billing period started, resources reset to ${newSub.name} allocation`);
+                console.log(`✅ UPGRADE: New billing period started, remaining quota + new ${newSub.name} allocation added`);
             } else if (changeType === 'renew') {
                 // RENEW: New billing period starts NOW, ADD resources to existing allocation
                 updateFields = {
@@ -308,7 +309,7 @@ router.get('/confirm_payment', async (req, res) => {
                     imagesLeft: Math.max(user.imagesLeft || 0, newSub.generatedImages || 0),
                     videosLeft: Math.max(user.videosLeft || 0, newSub.videoGenerations || 0),
                     modelsLeft: Math.max(user.modelsLeft || 0, newSub.models3d || 0),
-                    // Keep existing coins
+                    // Keep existing coins unchanged
                 };
                 console.log(`✅ DOWNGRADE: Resources preserved, new billing cycle set`);
             } else {
@@ -434,7 +435,7 @@ router.post('/changeSubscription', async (req, res) => {
             subscriptionName: newSubscription.name,
             billingCycle,
             changeType: 'upgrade',
-            message: `Upgrading to ${newSubscription.name} will start a new ${billingCycle} billing period immediately and reset your resource allocation.`
+            message: `Upgrading to ${newSubscription.name} will start a new ${billingCycle} billing period immediately and add the new plan's resources to your existing quota.`
         });
 
     } catch (error) {

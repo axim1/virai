@@ -53,12 +53,12 @@ const PricingSection = () => {
           description: `You're upgrading from ${currentSubscription} to ${planName}.`,
           effects: [
             '🔄 New billing period starts immediately',
-            '📊 Resources reset to new plan allocation',
+            '📈 Your remaining quota + new plan resources combined',
             `💰 Charged €${currentPrice} for ${billingText} billing`,
             '🚀 Get access to higher tier features instantly'
           ],
           resources: plan.features,
-          warning: 'Your current unused resources will be replaced with the new plan allocation.'
+          warning: 'Your current unused resources will be preserved and new plan resources will be added to them.'
         };
         
       case 'downgrade':
