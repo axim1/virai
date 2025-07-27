@@ -25,6 +25,7 @@ const Profile = () => {
   const [formErrors, setFormErrors] = useState({});
   const [previewUrl, setPreviewUrl] = useState(null);
   const [profilePicFilename, setProfilePicFilename] = useState(storedUser?.profilePic || "");
+  const [activeTab, setActiveTab] = useState('subscription'); // Default to subscription tab
   const [subscriptions, setSubscriptions] = useState([]);
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   const [showCoinModal, setShowCoinModal] = useState(false);
@@ -269,8 +270,7 @@ const Profile = () => {
           </div>
           <div className="resources-summary">
             <div className='resource-item'>
-              <img src={coinIcon} alt="images" /> 
-              <span>{storedUser?.no_of_images_left || storedUser?.imagesLeft || 0} Images</span>
+              <span>🖼 {storedUser?.no_of_images_left || storedUser?.imagesLeft || 0} Images</span>
             </div>
             <div className='resource-item'>
               <span>🎥 {storedUser?.videosLeft || 0} Videos</span>
@@ -279,108 +279,173 @@ const Profile = () => {
               <span>🎨 {storedUser?.modelsLeft || 0} 3D Models</span>
             </div>
             <div className='resource-item'>
-              <span>🪙 {storedUser?.coins || 0} Coins</span>
+            <img src={coinIcon} alt="images" /> 
+
+              <span>{storedUser?.coins || 0} Coins</span>
             </div>
           </div>
           
           {/* Low resources warning */}
           {isLowOnResources() && (
-            <div className="low-resources-warning" style={{
-              background: '#fff3cd',
-              border: '1px solid #ffeaa7',
-              borderRadius: '5px',
-              padding: '10px',
-              marginTop: '10px',
-              fontSize: '14px'
-            }}>
+            <div className="low-resources-warning">
               ⚠️ You're running low on resources. Consider upgrading your plan or buying coins.
             </div>
           )}
         </div>
       </div>
 
-      {/* Subscription Management Section */}
-      <div className="subscription-management" style={{ marginBottom: '2rem', background: '#f8f9fa', padding: '20px', borderRadius: '10px' }}>
-        <h3>Subscription Management</h3>
-        <div className="subscription-actions" style={{ display: 'flex', gap: '1rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
-          <button 
-            onClick={() => setShowSubscriptionModal(true)}
-            className="subscription-btn"
-            style={{
-              padding: '10px 20px',
-              backgroundColor: '#007bff',
-              color: 'white',
-              border: 'none',
-              borderRadius: '5px',
-              cursor: 'pointer'
-            }}
-          >
-            Change Plan
-          </button>
-          
-          <button 
-            onClick={() => setShowCoinModal(true)}
-            className="subscription-btn"
-            style={{
-              padding: '10px 20px',
-              backgroundColor: '#28a745',
-              color: 'white',
-              border: 'none',
-              borderRadius: '5px',
-              cursor: 'pointer'
-            }}
-          >
-            Buy Coins
-          </button>
-        </div>
-
-        <div className="toggle-renewal" style={{ marginTop: '15px' }}>
-          <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
-            <input
-              type="checkbox"
-              checked={storedUser?.autoRenew}
-              onChange={handleAutoRenewToggle}
-              style={{ marginRight: '8px' }}
-            />
-            Auto-Renew Subscription
-          </label>
-        </div>
+      {/* Tab Navigation */}
+      <div className="tab-navigation">
+        <button 
+          className={`tab-btn ${activeTab === 'subscription' ? 'active' : ''}`}
+          onClick={() => setActiveTab('subscription')}
+        >
+          Subscription Management
+        </button>
+        <button 
+          className={`tab-btn ${activeTab === 'profile' ? 'active' : ''}`}
+          onClick={() => setActiveTab('profile')}
+        >
+          Edit Profile
+        </button>
       </div>
 
+      {/* Tab Content */}
+      {activeTab === 'subscription' && (
+        <div className="tab-content">
+          {/* Subscription Management Section */}
+          <div className="subscription-management">
+            <h3>Subscription Management</h3>
+            <div className="subscription-actions">
+              <button 
+                onClick={() => setShowSubscriptionModal(true)}
+                className="subscription-btn primary"
+              >
+                Change Plan
+              </button>
+              
+              <button 
+                onClick={() => setShowCoinModal(true)}
+                className="subscription-btn secondary"
+              >
+                Buy Coins
+              </button>
+            </div>
+
+            <div className="toggle-renewal">
+              <label>
+                <input
+                  type="checkbox"
+                  checked={storedUser?.autoRenew}
+                  onChange={handleAutoRenewToggle}
+                />
+                Auto-Renew Subscription
+              </label>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'profile' && (
+        <div className="tab-content">
+          <form onSubmit={handleSubmit}>
+            <h1 className="mb-4">Edit your profile</h1>
+
+            <select
+              name="userType"
+              onChange={handleChange}
+              value={form.userType}
+              className="form-container form-ddd"
+            >
+              <option value="individual">Individual</option>
+              <option value="company">Company</option>
+            </select>
+
+            <input
+              name="fname"
+              placeholder="First Name"
+              onChange={handleChange}
+              value={form.fname}
+              className="form-container"
+            />
+            <input
+              name="lname"
+              placeholder="Last Name"
+              onChange={handleChange}
+              value={form.lname}
+              className="form-container"
+            />
+            <input
+              name="email"
+              placeholder="Email"
+              onChange={handleChange}
+              value={form.email}
+              className="form-container"
+            />
+            <input
+              name="phone"
+              placeholder="Phone Number"
+              onChange={handleChange}
+              value={form.phone}
+              className="form-container"
+            />
+
+            {form.userType === "company" && (
+              <>
+                <input
+                  name="companyName"
+                  placeholder="Company Name"
+                  onChange={handleChange}
+                  value={form.companyName}
+                  className="form-container"
+                />
+                <input
+                  name="address"
+                  placeholder="Company Address"
+                  onChange={handleChange}
+                  value={form.address}
+                  className="form-container"
+                />
+                <input
+                  name="vatNumber"
+                  placeholder="VAT Number"
+                  onChange={handleChange}
+                  value={form.vatNumber}
+                  className="form-container"
+                />
+              </>
+            )}
+
+            {Object.keys(formErrors).length > 0 && (
+              <p className="form-errors">Please fill all required fields</p>
+            )}
+
+            <button type="submit" className="updateButton">
+              UPDATE PROFILE
+            </button>
+
+            <NavLink to="/gen" style={{ color: "#2E8B57" }} className="mt-3 d-block text-center">
+              Go back to Dashboard
+            </NavLink>
+          </form>
+        </div>
+      )}
+
+      {/* Modals - Always available regardless of active tab */}
       {/* Subscription Change Modal */}
       {showSubscriptionModal && (
-        <div className="modal-overlay" style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0,0,0,0.5)',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          zIndex: 1000
-        }}>
-          <div className="modal-content" style={{
-            backgroundColor: 'white',
-            padding: '2rem',
-            borderRadius: '10px',
-            maxWidth: '500px',
-            width: '90%',
-            maxHeight: '80vh',
-            overflowY: 'auto'
-          }}>
+        <div className="modal-overlay">
+          <div className="modal-content">
             <h3>Change Subscription Plan</h3>
             
-            <div className="billing-cycle-selector" style={{ marginBottom: '1rem' }}>
-              <label style={{ marginRight: '1rem' }}>
+            <div className="billing-cycle-selector">
+              <label>
                 <input
                   type="radio"
                   name="billingCycle"
                   value="monthly"
                   checked={billingCycle === 'monthly'}
                   onChange={(e) => setBillingCycle(e.target.value)}
-                  style={{ marginRight: '5px' }}
                 />
                 Monthly
               </label>
@@ -391,7 +456,6 @@ const Profile = () => {
                   value="yearly"
                   checked={billingCycle === 'yearly'}
                   onChange={(e) => setBillingCycle(e.target.value)}
-                  style={{ marginRight: '5px' }}
                 />
                 Yearly (Save 17%)
               </label>
@@ -406,19 +470,11 @@ const Profile = () => {
                   <div 
                     key={sub._id} 
                     className={`subscription-option ${isCurrentSub ? 'current' : ''}`}
-                    style={{
-                      border: `2px solid ${isCurrentSub ? '#007bff' : '#ddd'}`,
-                      borderRadius: '8px',
-                      padding: '1rem',
-                      marginBottom: '1rem',
-                      cursor: isCurrentSub ? 'default' : 'pointer',
-                      backgroundColor: isCurrentSub ? '#f8f9fa' : 'white'
-                    }}
                     onClick={() => !isCurrentSub && setSelectedSubscription(sub)}
                   >
                     <h4>{sub.name} {isCurrentSub && '(Current)'}</h4>
                     <p><strong>€{price}</strong> / {billingCycle}</p>
-                    <div style={{ fontSize: '14px', color: '#666' }}>
+                    <div className="subscription-details">
                       <p>• {sub.generatedImages} images</p>
                       <p>• {sub.videoGenerations} videos</p>
                       <p>• {sub.models3d} 3D models</p>
@@ -431,22 +487,9 @@ const Profile = () => {
               })}
             </div>
 
-            <div className="modal-actions" style={{ 
-              display: 'flex', 
-              gap: '1rem', 
-              justifyContent: 'flex-end',
-              marginTop: '2rem'
-            }}>
+            <div className="modal-actions">
               <button 
                 onClick={() => setShowSubscriptionModal(false)}
-                style={{
-                  padding: '10px 20px',
-                  backgroundColor: '#6c757d',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '5px',
-                  cursor: 'pointer'
-                }}
               >
                 Cancel
               </button>
@@ -454,14 +497,6 @@ const Profile = () => {
               {selectedSubscription && (
                 <button 
                   onClick={() => handleSubscriptionChange(selectedSubscription)}
-                  style={{
-                    padding: '10px 20px',
-                    backgroundColor: '#28a745',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '5px',
-                    cursor: 'pointer'
-                  }}
                 >
                   Change to {selectedSubscription.name}
                 </button>
@@ -473,29 +508,10 @@ const Profile = () => {
 
       {/* Coin Purchase Modal */}
       {showCoinModal && (
-        <div className="modal-overlay" style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0,0,0,0.5)',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          zIndex: 1000
-        }}>
-          <div className="modal-content" style={{
-            backgroundColor: 'white',
-            padding: '2rem',
-            borderRadius: '10px',
-            maxWidth: '500px',
-            width: '90%',
-            maxHeight: '80vh',
-            overflowY: 'auto'
-          }}>
+        <div className="modal-overlay">
+          <div className="modal-content">
             <h3>Buy Coins</h3>
-            <p style={{ marginBottom: '1rem', color: '#666' }}>
+            <p>
               Use coins to generate images, videos, or 3D models when you run out of your monthly allocation.
             </p>
             
@@ -504,61 +520,31 @@ const Profile = () => {
                 <div 
                   key={index}
                   className={`coin-package ${pkg.popular ? 'popular' : ''}`}
-                  style={{
-                    border: `2px solid ${pkg.popular ? '#28a745' : '#ddd'}`,
-                    borderRadius: '8px',
-                    padding: '1rem',
-                    marginBottom: '1rem',
-                    cursor: 'pointer',
-                    position: 'relative',
-                    backgroundColor: pkg.popular ? '#f8fff8' : 'white'
-                  }}
                   onClick={() => handleBuyCoins(pkg)}
                 >
                   {pkg.popular && (
-                    <div style={{
-                      position: 'absolute',
-                      top: '-10px',
-                      right: '10px',
-                      background: '#28a745',
-                      color: 'white',
-                      padding: '2px 8px',
-                      borderRadius: '12px',
-                      fontSize: '12px'
-                    }}>
+                    <div className="popular-badge">
                       Most Popular
                     </div>
                   )}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div>
+                  <div className="coin-package-content">
+                    <div className="coin-info">
                       <h4>🪙 {pkg.coins} Coins</h4>
-                      <p style={{ color: '#666', margin: 0 }}>
+                      <p className="coin-rate">
                         €{(pkg.price / pkg.coins).toFixed(3)} per coin
                       </p>
                     </div>
-                    <div style={{ textAlign: 'right' }}>
-                      <strong style={{ fontSize: '18px' }}>€{pkg.price}</strong>
+                    <div className="coin-price">
+                      <strong>€{pkg.price}</strong>
                     </div>
                   </div>
                 </div>
               ))}
             </div>
 
-            <div className="modal-actions" style={{ 
-              display: 'flex', 
-              justifyContent: 'flex-end',
-              marginTop: '2rem'
-            }}>
+            <div className="modal-actions">
               <button 
                 onClick={() => setShowCoinModal(false)}
-                style={{
-                  padding: '10px 20px',
-                  backgroundColor: '#6c757d',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '5px',
-                  cursor: 'pointer'
-                }}
               >
                 Cancel
               </button>
@@ -566,87 +552,6 @@ const Profile = () => {
           </div>
         </div>
       )}
-
-      <form onSubmit={handleSubmit}>
-        <h1 className="mb-4">Edit your profile</h1>
-
-        <select
-          name="userType"
-          onChange={handleChange}
-          value={form.userType}
-          className="form-container form-ddd"
-        >
-          <option value="individual">Individual</option>
-          <option value="company">Company</option>
-        </select>
-
-        <input
-          name="fname"
-          placeholder="First Name"
-          onChange={handleChange}
-          value={form.fname}
-          className="form-container"
-        />
-        <input
-          name="lname"
-          placeholder="Last Name"
-          onChange={handleChange}
-          value={form.lname}
-          className="form-container"
-        />
-        <input
-          name="email"
-          placeholder="Email"
-          onChange={handleChange}
-          value={form.email}
-          className="form-container"
-        />
-        <input
-          name="phone"
-          placeholder="Phone Number"
-          onChange={handleChange}
-          value={form.phone}
-          className="form-container"
-        />
-
-        {form.userType === "company" && (
-          <>
-            <input
-              name="companyName"
-              placeholder="Company Name"
-              onChange={handleChange}
-              value={form.companyName}
-              className="form-container"
-            />
-            <input
-              name="address"
-              placeholder="Company Address"
-              onChange={handleChange}
-              value={form.address}
-              className="form-container"
-            />
-            <input
-              name="vatNumber"
-              placeholder="VAT Number"
-              onChange={handleChange}
-              value={form.vatNumber}
-              className="form-container"
-            />
-          </>
-        )}
-
-        {Object.keys(formErrors).length > 0 && (
-          <p className="form-errors">Please fill all required fields</p>
-        )}
-
-        <button type="submit" className="updateButton">
-          UPDATE PROFILE
-        </button>
-
-        <NavLink to="/gen" style={{ color: "#2E8B57" }} className="mt-3 d-block text-center">
-          Go back to Dashboard
-        </NavLink>
-      </form>
     </div>
   );
 };
