@@ -3,7 +3,7 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 const axios = require("axios");
 const path = require('path');
-const { User, Subscription, GeneratedImage } = require('./models');
+const { User, Subscription, GeneratedImage, Chat } = require('./models');
 const multer = require('multer');
 const upload = multer({ dest: 'uploads/' });
 const app = express();
@@ -14,6 +14,7 @@ const imageEnhancementRoutes = require('./routes/serverless_apis');
 const sketchToImageServerless = require('./routes/serverless_sketch_to_image');
 const d3Serverless = require('./routes/3d-model-generator');
 const paymentRoutes = require('./routes/paymentRoutes');
+const chatRoutes = require('./routes/chatRoutes');
 require('./cron/recurringBillingJob');
 
 const t2i = require('./routes/text-to-image');
@@ -68,6 +69,7 @@ app.use('/api/serverless', sketchToImageServerless);
 app.use('/api/serverless', d3Serverless);
 app.use('/api/serverless', t2i);
 app.use('/api', paymentRoutes); // Prefix route
+app.use('/api', chatRoutes); // Add chat routes
 
 const clientOptions = { serverApi: { version: '1', strict: true, deprecationErrors: true } };
     // First API call to get the access token
@@ -90,11 +92,11 @@ mongoose.connect(uri, clientOptions)
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
+// Legacy chat endpoint - keeping for backward compatibility but will be deprecated
 app.post('/api/chat', async (req, res) => {
   const { messages } = req.body;
   console.log('user message :: ', messages)
   try {
-
 
     faqData = [
       {
@@ -962,28 +964,92 @@ app.get('/api/images', async (req, res) => {
 app.post("/api/images/:id/like", async (req, res) => {
   try {
     const { id } = req.params;
-    console.log('image id: ',id)
-    const image = await GeneratedImage.findByIdAndUpdate(id, { $inc: { likes: 1 } }, { new: true });
+    const { userId } = req.body;
+    console.log('image id: ', id, 'user id:', userId);
+    
+    const image = await GeneratedImage.findByIdAndUpdate(
+      id, 
+      { $inc: { likes: 1 } }, 
+      { new: true }
+    );
+    
     if (!image) {
       return res.status(404).json({ message: "Image not found" });
     }
+    
     res.json(image);
   } catch (error) {
-    res.status(500).json({ message: "Server error", error });
+    console.error('Error liking image:', error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+});
+
+app.post("/api/images/:id/fire", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { userId } = req.body;
+    console.log('fire image id: ', id, 'user id:', userId);
+    
+    const image = await GeneratedImage.findByIdAndUpdate(
+      id, 
+      { $inc: { fires: 1 } }, 
+      { new: true }
+    );
+    
+    if (!image) {
+      return res.status(404).json({ message: "Image not found" });
+    }
+    
+    res.json(image);
+  } catch (error) {
+    console.error('Error firing image:', error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+});
+
+app.post("/api/images/:id/share", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { userId } = req.body;
+    console.log('share image id: ', id, 'user id:', userId);
+    
+    const image = await GeneratedImage.findByIdAndUpdate(
+      id, 
+      { $inc: { shares: 1 } }, 
+      { new: true }
+    );
+    
+    if (!image) {
+      return res.status(404).json({ message: "Image not found" });
+    }
+    
+    res.json(image);
+  } catch (error) {
+    console.error('Error sharing image:', error);
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 });
 
 app.post("/api/images/:id/view", async (req, res) => {
   try {
     const { id } = req.params;
-    console.log('image id: ',id)
-    const image = await GeneratedImage.findByIdAndUpdate(id, { $inc: { views: 1 } }, { new: true });
+    const { userId } = req.body;
+    console.log('view image id: ', id, 'user id:', userId);
+    
+    const image = await GeneratedImage.findByIdAndUpdate(
+      id, 
+      { $inc: { views: 1 } }, 
+      { new: true }
+    );
+    
     if (!image) {
       return res.status(404).json({ message: "Image not found" });
     }
+    
     res.json(image);
   } catch (error) {
-    res.status(500).json({ message: "Server error", error });
+    console.error('Error viewing image:', error);
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 });
 

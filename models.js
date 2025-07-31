@@ -137,6 +137,7 @@ const GeneratedImageSchema = new mongoose.Schema({
   title: String,
   description: String,
   likes: { type: Number, default: 0 },
+  fires: { type: Number, default: 0 },
   shares: { type: Number, default: 0 },
   views: { type: Number, default: 0 },
   createdAt: { type: Date, default: Date.now },
@@ -155,8 +156,20 @@ const GeneratedImage = mongoose.model('GeneratedImage', GeneratedImageSchema);
 //   foreignField: '_id',
 // });
 
+// Chat model for storing chat history
+const chatSchema = new Schema({
+  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+  title: { type: String, required: true }, // Short title for the chat session
+  messages: [{
+    role: { type: String, enum: ['user', 'assistant'], required: true },
+    content: { type: String, required: true },
+    timestamp: { type: Date, default: Date.now }
+  }],
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now }
+});
+
+const Chat = mongoose.model('Chat', chatSchema);
 
 
-
-
-module.exports = { User, Subscription, GeneratedImage };
+module.exports = { User, Subscription, GeneratedImage, Chat };
