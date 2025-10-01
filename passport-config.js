@@ -53,7 +53,7 @@ const AppleStrategy = require("passport-apple");
 const fs = require("fs");
 
 passport.use(new AppleStrategy({
-  clientID: "com.virtuartai.web", // Your Services ID
+  clientID: "com.virtuartai.web.login", // Your Services ID
   teamID: "NLF27X77L4",           // Your Team ID
   keyID: "3AKVR8445V",           // 10-char Key ID from Apple
   privateKeyString: fs.readFileSync("./AuthKey_3AKVR8445V.p8").toString(),
