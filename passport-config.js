@@ -51,7 +51,6 @@ passport.use(
 
 const AppleStrategy = require("passport-apple");
 const fs = require("fs");
-const { User } = require("./models");
 
 passport.use(new AppleStrategy({
   clientID: "com.virtuartai.web", // Your Services ID
