@@ -255,7 +255,7 @@
 .lazyImageContainer {
   position: relative;
   width: 100%;
-  min-height: 200px;
+  /* min-height: 200px;   */
   overflow: hidden;
 }
 
@@ -299,17 +299,17 @@
     rgba(46, 160, 67, 0.3),
     transparent
   );
-  animation: shimmer 2s infinite;
+  /* animation: shimmer 2s infinite; */
 }
 
-@keyframes shimmer {
+/* @keyframes shimmer {
   0% {
     left: -100%;
   }
   100% {
     left: 100%;
   }
-}
+} */
 
 .errorPlaceholder {
   width: 100%;
@@ -328,7 +328,7 @@
   align-items: center;
   padding: 1rem;
   gap: 0.75rem;
-  background: linear-gradient(135deg, rgba(42, 42, 42, 0.9) 0%, rgba(51, 51, 51, 0.9) 100%);
+  background: linear-gradient(0deg, rgba(0, 0, 0, 0.9) 0%, rgba(51, 51, 51, 0.9) 100%);
   backdrop-filter: blur(10px);
 }
 

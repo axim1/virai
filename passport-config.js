@@ -49,6 +49,42 @@ passport.use(
   )
 );
 
+const AppleStrategy = require("passport-apple");
+const fs = require("fs");
+const { User } = require("./models");
+
+passport.use(new AppleStrategy({
+  clientID: "com.virtuartai.web", // Your Services ID
+  teamID: "NLF27X77L4",           // Your Team ID
+  keyID: "3AKVR8445V",           // 10-char Key ID from Apple
+  privateKeyString: fs.readFileSync("./AuthKey_3AKVR8445V.p8").toString(),
+  callbackURL: process.env.CALLBACK_URL + "/auth/apple/callback",
+  scope: ["name", "email"]
+},
+async (accessToken, refreshToken, idToken, profile, done) => {
+  try {
+    const email = profile.email || (idToken && idToken.email);
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      user = await User.create({
+        fname: profile.name?.firstName || "Apple",
+        lname: profile.name?.lastName || "User",
+        email,
+        password: "", // Not used for social login
+        phone: "",
+        userType: "individual",
+        no_of_images_left: 0,
+        appleId: profile.id,
+        authProvider: "apple"
+      });
+    }
+
+    return done(null, user);
+  } catch (err) {
+    return done(err, null);
+  }
+}));
 
 // const AppleStrategy = require('passport-apple');
 // const fs = require('fs');

@@ -176,17 +176,16 @@ app.get("/subscriptions", async (req, res) => {
 
 
 
+// Start Apple login
+app.get("/auth/apple", passport.authenticate("apple"));
 
-
-
-
-app.get('/auth/apple', passport.authenticate('apple'));
-
-app.post('/auth/apple/callback',
-  passport.authenticate('apple', { failureRedirect: '/login', session: true }),
+// Callback from Apple
+app.post("/auth/apple/callback",
+  passport.authenticate("apple", { failureRedirect: "/login", session: true }),
   (req, res) => {
     const user = req.user;
     const frontendUrl = `${process.env.FRONTEND_URL}home`;
+
     const userData = {
       _id: user._id,
       email: user.email,
@@ -196,10 +195,35 @@ app.post('/auth/apple/callback',
       subscribed_monthly: user.subscribed_monthly,
       subscribed_yearly: user.subscribed_yearly,
     };
+
     const query = new URLSearchParams(userData).toString();
     res.redirect(`${frontendUrl}?${query}`);
   }
 );
+
+
+
+
+// app.get('/auth/apple', passport.authenticate('apple'));
+
+// app.post('/auth/apple/callback',
+//   passport.authenticate('apple', { failureRedirect: '/login', session: true }),
+//   (req, res) => {
+//     const user = req.user;
+//     const frontendUrl = `${process.env.FRONTEND_URL}home`;
+//     const userData = {
+//       _id: user._id,
+//       email: user.email,
+//       fname: user.fname,
+//       lname: user.lname,
+//       no_of_images_left: user.no_of_images_left,
+//       subscribed_monthly: user.subscribed_monthly,
+//       subscribed_yearly: user.subscribed_yearly,
+//     };
+//     const query = new URLSearchParams(userData).toString();
+//     res.redirect(`${frontendUrl}?${query}`);
+//   }
+// );
 
 // Route to initiate Google sign-in
 app.get('/auth/google',
