@@ -52,14 +52,20 @@ const AppleStrategy = require("passport-apple");
 const fs = require("fs");
 const jwt = require("jsonwebtoken");
 
+
+
 passport.use(
   new AppleStrategy(
     {
       clientID: process.env.APPLE_CLIENT_ID || "com.virtuartai.web.login",
       teamID: process.env.APPLE_TEAM_ID || "NLF27X77L4",
       keyID: process.env.APPLE_KEY_ID || "3AKVR8445V",
-      privateKeyString: fs.readFileSync(path.join(__dirname, "AuthKey_3AKVR8445V.p8")).toString(),
-      callbackURL: process.env.APPLE_CALLBACK_URL || "https://virtuartai.com/auth/apple/callback",
+      privateKeyString: fs.readFileSync(
+        path.join(__dirname, "AuthKey_3AKVR8445V.p8")
+      ).toString(),
+      callbackURL:
+        process.env.APPLE_CALLBACK_URL ||
+        "https://virtuartai.com/auth/apple/callback",
       scope: ["name", "email"],
     },
     async (accessToken, refreshToken, idToken, profile, done) => {
@@ -69,37 +75,48 @@ passport.use(
       console.log("accessToken:", !!accessToken);
       console.log("refreshToken:", !!refreshToken);
 
-      // ✅ Decode Apple ID token to extract user info
+      // 🔍 Try to manually decode the ID token (safer than jwt.decode)
       let decoded = {};
       try {
-        decoded = jwt.decode(idToken) || {};
+        if (idToken && idToken.split(".").length === 3) {
+          const payload = Buffer.from(idToken.split(".")[1], "base64").toString(
+            "utf8"
+          );
+          decoded = JSON.parse(payload);
+        } else {
+          decoded = jwt.decode(idToken) || {};
+        }
         console.log("🧩 Decoded Apple ID Token:", decoded);
       } catch (err) {
         console.error("❌ Failed to decode Apple ID token:", err);
       }
 
       const appleId = decoded.sub || profile?.id || null;
-      const email = decoded.email || profile?.email || (profile?._json?.email) || null;
+      const email =
+        decoded.email ||
+        profile?.email ||
+        profile?._json?.email ||
+        (appleId ? `appleuser_${appleId}@appleuser.com` : null);
 
       console.log("📧 Extracted Email:", email);
       console.log("🆔 Apple Sub ID:", appleId);
 
       try {
-        // 🧠 1. Find by Apple ID first (never collide with existing users)
+        // 🧠 1️⃣ Try to find by Apple ID first
         let user = appleId ? await User.findOne({ appleId }) : null;
 
-        // 🧠 2. If not found and email exists, check if any user has same email
+        // 🧠 2️⃣ If not found but email exists, check and link
         if (!user && email) {
           user = await User.findOne({ email });
           if (user) {
-            // Attach appleId for future logins
             user.appleId = appleId;
+            user.authProvider = "apple";
             await user.save();
             console.log("🔗 Linked existing user to Apple ID:", user.email);
           }
         }
 
-        // 🧠 3. If still not found → Create a new user
+        // 🧠 3️⃣ If still not found, create new Apple user
         if (!user) {
           console.log("⚙️ Creating NEW Apple user in DB...");
           user = await User.create({
