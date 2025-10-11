@@ -54,41 +54,100 @@ const jwt = require("jsonwebtoken");
 
 
 
+/**
+ * Helper: build signed JWT (client_secret) for Apple token exchange
+ */
+function generateClientSecret() {
+  try {
+    const privateKey = fs.readFileSync(
+      path.join(__dirname, "AuthKey_3AKVR8445V.p8")
+    );
+    const payload = {
+      iss: process.env.APPLE_TEAM_ID || "NLF27X77L4",
+      iat: Math.floor(Date.now() / 1000),
+      exp: Math.floor(Date.now() / 1000) + 86400 * 180, // 180 days
+      aud: "https://appleid.apple.com",
+      sub: process.env.APPLE_CLIENT_ID || "com.virtuartai.web.login",
+    };
+    const token = jwt.sign(payload, privateKey, {
+      algorithm: "ES256",
+      keyid: process.env.APPLE_KEY_ID || "3AKVR8445V",
+    });
+    console.log("✅ [generateClientSecret] Successfully created JWT");
+    return token;
+  } catch (err) {
+    console.error("❌ [generateClientSecret] Failed to create JWT:", err);
+    return null;
+  }
+}
+
 passport.use(
   new AppleStrategy(
     {
       clientID: process.env.APPLE_CLIENT_ID || "com.virtuartai.web.login",
       teamID: process.env.APPLE_TEAM_ID || "NLF27X77L4",
       keyID: process.env.APPLE_KEY_ID || "3AKVR8445V",
-      privateKeyString: fs.readFileSync(
-        path.join(__dirname, "AuthKey_3AKVR8445V.p8")
-      ).toString(),
+      privateKeyString: fs
+        .readFileSync(path.join(__dirname, "AuthKey_3AKVR8445V.p8"))
+        .toString(),
       callbackURL:
         process.env.APPLE_CALLBACK_URL ||
         "https://virtuartai.com/auth/apple/callback",
       scope: ["name", "email"],
+      passReqToCallback: true,
     },
-    async (accessToken, refreshToken, idToken, profile, done) => {
+
+    async (req, accessToken, refreshToken, idToken, profile, done) => {
       console.log("\n============================");
       console.log("🍎 [Apple Login Callback Triggered]");
       console.log("============================");
       console.log("accessToken:", !!accessToken);
       console.log("refreshToken:", !!refreshToken);
+      console.log("profile:", profile);
+      console.log("Raw idToken length:", idToken ? idToken.length : "❌ none");
 
-      // 🔍 Try to manually decode the ID token (safer than jwt.decode)
       let decoded = {};
       try {
+        // 1️⃣ Try to decode existing idToken
         if (idToken && idToken.split(".").length === 3) {
-          const payload = Buffer.from(idToken.split(".")[1], "base64").toString(
-            "utf8"
+          decoded = JSON.parse(
+            Buffer.from(idToken.split(".")[1], "base64").toString("utf8")
           );
-          decoded = JSON.parse(payload);
+          console.log("🧩 Decoded Apple ID Token (direct):", decoded);
         } else {
-          decoded = jwt.decode(idToken) || {};
+          console.log("⚠️ idToken missing, attempting manual token exchange...");
+          if (req?.body?.code) {
+            console.log("🔄 Exchanging code manually for tokens...");
+            const form = new URLSearchParams({
+              grant_type: "authorization_code",
+              code: req.body.code,
+              client_id: process.env.APPLE_CLIENT_ID || "com.virtuartai.web.login",
+              client_secret: generateClientSecret(),
+            });
+
+            const tokenResp = await axios.post(
+              "https://appleid.apple.com/auth/token",
+              form,
+              { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
+            );
+
+            console.log("📥 Apple token response:", tokenResp.data);
+
+            if (tokenResp.data.id_token) {
+              idToken = tokenResp.data.id_token;
+              decoded = JSON.parse(
+                Buffer.from(idToken.split(".")[1], "base64").toString("utf8")
+              );
+              console.log("🧩 Decoded Apple ID Token (manual):", decoded);
+            } else {
+              console.error("❌ No id_token returned from manual exchange!");
+            }
+          } else {
+            console.error("❌ No code available in req.body for manual exchange.");
+          }
         }
-        console.log("🧩 Decoded Apple ID Token:", decoded);
       } catch (err) {
-        console.error("❌ Failed to decode Apple ID token:", err);
+        console.error("❌ [Decode Error]:", err);
       }
 
       const appleId = decoded.sub || profile?.id || null;
@@ -102,10 +161,8 @@ passport.use(
       console.log("🆔 Apple Sub ID:", appleId);
 
       try {
-        // 🧠 1️⃣ Try to find by Apple ID first
+        // 🔎 Find or create user
         let user = appleId ? await User.findOne({ appleId }) : null;
-
-        // 🧠 2️⃣ If not found but email exists, check and link
         if (!user && email) {
           user = await User.findOne({ email });
           if (user) {
@@ -116,7 +173,6 @@ passport.use(
           }
         }
 
-        // 🧠 3️⃣ If still not found, create new Apple user
         if (!user) {
           console.log("⚙️ Creating NEW Apple user in DB...");
           user = await User.create({
@@ -140,7 +196,8 @@ passport.use(
         console.log("🚀 Apple Auth Success for:", user.email);
         return done(null, user);
       } catch (err) {
-        console.error("❌ Apple Auth Error:", err);
+        console.error("❌ [Apple Auth Error]:", err);
+        console.error("Stack:", err.stack);
         return done(err, null);
       }
     }
