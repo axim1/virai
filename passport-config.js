@@ -48,24 +48,18 @@ passport.use(
     }
   )
 );
-
 const AppleStrategy = require("passport-apple");
 const fs = require("fs");
-
-
 const jwt = require("jsonwebtoken");
-// const AppleStrategy = require("passport-apple");
-// const fs = require("fs");
-// const path = require("path");
 
 passport.use(
   new AppleStrategy(
     {
-      clientID: "com.virtuartai.web.login",
-      teamID: "NLF27X77L4",
-      keyID: "3AKVR8445V",
+      clientID: process.env.APPLE_CLIENT_ID || "com.virtuartai.web.login",
+      teamID: process.env.APPLE_TEAM_ID || "NLF27X77L4",
+      keyID: process.env.APPLE_KEY_ID || "3AKVR8445V",
       privateKeyString: fs.readFileSync(path.join(__dirname, "AuthKey_3AKVR8445V.p8")).toString(),
-      callbackURL: "https://virtuartai.com/auth/apple/callback",
+      callbackURL: process.env.APPLE_CALLBACK_URL || "https://virtuartai.com/auth/apple/callback",
       scope: ["name", "email"],
     },
     async (accessToken, refreshToken, idToken, profile, done) => {
@@ -74,42 +68,59 @@ passport.use(
       console.log("============================");
       console.log("accessToken:", !!accessToken);
       console.log("refreshToken:", !!refreshToken);
-      console.log("idToken type:", typeof idToken);
 
+      // ✅ Decode Apple ID token to extract user info
       let decoded = {};
       try {
         decoded = jwt.decode(idToken) || {};
-        console.log("🧩 Decoded Apple ID Token:", JSON.stringify(decoded, null, 2));
+        console.log("🧩 Decoded Apple ID Token:", decoded);
       } catch (err) {
         console.error("❌ Failed to decode Apple ID token:", err);
       }
 
-      // Use decoded info when profile is empty
-      const appleId = decoded.sub || profile.id;
-      const email = decoded.email || profile.email || `appleuser_${appleId}@appleuser.com`;
+      const appleId = decoded.sub || profile?.id || null;
+      const email = decoded.email || profile?.email || (profile?._json?.email) || null;
+
+      console.log("📧 Extracted Email:", email);
+      console.log("🆔 Apple Sub ID:", appleId);
 
       try {
-        let user = await User.findOne({ $or: [{ email }, { appleId }] });
+        // 🧠 1. Find by Apple ID first (never collide with existing users)
+        let user = appleId ? await User.findOne({ appleId }) : null;
 
+        // 🧠 2. If not found and email exists, check if any user has same email
+        if (!user && email) {
+          user = await User.findOne({ email });
+          if (user) {
+            // Attach appleId for future logins
+            user.appleId = appleId;
+            await user.save();
+            console.log("🔗 Linked existing user to Apple ID:", user.email);
+          }
+        }
+
+        // 🧠 3. If still not found → Create a new user
         if (!user) {
           console.log("⚙️ Creating NEW Apple user in DB...");
           user = await User.create({
-            fname: "Apple",
-            lname: "User",
-            email,
+            fname: profile?.name?.firstName || "Apple",
+            lname: profile?.name?.lastName || "User",
+            email: email || `apple_${Date.now()}@appleuser.com`,
+            appleId,
             password: "external",
             phone: "external",
             userType: "individual",
             no_of_images_left: 0,
-            appleId,
+            subscribed_monthly: false,
+            subscribed_yearly: false,
             authProvider: "apple",
           });
-          console.log("✅ New user created:", user.email);
+          console.log("✅ New Apple user created:", user.email);
         } else {
           console.log("🔄 Existing Apple user found:", user.email);
         }
 
-        console.log("🚀 Apple Auth Success");
+        console.log("🚀 Apple Auth Success for:", user.email);
         return done(null, user);
       } catch (err) {
         console.error("❌ Apple Auth Error:", err);
@@ -118,44 +129,3 @@ passport.use(
     }
   )
 );
-
-
-// const AppleStrategy = require('passport-apple');
-// const fs = require('fs');
-// const path = require('path');
-
-// passport.use(new AppleStrategy({
-//   clientID: process.env.APPLE_CLIENT_ID,
-//   teamID: process.env.APPLE_TEAM_ID,
-//   keyID: process.env.APPLE_KEY_ID,
-//   privateKeyString: fs.readFileSync(path.join(__dirname, './AuthKey.p8')).toString(),
-//   callbackURL: `${process.env.BACKEND_URL}/auth/apple/callback`,
-//   passReqToCallback: false,
-//   scope: ['name', 'email'],
-// }, async (accessToken, refreshToken, idToken, profile, done) => {
-//   try {
-//     const { sub: appleId, email } = idToken;
-
-//     const existingUser = await User.findOne({ appleId });
-
-//     if (existingUser) return done(null, existingUser);
-
-//     const newUser = await User.create({
-//       appleId,
-//       email: email || 'anonymous@apple.com',
-//       fname: 'Apple',
-//       lname: 'User',
-//       password: 'external',
-//       phone: 'external',
-//       no_of_images_left: 0,
-//       subscribed_monthly: false,
-//       subscribed_yearly: false,
-//       authProvider: 'apple',
-//     });
-
-//     return done(null, newUser);
-//   } catch (err) {
-//     return done(err);
-//   }
-// }));
-

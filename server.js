@@ -204,6 +204,14 @@ app.post(
           message: "Apple authentication succeeded but user object not attached.",
         });
       }
+      if (req.body.user) {
+        try {
+          const appleUserData = JSON.parse(req.body.user);
+          console.log("📩 Apple provided profile:", appleUserData);
+        } catch (err) {
+          console.error("❌ Failed to parse Apple user JSON:", err);
+        }
+      }
 
       const user = req.user;
       const frontendUrl = `${process.env.FRONTEND_URL}home`;
