@@ -15,35 +15,69 @@ passport.deserializeUser(async (id, done) => {
   }
 });
 
+const AppleStrategy = require("passport-apple");
+const fs = require("fs");
+const path = require("path");
+
 passport.use(
-  new GoogleStrategy(
+  new AppleStrategy(
     {
-      clientID: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: "/auth/google/callback",
+      clientID: "com.virtuartai.web.login", // ✅ Your Services ID
+      teamID: "NLF27X77L4",                // ✅ Your Apple Team ID
+      keyID: "3AKVR8445V",                 // ✅ Your 10-character Key ID
+      privateKeyString: fs.readFileSync(path.join(__dirname, "AuthKey_3AKVR8445V.p8")).toString(),
+      callbackURL: "https://virtuartai.com/auth/apple/callback",
+      scope: ["name", "email"],
     },
-    async (accessToken, refreshToken, profile, done) => {
+    async (accessToken, refreshToken, idToken, profile, done) => {
+      console.log("\n============================");
+      console.log("🍎 [Apple Login Callback Triggered]");
+      console.log("============================");
+      console.log("accessToken:", accessToken ? "✅ present" : "❌ missing");
+      console.log("refreshToken:", refreshToken ? "✅ present" : "❌ missing");
+      console.log("idToken object type:", typeof idToken);
+      console.log("Profile received from Apple:", JSON.stringify(profile, null, 2));
+      console.log("============================");
+
       try {
-        const existingUser = await User.findOne({ googleId: profile.id });
+        // Try to extract email safely
+        const email =
+          profile.email ||
+          (idToken && idToken.email) ||
+          `appleuser_${profile.id}@appleuser.com`; // fallback dummy email
 
-        if (existingUser) return done(null, existingUser);
+        console.log("📧 Extracted Email:", email);
+        console.log("🧩 Apple Profile ID:", profile.id);
 
-        const newUser = await User.create({
-          googleId: profile.id,
-          email: profile.emails[0].value,
-          fname: profile.name.givenName || "Google",
-          lname: profile.name.familyName || "User",
-          password: 'external', // Optional: you may leave it empty or mark as external login
-          phone: 'external',
-          no_of_images_left: 0,
-          subscribed_monthly: false,
-          subscribed_yearly: false,
-          authProvider: 'google',
-        });
+        // Find user by email or appleId
+        let user = await User.findOne({ $or: [{ email }, { appleId: profile.id }] });
 
-        return done(null, newUser);
+        if (!user) {
+          console.log("⚙️ Creating NEW Apple user in database...");
+          user = await User.create({
+            fname: profile.name?.firstName || "Apple",
+            lname: profile.name?.lastName || "User",
+            email,
+            password: "external",
+            phone: "external",
+            userType: "individual",
+            no_of_images_left: 0,
+            appleId: profile.id,
+            authProvider: "apple",
+          });
+          console.log("✅ New Apple user created:", user._id.toString());
+        } else {
+          console.log("🔄 Existing Apple user found:", user._id.toString());
+        }
+
+        console.log("🚀 Apple Auth Success for user:", user.email);
+        console.log("============================\n");
+        return done(null, user);
       } catch (err) {
-        return done(err);
+        console.error("❌ Apple Auth Error:", err);
+        console.error("Full Stack Trace:", err.stack);
+        console.log("============================\n");
+        return done(err, null);
       }
     }
   )
