@@ -56,8 +56,8 @@ passport.use(new AppleStrategy({
   clientID: "com.virtuartai.web.login", // Your Services ID
   teamID: "NLF27X77L4",           // Your Team ID
   keyID: "3AKVR8445V",           // 10-char Key ID from Apple
-  privateKeyString: fs.readFileSync("./AuthKey_3AKVR8445V.p8").toString(),
-  callbackURL: process.env.CALLBACK_URL + "/auth/apple/callback",
+  privateKeyString: fs.readFileSync(require('path').join(__dirname, 'AuthKey_3AKVR8445V.p8')).toString(),
+  callbackURL: "https://virtuartai.com/auth/apple/callback",
   scope: ["name", "email"]
 },
 async (accessToken, refreshToken, idToken, profile, done) => {

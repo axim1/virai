@@ -122,6 +122,7 @@ const Login = ({ setLoggedIn, setUserState }) => {
 
 
 
+
 <button
   onClick={() => {
     window.location.href = `${process.env.REACT_APP_API_URL}auth/google`;
@@ -151,17 +152,34 @@ const Login = ({ setLoggedIn, setUserState }) => {
   Sign in with Google
 </button>
 
-
-
-{/* <button
-  className="btn btn-dark"
-  style={{ margin: '20px' }}
+<button
   onClick={() => {
     window.location.href = `${process.env.REACT_APP_API_URL}auth/apple`;
   }}
+  style={{
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    backgroundColor: 'black',
+    color: 'white',
+    border: '0px solid #dadce0',
+    padding: '10px 16px',
+    borderRadius: '40px',
+    fontSize: '14px',
+    fontWeight: 500,
+    fontFamily: 'Poppins, sans-serif',
+    cursor: 'pointer',
+    margin: '10px 50px',
+    boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
+  }}
 >
+  <img
+    src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg"
+    alt="Apple"
+    style={{ width: '18px', height: '18px', filter: 'invert(1)' }}
+  />
   Sign in with Apple
-</button> */}
+</button>
 
     </div>
     </>
