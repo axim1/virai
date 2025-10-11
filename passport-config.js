@@ -1,7 +1,7 @@
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const { User } = require('./models'); // Adjust path
-
+const path = require("path");
 passport.serializeUser((user, done) => {
   done(null, user.id); // serialize user by Mongo _id
 });
@@ -15,9 +15,43 @@ passport.deserializeUser(async (id, done) => {
   }
 });
 
+passport.use(
+  new GoogleStrategy(
+    {
+      clientID: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      callbackURL: "/auth/google/callback",
+    },
+    async (accessToken, refreshToken, profile, done) => {
+      try {
+        const existingUser = await User.findOne({ googleId: profile.id });
+
+        if (existingUser) return done(null, existingUser);
+
+        const newUser = await User.create({
+          googleId: profile.id,
+          email: profile.emails[0].value,
+          fname: profile.name.givenName || "Google",
+          lname: profile.name.familyName || "User",
+          password: 'external', // Optional: you may leave it empty or mark as external login
+          phone: 'external',
+          no_of_images_left: 0,
+          subscribed_monthly: false,
+          subscribed_yearly: false,
+          authProvider: 'google',
+        });
+
+        return done(null, newUser);
+      } catch (err) {
+        return done(err);
+      }
+    }
+  )
+);
+
 const AppleStrategy = require("passport-apple");
 const fs = require("fs");
-const path = require("path");
+
 
 passport.use(
   new AppleStrategy(
@@ -82,42 +116,6 @@ passport.use(
     }
   )
 );
-
-const AppleStrategy = require("passport-apple");
-const fs = require("fs");
-
-passport.use(new AppleStrategy({
-  clientID: "com.virtuartai.web.login", // Your Services ID
-  teamID: "NLF27X77L4",           // Your Team ID
-  keyID: "3AKVR8445V",           // 10-char Key ID from Apple
-  privateKeyString: fs.readFileSync(require('path').join(__dirname, 'AuthKey_3AKVR8445V.p8')).toString(),
-  callbackURL: "https://virtuartai.com/auth/apple/callback",
-  scope: ["name", "email"]
-},
-async (accessToken, refreshToken, idToken, profile, done) => {
-  try {
-    const email = profile.email || (idToken && idToken.email);
-    let user = await User.findOne({ email });
-
-    if (!user) {
-      user = await User.create({
-        fname: profile.name?.firstName || "Apple",
-        lname: profile.name?.lastName || "User",
-        email,
-        password: "", // Not used for social login
-        phone: "",
-        userType: "individual",
-        no_of_images_left: 0,
-        appleId: profile.id,
-        authProvider: "apple"
-      });
-    }
-
-    return done(null, user);
-  } catch (err) {
-    return done(err, null);
-  }
-}));
 
 // const AppleStrategy = require('passport-apple');
 // const fs = require('fs');
