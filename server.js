@@ -180,24 +180,59 @@ app.get("/subscriptions", async (req, res) => {
 app.get("/auth/apple", passport.authenticate("apple"));
 
 // Callback from Apple
-app.post("/auth/apple/callback",
+// Callback from Apple
+app.post(
+  "/auth/apple/callback",
+  (req, res, next) => {
+    console.log("\n====================================");
+    console.log("🍎 [Apple Callback Route Triggered]");
+    console.log("Method:", req.method);
+    console.log("Incoming body:", req.body);
+    console.log("====================================");
+    next();
+  },
   passport.authenticate("apple", { failureRedirect: "/login", session: true }),
-  (req, res) => {
-    const user = req.user;
-    const frontendUrl = `${process.env.FRONTEND_URL}home`;
+  async (req, res) => {
+    console.log("\n✅ [Apple Authentication Passed]");
+    console.log("Session user object available:", !!req.user);
+    console.log("req.user content:", JSON.stringify(req.user, null, 2));
 
-    const userData = {
-      _id: user._id,
-      email: user.email,
-      fname: user.fname,
-      lname: user.lname,
-      no_of_images_left: user.no_of_images_left,
-      subscribed_monthly: user.subscribed_monthly,
-      subscribed_yearly: user.subscribed_yearly,
-    };
+    try {
+      if (!req.user) {
+        console.error("❌ ERROR: req.user is missing after passport.authenticate()");
+        return res.status(500).send({
+          message: "Apple authentication succeeded but user object not attached.",
+        });
+      }
 
-    const query = new URLSearchParams(userData).toString();
-    res.redirect(`${frontendUrl}?${query}`);
+      const user = req.user;
+      const frontendUrl = `${process.env.FRONTEND_URL}home`;
+
+      const userData = {
+        _id: user._id,
+        email: user.email,
+        fname: user.fname,
+        lname: user.lname,
+        no_of_images_left: user.no_of_images_left,
+        subscribed_monthly: user.subscribed_monthly,
+        subscribed_yearly: user.subscribed_yearly,
+      };
+
+      console.log("📦 Prepared userData for redirect:", userData);
+
+      // Convert user data to URL parameters
+      const query = new URLSearchParams(userData).toString();
+      const redirectUrl = `${frontendUrl}?${query}`;
+
+      console.log("🔁 Redirecting to frontend:", redirectUrl);
+      console.log("====================================\n");
+
+      res.redirect(redirectUrl);
+    } catch (err) {
+      console.error("❌ Apple callback route error:", err);
+      console.error("Stack trace:", err.stack);
+      res.status(500).send({ message: "Internal Server Error in Apple callback." });
+    }
   }
 );
 

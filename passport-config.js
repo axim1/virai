@@ -53,12 +53,17 @@ const AppleStrategy = require("passport-apple");
 const fs = require("fs");
 
 
+const jwt = require("jsonwebtoken");
+const AppleStrategy = require("passport-apple");
+const fs = require("fs");
+const path = require("path");
+
 passport.use(
   new AppleStrategy(
     {
-      clientID: "com.virtuartai.web.login", // ✅ Your Services ID
-      teamID: "NLF27X77L4",                // ✅ Your Apple Team ID
-      keyID: "3AKVR8445V",                 // ✅ Your 10-character Key ID
+      clientID: "com.virtuartai.web.login",
+      teamID: "NLF27X77L4",
+      keyID: "3AKVR8445V",
       privateKeyString: fs.readFileSync(path.join(__dirname, "AuthKey_3AKVR8445V.p8")).toString(),
       callbackURL: "https://virtuartai.com/auth/apple/callback",
       scope: ["name", "email"],
@@ -67,55 +72,53 @@ passport.use(
       console.log("\n============================");
       console.log("🍎 [Apple Login Callback Triggered]");
       console.log("============================");
-      console.log("accessToken:", accessToken ? "✅ present" : "❌ missing");
-      console.log("refreshToken:", refreshToken ? "✅ present" : "❌ missing");
-      console.log("idToken object type:", typeof idToken);
-      console.log("Profile received from Apple:", JSON.stringify(profile, null, 2));
-      console.log("============================");
+      console.log("accessToken:", !!accessToken);
+      console.log("refreshToken:", !!refreshToken);
+      console.log("idToken type:", typeof idToken);
+
+      let decoded = {};
+      try {
+        decoded = jwt.decode(idToken) || {};
+        console.log("🧩 Decoded Apple ID Token:", JSON.stringify(decoded, null, 2));
+      } catch (err) {
+        console.error("❌ Failed to decode Apple ID token:", err);
+      }
+
+      // Use decoded info when profile is empty
+      const appleId = decoded.sub || profile.id;
+      const email = decoded.email || profile.email || `appleuser_${appleId}@appleuser.com`;
 
       try {
-        // Try to extract email safely
-        const email =
-          profile.email ||
-          (idToken && idToken.email) ||
-          `appleuser_${profile.id}@appleuser.com`; // fallback dummy email
-
-        console.log("📧 Extracted Email:", email);
-        console.log("🧩 Apple Profile ID:", profile.id);
-
-        // Find user by email or appleId
-        let user = await User.findOne({ $or: [{ email }, { appleId: profile.id }] });
+        let user = await User.findOne({ $or: [{ email }, { appleId }] });
 
         if (!user) {
-          console.log("⚙️ Creating NEW Apple user in database...");
+          console.log("⚙️ Creating NEW Apple user in DB...");
           user = await User.create({
-            fname: profile.name?.firstName || "Apple",
-            lname: profile.name?.lastName || "User",
+            fname: "Apple",
+            lname: "User",
             email,
             password: "external",
             phone: "external",
             userType: "individual",
             no_of_images_left: 0,
-            appleId: profile.id,
+            appleId,
             authProvider: "apple",
           });
-          console.log("✅ New Apple user created:", user._id.toString());
+          console.log("✅ New user created:", user.email);
         } else {
-          console.log("🔄 Existing Apple user found:", user._id.toString());
+          console.log("🔄 Existing Apple user found:", user.email);
         }
 
-        console.log("🚀 Apple Auth Success for user:", user.email);
-        console.log("============================\n");
+        console.log("🚀 Apple Auth Success");
         return done(null, user);
       } catch (err) {
         console.error("❌ Apple Auth Error:", err);
-        console.error("Full Stack Trace:", err.stack);
-        console.log("============================\n");
         return done(err, null);
       }
     }
   )
 );
+
 
 // const AppleStrategy = require('passport-apple');
 // const fs = require('fs');
