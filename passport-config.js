@@ -54,9 +54,9 @@ const fs = require("fs");
 
 
 const jwt = require("jsonwebtoken");
-const AppleStrategy = require("passport-apple");
-const fs = require("fs");
-const path = require("path");
+// const AppleStrategy = require("passport-apple");
+// const fs = require("fs");
+// const path = require("path");
 
 passport.use(
   new AppleStrategy(
