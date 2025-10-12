@@ -13,22 +13,27 @@ console.log('tatrabanka: ',clientId, clientSecret);
 
 // Helper function to format phone number for Tatra Bank API
 function formatPhoneNumber(phone) {
-  if (!phone) return '+421901123456'; // Default Slovak number
-  
-  // Remove all non-digit characters
+  if (!phone || phone === 'external' || phone === 'undefined' || phone === 'null') {
+    // Use a safe default test number (Slovakia)
+    return '+421901123456';
+  }
+
   const cleanPhone = phone.replace(/\D/g, '');
-  
-  // If it starts with 0, assume it's Slovak and replace with +421
+
+  // Ensure at least 9 digits
+  if (cleanPhone.length < 9) {
+    return '+421901123456';
+  }
+
   if (cleanPhone.startsWith('0')) {
     return '+421' + cleanPhone.substring(1);
   }
-  
-  // If it doesn't start with +, add +421 prefix
+
   if (!phone.startsWith('+')) {
     return '+421' + cleanPhone;
   }
-  
-  return phone; // Already in correct format
+
+  return phone;
 }
 
 // Helper function to determine subscription change type

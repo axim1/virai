@@ -190,7 +190,8 @@ const Navbar = ({ loggedIn,  setLoggedIn = () => {}, onHomeClick,activeLink,setA
               </div>
                
         
-                  <div className={styles.subscriptionPlanText}> {user.subscription.name}</div> 
+                  <div className={styles.subscriptionPlanText}>  {user.subscription?.name || "No Plan"}
+</div> 
               </div>
               </div>
                   {/* <div><strong>Images Left:</strong> {user.no_of_images_left}</div> */}
