@@ -215,7 +215,6 @@ app.post(
 
       const user = req.user;
       const frontendUrl = `${process.env.FRONTEND_URL}home`;
-
       const userData = {
         _id: user._id,
         email: user.email,
@@ -226,16 +225,31 @@ app.post(
         subscribed_yearly: user.subscribed_yearly,
       };
 
-      console.log("📦 Prepared userData for redirect:", userData);
-
-      // Convert user data to URL parameters
       const query = new URLSearchParams(userData).toString();
-      const redirectUrl = `${frontendUrl}?${query}`;
-
-      console.log("🔁 Redirecting to frontend:", redirectUrl);
-      console.log("====================================\n");
-
+      const redirectUrl = `${process.env.FRONTEND_URL}auth-success?${query}`;
+      console.log("🍎 Redirecting Apple user to:", redirectUrl);
       res.redirect(redirectUrl);
+
+      // const userData = {
+      //   _id: user._id,
+      //   email: user.email,
+      //   fname: user.fname,
+      //   lname: user.lname,
+      //   no_of_images_left: user.no_of_images_left,
+      //   subscribed_monthly: user.subscribed_monthly,
+      //   subscribed_yearly: user.subscribed_yearly,
+      // };
+
+      // console.log("📦 Prepared userData for redirect:", userData);
+
+      // // Convert user data to URL parameters
+      // const query = new URLSearchParams(userData).toString();
+      // const redirectUrl = `${frontendUrl}?${query}`;
+
+      // console.log("🔁 Redirecting to frontend:", redirectUrl);
+      // console.log("====================================\n");
+
+      // res.redirect(redirectUrl);
     } catch (err) {
       console.error("❌ Apple callback route error:", err);
       console.error("Stack trace:", err.stack);

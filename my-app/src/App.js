@@ -12,6 +12,7 @@ import Footer from "./Components/Home/Components/Footer";
 import ImageGallery from "./Components/ImageGallery/ImageGallery";
 import Chatgpt from './Components/Chatgpt/Chatgpt'
 import Profile from './Components/Profile/Profile'
+import AuthSuccess from "./Components/Login/AuthSuccess";
 
 function App() {
   // const location = useLocation();
@@ -133,6 +134,11 @@ function App() {
           <Route path="/gallery" element={<ImageGallery />} />
           <Route path="/chat-ai" element={<Chatgpt />} />
           <Route path="/user" element={<Profile />} />
+          <Route
+  path="/auth-success"
+  element={<AuthSuccess setLoggedIn={setLoggedIn} setUserState={setUserState} />}
+/>
+
 
           {/* Terms of Service Route */}
           <Route path="/terms-of-service" element={<TermsOfService />} />
