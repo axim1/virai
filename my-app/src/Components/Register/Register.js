@@ -226,9 +226,77 @@ const Register = () => {
           <NavLink to="/login" style={{ color: '#2E8B57' }} className="mt-3 d-block text-center">
           Already registered? Login
         </NavLink>
+
+
+
+
         </form>
+        
 
 
+       < div style={{ marginTop:'30px',textAlign:'center',display:'flex', flexDirection:'row', alignItems:'center', flexWrap:'wrap',justifyContent:'space-evenly',gap:'100px', maWidth:'800px'}} >
+       <button
+  onClick={() => {
+    window.location.href = `${process.env.REACT_APP_API_URL}auth/google`;
+  }}
+  style={{
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    backgroundColor: 'white',
+        width: '200px',
+
+    color: '#5f6368',
+    border: '0px solid #dadce0',
+    padding: '10px 16px',
+    borderRadius: '40px',
+    fontSize: '14px',
+    fontWeight: 500,
+    fontFamily: 'Poppins, sans-serif',
+    cursor: 'pointer',
+    // margin: '50px',
+    boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
+  }}
+>
+  <img
+    src="https://developers.google.com/identity/images/g-logo.png"
+    alt="Google"
+    style={{ width: '18px', height: '18px' }}
+  />
+  Sign in with Google
+</button>
+
+<button
+  onClick={() => {
+    window.location.href = `${process.env.REACT_APP_API_URL}auth/apple`;
+  }}
+  style={{
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    backgroundColor: 'black',
+    width: '200px',
+    color: 'white',
+    border: '0px solid #dadce0',
+    padding: '10px 16px',
+    borderRadius: '40px',
+    fontSize: '14px',
+    fontWeight: 500,
+    fontFamily: 'Poppins, sans-serif',
+    cursor: 'pointer',
+    // margin: '50px',
+    boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
+  }}
+>
+  <img
+    src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg"
+    alt="Apple"
+    style={{ width: '18px', height: '18px', filter: 'invert(1)' }}
+  />
+  Sign in with Apple
+</button>
+
+       </div>
       </div>
     </>
   );
