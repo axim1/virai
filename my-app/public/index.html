@@ -24,7 +24,54 @@
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
     <title>React App</title>
-  </head>
+  <script>
+    (function () {
+      function scrollTop() {
+        try { window.scrollTo({ top: 0, left: 0, behavior: 'auto' }); } catch (e) { window.scrollTo(0, 0); }
+      }
+      function pathOf(u) {
+        try {
+          var url = typeof u === 'string' ? new URL(u, window.location.href) : (u || window.location);
+          return url.pathname + url.search;
+        } catch (e) {
+          return window.location.pathname + window.location.search;
+        }
+      }
+      var lastPath = pathOf(window.location.href);
+      var origPushState = history.pushState;
+      var origReplaceState = history.replaceState;
+      if (origPushState) {
+        history.pushState = function (state, title, url) {
+          var nextPath = pathOf(url);
+          var ret = origPushState.apply(this, arguments);
+          if (nextPath !== lastPath) {
+            scrollTop();
+            lastPath = nextPath;
+          }
+          return ret;
+        };
+      }
+      if (origReplaceState) {
+        history.replaceState = function (state, title, url) {
+          var nextPath = pathOf(url);
+          var ret = origReplaceState.apply(this, arguments);
+          if (nextPath !== lastPath) {
+            scrollTop();
+            lastPath = nextPath;
+          }
+          return ret;
+        };
+      }
+      window.addEventListener('popstate', function () {
+        var currentPath = pathOf(window.location.href);
+        if (currentPath !== lastPath) {
+          scrollTop();
+          lastPath = currentPath;
+        }
+      });
+    })();
+  </script>
+</head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>

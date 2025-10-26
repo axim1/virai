@@ -231,6 +231,7 @@ const Navbar = ({ loggedIn, setLoggedIn = () => {}, onHomeClick = () => {}, acti
       <button
         className={styles.mobileMenuIcon}
         onClick={toggleMenu}
+        style={{ outline: 'none' , border: 'none', background: 'transparent'}}
         aria-label="Toggle menu"
         aria-controls="mobile-nav"
         aria-expanded={menuOpen}
