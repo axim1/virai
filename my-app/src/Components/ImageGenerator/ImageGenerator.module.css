@@ -773,6 +773,60 @@ cursor: pointer;
   /* width:   ; */
 }
 
+/* Extra-narrow screens: keep prompt centered and full-width */
+@media (max-width: 463px) {
+  .generatorContainer {
+    padding: 16px;
+    align-items: stretch;
+  }
+  .leftSection,
+  .topInputContainer,
+  .inputContainer {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    box-sizing: border-box;
+  }
+  /* Keep left column children uniform width and centered */
+  .leftSection {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .leftSection > * {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+  .topInputContainer,
+  .inputContainer {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  /* Ensure inner elements do not force overflow */
+  .topInputContainer * {
+    max-width: 100%;
+    min-width: 0;
+  }
+  .dropdownMobileOnly {
+    margin-left: 0;
+    margin-right: 0;
+    width: 100% !important;
+  }
+  .dropdownMobileOnly > * {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  /* Make the green Generate button span full width */
+  .generateButton {
+    width: 100% !important;
+    display: block;
+  }
+}
+
 .dropdownHeader {
   background-color: #3b7d23;
   color: white;
@@ -1117,14 +1171,34 @@ line-height: normal;
 text-transform: capitalize;
 }
 
+/* Visibility helpers for dropdown placement */
+.dropdownDesktopOnly { display: block; width: 100%; margin: 0; padding: 0; }
+.dropdownMobileOnly { display: none;width: 100%; margin: 0; padding: 0; }
+
+/* Desktop alignment fixes */
+.topToolBar { margin-top: 0; }
+.rightSection { margin-top: 0; }
+
+@media (min-width: 769px) {
+  .rightSection > .dropdownDesktopOnly { margin-top: 0 !important; }
+}
+
 /* Responsive for Mobile (max-width: 768px) */
 @media (max-width: 768px) {
   .generatorContainer{
     flex-direction:column ;
   }
-  .rightSection{
+  /* Ensure prompt/controls show before image preview on mobile */
+  .leftSection{
+    order: 1;
     width: 100%;
     max-width: 100%;
+  }
+  .rightSection{
+    order: 2;
+    width: 100%;
+    max-width: 100%;
+    margin-top: 16px;
   }
   .topInputContainer {
     width: 100%;
@@ -1162,6 +1236,10 @@ text-transform: capitalize;
     font-size: 1em;
     padding: 10px; /* Adjust padding for mobile */
   }
+
+  /* Show mobile dropdown at top; hide desktop one */
+  .dropdownDesktopOnly { display: none; }
+  .dropdownMobileOnly { display: block; margin-bottom: 12px; }
 }
 
 .slider {
@@ -1219,4 +1297,50 @@ text-transform: capitalize;
 .emptyState p {
   font-size: 1rem;
   color: #777;
+}
+
+/* Ultra-small screens: unify widths and center left column */
+@media (max-width: 463px) {
+  .generatorContainer { padding: 12px; }
+  .leftSection {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  /* Make dropdown, prompt card, and advanced settings equal width */
+  .leftSection > .dropdownMobileOnly,
+  .leftSection > .topInputContainer,
+  .leftSection > .inputContainer {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+  }
+  /* Stretch inner content so nothing appears narrower */
+  .topInputContainer,
+  .inputContainer {
+    align-items: stretch !important;
+  }
+  .topInputContainer > *,
+  .inputContainer > * {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  .topInputContainer :where(textarea, input[type="text"], input[type="number"], select) {
+    width: 100% !important;
+  }
+  /* Full-width generate button */
+  .generateButton { width: 100% !important; display: block; }
+  /* Catch-all: any Container-named wrappers should fill width */
+  .leftSection [class*="Container"] {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: 0 !important;
+
+    margin-right: 0 !important;
+  }
+    .rightSection{
+    width: 100%;
+    min-width: 100px;
+  }
 }

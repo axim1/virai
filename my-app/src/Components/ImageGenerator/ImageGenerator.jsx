@@ -865,7 +865,18 @@ const formatApiType = (apiType) => {
             ))}
           </div>
         </div> */}
-        <div className={styles.topInputContainer}>
+          {/* Mobile-only dropdown at the very top of left section */}
+          <div className={styles.dropdownMobileOnly}>
+            <Dropdown
+              apiType={apiType}
+              apiTypes={apiTypes}
+              formatApiType={formatApiType}
+              icons={icons}
+              iconsbottom={iconsbottom}
+              handleApiTypeChange={handleApiTypeChange}
+            />
+          </div>
+          <div className={styles.topInputContainer}>
 
 
 
@@ -1218,15 +1229,17 @@ Coming soon ...
         </div>
 
         <div className={styles.rightSection}>
-          {/* <div className='dropdown-mobile'> */}
-<Dropdown
-  apiType={apiType} // ✅ raw string like 'text-to-image'
-  apiTypes={apiTypes}
-  formatApiType={formatApiType}
-  icons={icons}
-  iconsbottom={iconsbottom}
-  handleApiTypeChange={handleApiTypeChange}
-/>
+          {/* Desktop-only dropdown in the right section */}
+          {/* <div className={styles.dropdownDesktopOnly}> */}
+            {/* <Dropdown
+              apiType={apiType}
+              apiTypes={apiTypes}
+              formatApiType={formatApiType}
+              icons={icons}
+              iconsbottom={iconsbottom}
+              handleApiTypeChange={handleApiTypeChange}
+            /> */}
+          {/* </div> */}
 
           {/* </div> */}
           <div className={styles.topToolBar}>

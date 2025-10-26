@@ -166,23 +166,23 @@
 
 .imageItem {
   background: linear-gradient(135deg, #2a2a2a 0%, #333 100%);
-  border: 1px solid #444;
+  border: none;
   border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  /* box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4); */
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
   position: relative;
 }
 
 .imageItem:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6);
-  border-color: #2E8B57;
+  /* transform: translateY(-8px); */
+  /* box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6); */
+  /* border-color: #2E8B57; */
 }
 
 .imageItem:hover .quickActions {
   opacity: 1;
-  transform: translateY(0);
+  /* transform: translateY(0); */
 }
 
 
