@@ -394,6 +394,11 @@
   }
 }
 
+/* Global typing animation for inline styles */
+:global(.typing-indicator span) {
+  animation: typing 1.4s infinite ease-in-out;
+}
+
 /* Input Area */
 .inputArea {
   background: linear-gradient(135deg, #333 0%, #2a2a2a 100%);
