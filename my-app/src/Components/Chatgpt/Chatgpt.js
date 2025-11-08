@@ -3,36 +3,32 @@ import axios from 'axios';
 import cx from 'classnames';
 import styles from './Chatgpt.module.css';
 
-// Image assets (Figma export)
-const imgTexture = "http://localhost:3845/assets/a94c83d1539778b55baf631c6aea127af3ff4bab.png";
-const imgPricing011 = "http://localhost:3845/assets/0007086edb27dbb802e01f50d55c69f8f779b9eb.svg";
-const imgPolygon3 = "http://localhost:3845/assets/008cce32b90973ec1dbe244e70cfee8bc2307f27.svg";
-const imgVituartAiWordMarkVector1 = "http://localhost:3845/assets/83dc0e4c52fe83ab4b5094f07ce3d5a251dbba84.svg";
-
-const imgNewChatIcon = "http://localhost:3845/assets/89cfb4b6af555971af1bab48287fcd45c7d4756c.svg";
-const imgVector = "http://localhost:3845/assets/e18085e76b3c562b6cb2da170805c9f098ca3138.svg";
-
-const imgGroup = "http://localhost:3845/assets/2e73036addfdb9c305eb9b667ee929c8ac10360e.svg";
-const imgGroup1 = "http://localhost:3845/assets/75b635b62abb72d385cb09f812bda73ddffdd085.svg";
-const imgGroup2 = "http://localhost:3845/assets/9a4856d8f163142fbc6f34089b0899b8f74aa1a4.svg";
-const imgGroup3 = "http://localhost:3845/assets/414f3f61ead6a2ac6f9ee6fdddc98a46a7adbf82.svg";
-const imgGroup4 = "http://localhost:3845/assets/b38a222fbd5b55013406900471e00440724cc06a.svg";
-const imgGroup5 = "http://localhost:3845/assets/9305822bc81ee3029103920ff9a61e5b46cf53c2.svg";
-const imgGroup6 = "http://localhost:3845/assets/70bf581384bf53147e7b6802601eff55d6c3e10b.svg";
-const imgGroup7 = "http://localhost:3845/assets/1b4af2a0d20dcb84929fdc7a9aa119f00532f252.svg";
-const imgGroup8 = "http://localhost:3845/assets/aab2c68b1d9dba187c18fa0fbdd22679ff9534c4.svg";
-const imgGroup9 = "http://localhost:3845/assets/2bc973069a5967b8b3fa8d3895216de0afe26a47.svg";
-const imgGroup10 = "http://localhost:3845/assets/9b0b9fdd031f6fcf9bcb1177b7b144e1c075af76.svg";
-const imgGroup11 = "http://localhost:3845/assets/81853a9114e49420254b06b9e82479f08399f185.svg";
-const imgGroup12 = "http://localhost:3845/assets/d3ca43e139547a8bb6d2b12f19fbd7fad3d7f9d8.svg";
-
-const imgVector1 = "http://localhost:3845/assets/a65c85a9ce7d6909ec69714c25d51efaa35fba17.svg";
-const imgEllipse6 = "http://localhost:3845/assets/f4a89a9066001e0be74e140166bb289b565c410c.svg";
-const imgEllipse7 = "http://localhost:3845/assets/b3ebe70060b10455266854f8ff5f6f6991a42a71.svg";
-const imgGroup88 = "http://localhost:3845/assets/30d16caf5140e55b9db3dbe0c4da8666ee1eeb90.svg";
-const imgGroup91 = "http://localhost:3845/assets/9ced641531769791108b261cfc4eaa5b02a31d21.svg";
-const imgCheckmark1 = "http://localhost:3845/assets/7f1ce1a710ffa00a474a8d2d823f968aba98c9bf.svg";
-const imgArrow2 = "http://localhost:3845/assets/5b576b90578aa41c1639ff6bf377e04595d41ca4.svg";
+// Local image assets
+import imgTexture from '../../assets/chatgpt-icons/texture.png';
+import imgPricing011 from '../../assets/chatgpt-icons/Login/pricing-01 1.svg';
+import imgPolygon3 from '../../assets/chatgpt-icons/Polygon 3.svg';
+import imgVituartAiWordMarkVector1 from '../../assets/chatgpt-icons/VituartAI WordMark Vector 1.svg';
+import imgNewChatIcon from '../../assets/chatgpt-icons/new chat icon.svg';
+import imgVector from '../../assets/chatgpt-icons/Vector.svg';
+import iconProjects from '../../assets/chatgpt-icons/Group-12.svg';
+import iconTemplates from '../../assets/chatgpt-icons/Group-1.svg';
+import iconDocuments from '../../assets/chatgpt-icons/Group-7.svg';
+import iconCommunity from '../../assets/chatgpt-icons/Group-6.svg';
+import iconSettings from '../../assets/chatgpt-icons/Group-5.svg';
+import iconHelp from '../../assets/chatgpt-icons/Group-4.svg';
+import iconUpgrade from '../../assets/chatgpt-icons/Group-2.svg';
+import iconAttach from '../../assets/chatgpt-icons/Group-9.svg';
+import iconVoice from '../../assets/chatgpt-icons/Group-8.svg';
+import iconBrowse from '../../assets/chatgpt-icons/Group-3.svg';
+import imgGroup10 from '../../assets/chatgpt-icons/Group-10.svg';
+import imgGroup11 from '../../assets/chatgpt-icons/Group-11.svg';
+import imgVector1 from '../../assets/chatgpt-icons/Vector-1.svg';
+import imgEllipse6 from '../../assets/chatgpt-icons/Ellipse 6.svg';
+import imgEllipse7 from '../../assets/chatgpt-icons/Ellipse 6-1.svg';
+import imgGroup88 from '../../assets/chatgpt-icons/Group 88.svg';
+import imgGroup91 from '../../assets/chatgpt-icons/Group 91.svg';
+import imgCheckmark1 from '../../assets/chatgpt-icons/checkmark 1.svg';
+import imgArrow2 from '../../assets/chatgpt-icons/Arrow 2.svg';
 
 const apiUrl = process.env.REACT_APP_API_URL;
 
@@ -46,6 +42,7 @@ function Chatgpt() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [editingTitle, setEditingTitle] = useState(null);
   const [editTitle, setEditTitle] = useState('');
+  const [promoState, setPromoState] = useState('enter'); // enter | idle | exit | hidden
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
@@ -62,6 +59,22 @@ function Chatgpt() {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
     }
   }, [messages]);
+
+  useEffect(() => {
+    if (promoState === 'enter') {
+      const timer = setTimeout(() => setPromoState('idle'), 40);
+      return () => clearTimeout(timer);
+    }
+    return undefined;
+  }, [promoState]);
+
+  useEffect(() => {
+    if (promoState === 'exit') {
+      const timer = setTimeout(() => setPromoState('hidden'), 400);
+      return () => clearTimeout(timer);
+    }
+    return undefined;
+  }, [promoState]);
 
   const loadChatHistory = async (userId) => {
     try {
@@ -97,6 +110,11 @@ function Chatgpt() {
     } catch (error) {
       console.error('Error loading chat:', error);
     }
+  };
+
+  const handlePromoDismiss = () => {
+    if (promoState === 'exit' || promoState === 'hidden') return;
+    setPromoState('exit');
   };
 
   const sendMessage = async () => {
@@ -199,6 +217,17 @@ function Chatgpt() {
     return date.toLocaleDateString();
   };
 
+  const promoIsRendered = promoState !== 'hidden';
+  const mainGridClass = cx(
+    styles.mainGrid,
+    promoIsRendered ? styles.mainGridWithPromo : styles.mainGridNoPromo
+  );
+  const promoPanelClass = cx(
+    styles.promoPanel,
+    promoState === 'enter' && styles.promoEntering,
+    promoState === 'exit' && styles.promoExiting
+  );
+
   if (!user) {
     return (
       <div className={styles.loginPrompt}>
@@ -242,12 +271,14 @@ function Chatgpt() {
       </header>
 
       {/* MAIN GRID */}
-      <main className={styles.mainGrid}>
+      <main className={mainGridClass}>
         {/* LEFT SIDEBAR */}
         <aside className={cx(styles.sidebar, !sidebarOpen && styles.sidebarCollapsed)}>
           <button className={styles.newChat} onClick={createNewChat}>
-            <img src={imgNewChatIcon} alt="" />
-            <span>New Chat</span>
+            <span className={styles.newChatLabel}>New Chat</span>
+            <span className={styles.newChatIcon}>
+              <img src={imgNewChatIcon} alt="" />
+            </span>
           </button>
 
           <div className={styles.sectionDivider} />
@@ -256,8 +287,9 @@ function Chatgpt() {
             <h3 className={styles.sectionTitle}>History</h3>
 
             <div className={styles.searchBox}>
-              <img src={imgVector} alt="" />
               <input type="text" placeholder="Search chats" />
+                <img src={imgVector1} alt="" />  
+
             </div>
 
             <div className={styles.historyList}>
@@ -312,22 +344,23 @@ function Chatgpt() {
             </div>
           </section>
 
-          <div className={styles.sectionDivider} />
 
           <nav className={styles.quickNav} aria-label="Quick nav">
-            <button className={styles.quickItem}><img src={imgGroup} alt="" />Projects</button>
-            <button className={styles.quickItem}><img src={imgGroup1} alt="" />Templates</button>
-            <button className={styles.quickItem}><img src={imgGroup2} alt="" />Documents</button>
-            <button className={styles.quickItem}><img src={imgGroup3} alt="" />Community</button>
+            <button className={styles.quickItem}><img src={iconProjects} alt="" />Projects</button>
+            <button className={styles.quickItem}><img src={iconTemplates} alt="" />Templates</button>
+            <button className={styles.quickItem}><img src={iconDocuments} alt="" />Documents</button>
+            <button className={styles.quickItem}><img src={iconCommunity} alt="" />Community</button>
           </nav>
 
-          <div className={styles.sectionDivider} />
 
-          <section>
+          <nav className={styles.quickNav} aria-label="Quick nav">
             <h3 className={styles.sectionTitle}>Settings &amp; Help</h3>
-            <button className={styles.quickItem}><img src={imgGroup4} alt="" />Settings</button>
-            <button className={styles.quickItem}><img src={imgGroup5} alt="" />Help</button>
-          </section>
+                      <div className={styles.sectionDivider} />
+
+            <button className={styles.quickItem}><img src={iconSettings} alt="" />Settings</button>
+            <button className={styles.quickItem}><img src={iconHelp} alt="" />Help</button>
+          </nav>
+
         </aside>
 
         {/* CENTER CHAT */}
@@ -337,7 +370,7 @@ function Chatgpt() {
               {currentChat ? currentChat.title : 'VirtuartAI Assistant'}
             </div>
             <button className={styles.upgradeBtn}>
-              <img src={imgGroup12} alt="" />
+              <img src={iconUpgrade} alt="" />
               Upgrade
             </button>
           </header>
@@ -386,7 +419,7 @@ function Chatgpt() {
                   </button>
 
                   <button
-                    className={cx(styles.quickCard, styles.quickPrimary)}
+                    className={styles.quickCard}
                     onClick={() => {
                       const el = document.querySelector('input[placeholder="Ask me anything else..."]');
                       if (el) el.focus();
@@ -453,44 +486,55 @@ function Chatgpt() {
                 aria-label="Send message"
                 title="Send"
               >
-                <img src={imgVector1} alt="" />
+                <img src={imgVector} alt="" />
               </button>
             </div>
 
             <div className={styles.toolbar}>
-              <button className={styles.toolBtn}><img src={imgGroup9} alt="" />Attach</button>
-              <button className={styles.toolBtn}><img src={imgGroup8} alt="" />Voice Message</button>
-              <button className={styles.toolBtn}><img src={imgGroup7} alt="" />Browse Prompts</button>
+              <button className={styles.toolBtn}><img src={iconAttach} alt="" />Attach</button>
+              <button className={styles.toolBtn}><img src={iconVoice} alt="" />Voice Message</button>
+              <button className={styles.toolBtn}><img src={iconBrowse} alt="" />Browse Prompts</button>
             </div>
           </footer>
         </section>
 
         {/* RIGHT PANEL */}
-        <aside className={styles.promoPanel}>
-          <img src={imgTexture} alt="" className={styles.promoTexture} />
-          <div className={styles.promoInner}>
-            <h3 className={styles.promoKick}>Start your 7-day free trial</h3>
-            <p className={styles.promoLead}>
-              AI-powered creative toolkit for<br />
-              <strong>individuals &amp; teams.</strong>
-            </p>
-            <div className={styles.promoPlan}>PRO</div>
-            <div className={styles.promoSub}>Maximize creative efficiency</div>
-            <div className={styles.promoPrice}>€150/mo.</div>
-
-            <ul className={styles.promoList}>
-              <li><img src={imgCheckmark1} alt="" />Standard photo and video editing tools</li>
-              <li><img src={imgCheckmark1} alt="" />5 credits per week for generative AI tools</li>
-              <li><img src={imgCheckmark1} alt="" />Free assets & customization templates</li>
-              <li><img src={imgCheckmark1} alt="" />Access on web & mobile</li>
-              <li><img src={imgCheckmark1} alt="" />100 MB cloud storage</li>
-            </ul>
-
-            <button className={styles.promoCTA}>
-              Try for free <img src={imgArrow2} alt="" />
+        {promoIsRendered && (
+          <aside className={promoPanelClass}>
+            <button
+              className={styles.promoDismiss}
+              type="button"
+              onClick={handlePromoDismiss}
+              aria-label="Hide promotional banner"
+              title="Hide this offer"
+            >
+              ×
             </button>
-          </div>
-        </aside>
+            <img src={imgTexture} alt="" className={styles.promoTexture} />
+            <div className={styles.promoInner}>
+              <h3 className={styles.promoKick}>Start your 7-day free trial</h3>
+              <p className={styles.promoLead}>
+                AI-powered creative toolkit for<br />
+                <strong>individuals &amp; teams.</strong>
+              </p>
+              <div className={styles.promoPlan}>PRO</div>
+              <div className={styles.promoSub}>Maximize creative efficiency</div>
+              <div className={styles.promoPrice}>€150/mo.</div>
+
+              <ul className={styles.promoList}>
+                <li><img src={imgCheckmark1} alt="" />Standard photo and video editing tools</li>
+                <li><img src={imgCheckmark1} alt="" />5 credits per week for generative AI tools</li>
+                <li><img src={imgCheckmark1} alt="" />Free assets & customization templates</li>
+                <li><img src={imgCheckmark1} alt="" />Access on web & mobile</li>
+                <li><img src={imgCheckmark1} alt="" />100 MB cloud storage</li>
+              </ul>
+
+              <button className={styles.promoCTA}>
+                Try for free <img src={imgArrow2} alt="" />
+              </button>
+            </div>
+          </aside>
+        )}
       </main>
     </div>
   );

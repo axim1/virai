@@ -81,6 +81,7 @@ function ImageGenerator({ onGenerateImage }) {
   const [strength, setStrength] = useState(0.75);
   const [ModOrRep, setModOrRep] = useState('Replace') // state for image enhancement to check if image is to be modified or replaced
   const [isImageUploaded, setIsImageUploaded] = useState(false);
+  const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 
   useEffect(() => {
@@ -185,48 +186,42 @@ function ImageGenerator({ onGenerateImage }) {
 
       const endTime = Date.now() + 100000; // 100 sec timeout
 
-      // Step 2: Polling logic
       const pollResult = async () => {
-        return new Promise((resolve, reject) => {
-          const intervalId = setInterval(async () => {
-            if (Date.now() > endTime) {
-              clearInterval(intervalId);
-              return reject(new Error('Timeout while waiting for sketch-to-image result'));
-            }
-
-            try {
-              const pollRes = await axios.get(`${apiUrl}api/serverless/sketch-to-image-status/${jobId}`, {
-                params: {
-                  userId,
-                  prompt: promptText,
-                  negative_prompt: negativePromptText,
-                  width: imageWidth,
-                  height: imageHeight,
-                  steps: 25,
-                  guidance_scale: scale,
-
-                  scheduler: 'normal',
-                  clip_skip: 0,
-                  style: styleType,
-                  model_xl: false
-                }
-
-              });
-
-              if (pollRes.status === 202) return; // still processing
-
-              if (pollRes.status === 200 && pollRes.data.imageUrls) {
-                clearInterval(intervalId);
-                resolve(pollRes.data.imageUrls);
+        while (Date.now() <= endTime) {
+          try {
+            const pollRes = await axios.get(`${apiUrl}api/serverless/sketch-to-image-status/${jobId}`, {
+              params: {
+                userId,
+                prompt: promptText,
+                negative_prompt: negativePromptText,
+                width: imageWidth,
+                height: imageHeight,
+                steps: 25,
+                guidance_scale: scale,
+                scheduler: 'normal',
+                clip_skip: 0,
+                style: styleType,
+                model_xl: false
               }
+            });
 
-            } catch (err) {
-              if (err.response && err.response.status === 202) return;
-              clearInterval(intervalId);
-              reject(err);
+            if (pollRes.status === 202) {
+              await sleep(3000);
+              continue;
             }
-          }, 3000);
-        });
+
+            if (pollRes.status === 200 && pollRes.data.imageUrls) {
+              return pollRes.data.imageUrls;
+            }
+          } catch (err) {
+            if (err.response && err.response.status === 202) {
+              await sleep(3000);
+              continue;
+            }
+            throw err;
+          }
+        }
+        throw new Error('Timeout while waiting for sketch-to-image result');
       };
 
       const imageUrls = await pollResult();

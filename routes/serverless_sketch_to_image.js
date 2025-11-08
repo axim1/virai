@@ -10,6 +10,7 @@ const upload = multer({ dest: 'uploads/' });
 
 const RUNPOD_ENDPOINT = "https://api.runpod.ai/v2/e9h6mg32jrf3ol/run";
 const RUNPOD_API_KEY = "Bearer rpa_OPBINZKI3UYA9HX0YGSQ3ZMNPR1KMFT0PR0HSC7Qvtvij7";
+const sanitizeJobId = (jobId = '') => jobId.replace(/[^a-zA-Z0-9-_]/g, '');
 
 // Convert file to base64
 function toBase64(filePath) {
@@ -140,34 +141,49 @@ router.get('/sketch-to-image-status/:job_id', async (req, res) => {
         imageCount: output.images.length
       });
       const formattedImages = output.images.map(img => `data:image/png;base64,${img}`);
+      let skippedPersist = false;
       // Save to DB if userId is provided
       if (req.query.userId) {
-        for (const img of output.images) {
-          const buffer = Buffer.from(img, 'base64');
-              const fileName = `image-${Date.now()}.png`;
-              const savePath = path.join('/var/www/clients/client0/web1/web/images', fileName);
+        const existing = await GeneratedImage.exists({ jobId: job_id });
+        if (existing) {
+          skippedPersist = true;
+          console.log('♻️  [SKETCH-TO-IMAGE-STATUS] Job already persisted, skipping duplicate save:', {
+            jobId: job_id
+          });
+        } else {
+          const safeJobId = sanitizeJobId(job_id) || Date.now().toString();
+          for (const [index, img] of output.images.entries()) {
+            const buffer = Buffer.from(img, 'base64');
+            const fileName = `image-${safeJobId}-${index}.png`;
+            const savePath = path.join('/var/www/clients/client0/web1/web/images', fileName);
+            if (!fs.existsSync(savePath)) {
               fs.writeFileSync(savePath, buffer);
-              console.log('image url : ', fileName)
-          await GeneratedImage.create({
-                        userId: req.query.userId,
-            // image: buffer,
-      imageUrl: `/images/${fileName}`,
-            prompt: req.query.prompt || '',
-            negativePrompt: req.query.negative_prompt || '',
-            width: parseInt(req.query.width) || 512,
-            height: parseInt(req.query.height) || 512,
-            steps: parseInt(req.query.steps) || 25,
-            guidanceScale: parseFloat(req.query.guidance_scale) || 7.5,
-            seed: parseInt(req.query.seed) || Math.floor(Math.random() * 1000000000),
-            scheduler: req.query.scheduler || 'normal',
-            clipSkip: parseInt(req.query.clip_skip) || 0,
-            style: req.query.style || 'default',
-            model: req.query.model_xl === 'true' ? 'XL' : 'default',
-            type: 'image'
-           });
+            }
+            console.log('image url : ', fileName);
+            await GeneratedImage.create({
+              userId: req.query.userId,
+              jobId: job_id,
+              imageUrl: `/images/${fileName}`,
+              prompt: req.query.prompt || '',
+              negativePrompt: req.query.negative_prompt || '',
+              width: parseInt(req.query.width) || 512,
+              height: parseInt(req.query.height) || 512,
+              steps: parseInt(req.query.steps) || 25,
+              guidanceScale: parseFloat(req.query.guidance_scale) || 7.5,
+              seed: parseInt(req.query.seed) || Math.floor(Math.random() * 1000000000),
+              scheduler: req.query.scheduler || 'normal',
+              clipSkip: parseInt(req.query.clip_skip) || 0,
+              style: req.query.style || 'default',
+              model: req.query.model_xl === 'true' ? 'XL' : 'default',
+              type: 'image'
+            });
+          }
         }
       }
-      return res.status(200).json({ imageUrls: formattedImages });
+      return res.status(200).json({
+        imageUrls: formattedImages,
+        persisted: !skippedPersist
+      });
     }
 
     console.warn('⚠️ [SKETCH-TO-IMAGE-STATUS] Job completed but no images found:', {

@@ -122,6 +122,7 @@ subscriptionSchema.virtual('users', {
 const GeneratedImageSchema = new mongoose.Schema({
   image: Buffer,
   imageUrl: String, // base64 or external URL if stored on S3 or similar
+  jobId: { type: String, index: true },
   prompt: String,
   negativePrompt: String,
   width: Number,
