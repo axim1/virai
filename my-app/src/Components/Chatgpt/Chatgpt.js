@@ -33,17 +33,41 @@ import imgArrow2 from '../../assets/chatgpt-icons/Arrow 2.svg';
 const apiUrl = process.env.REACT_APP_API_URL;
 
 function Chatgpt() {
+  const detectMobileViewport = () =>
+    (typeof window !== 'undefined' ? window.innerWidth < 900 : false);
+
   const [input, setInput] = useState('');
   const [currentChat, setCurrentChat] = useState(null);
   const [chatHistory, setChatHistory] = useState([]);
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [user, setUser] = useState(null);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [isMobileLayout, setIsMobileLayout] = useState(detectMobileViewport);
+  const [sidebarOpen, setSidebarOpen] = useState(() => !detectMobileViewport());
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [editingTitle, setEditingTitle] = useState(null);
   const [editTitle, setEditTitle] = useState('');
   const [promoState, setPromoState] = useState('enter'); // enter | idle | exit | hidden
   const messagesEndRef = useRef(null);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+
+    const handleResize = () => {
+      const mobile = window.innerWidth < 900;
+      setIsMobileLayout(mobile);
+      if (mobile) {
+        setSidebarOpen(false);
+      } else {
+        setSidebarOpen(true);
+        setMobileNavOpen(false);
+      }
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem('user'));
@@ -96,6 +120,9 @@ function Chatgpt() {
       setCurrentChat(newChat);
       setMessages([]);
       setChatHistory(prev => [newChat, ...prev]);
+      if (isMobileLayout) {
+        setSidebarOpen(false);
+      }
     } catch (error) {
       console.error('Error creating new chat:', error);
     }
@@ -107,6 +134,9 @@ function Chatgpt() {
       const chat = data.chat;
       setCurrentChat(chat);
       setMessages(chat.messages || []);
+      if (isMobileLayout) {
+        setSidebarOpen(false);
+      }
     } catch (error) {
       console.error('Error loading chat:', error);
     }
@@ -115,6 +145,12 @@ function Chatgpt() {
   const handlePromoDismiss = () => {
     if (promoState === 'exit' || promoState === 'hidden') return;
     setPromoState('exit');
+  };
+
+  const handleNavSelect = () => {
+    if (isMobileLayout) {
+      setMobileNavOpen(false);
+    }
   };
 
   const sendMessage = async () => {
@@ -227,6 +263,12 @@ function Chatgpt() {
     promoState === 'enter' && styles.promoEntering,
     promoState === 'exit' && styles.promoExiting
   );
+  const navItems = ['Home', 'AI Tools', 'Creation', 'Gallery', 'Pricing', 'FAQ'];
+  const sidebarClasses = cx(
+    styles.sidebar,
+    !isMobileLayout && !sidebarOpen && styles.sidebarCollapsed,
+    isMobileLayout && sidebarOpen && styles.sidebarMobileOpen
+  );
 
   if (!user) {
     return (
@@ -242,38 +284,102 @@ function Chatgpt() {
       {/* HEADER */}
       <header className={styles.header}>
         <div className={styles.headerLeft}>
+          {isMobileLayout && (
+            <button
+              type="button"
+              className={cx(styles.headerToggle, mobileNavOpen && styles.headerToggleActive)}
+              onClick={() => setMobileNavOpen(prev => !prev)}
+              aria-expanded={mobileNavOpen}
+              aria-controls="chatgpt-primary-nav"
+            >
+              <span className={styles.srOnly}>Toggle navigation</span>
+              <span className={styles.headerToggleBar} />
+              <span className={styles.headerToggleBar} />
+              <span className={styles.headerToggleBar} />
+            </button>
+          )}
           <img src={imgVituartAiWordMarkVector1} alt="VituartAI" className={styles.brand} />
         </div>
 
-        <nav className={styles.headerCenter} aria-label="Primary">
-          <button className={styles.navLink}>Home</button>
-          <button className={styles.navLink}>AI Tools</button>
-          <button className={styles.navLink}>Creation</button>
-          <button className={styles.navLink}>Gallery</button>
-          <button className={styles.navLink}>Pricing</button>
-          <button className={styles.navLink}>FAQ</button>
+        <nav
+          id="chatgpt-primary-nav"
+          className={cx(
+            styles.headerCenter,
+            isMobileLayout && styles.mobileNavPanel,
+            isMobileLayout && mobileNavOpen && styles.mobileNavPanelOpen
+          )}
+          aria-label="Primary"
+        >
+          {navItems.map(item => (
+            <button key={item} className={styles.navLink} onClick={handleNavSelect}>
+              {item}
+            </button>
+          ))}
           <span className={styles.navCurrent}>Chat AI</span>
         </nav>
 
         <div className={styles.headerRight}>
-          <button
-            className={styles.accountBtn}
-            onClick={() => setSidebarOpen(o => !o)}
-            aria-pressed={sidebarOpen}
-            title={sidebarOpen ? 'Hide sidebar' : 'Show sidebar'}
-          >
-            {sidebarOpen ? 'Hide' : 'Show'} Sidebar
-          </button>
-          <span className={styles.creditCount}>100</span>
-          <img src={imgPricing011} alt="Credits" className={styles.creditIcon} />
-          <img src={imgPolygon3} alt="Open" className={styles.caret} />
+          {isMobileLayout ? (
+            <>
+              <button
+                type="button"
+                className={styles.mobileActionBtn}
+                onClick={() => setSidebarOpen(prev => !prev)}
+                aria-controls="chatHistoryDrawer"
+                aria-expanded={sidebarOpen}
+              >
+                {sidebarOpen ? 'Hide' : 'History'}
+              </button>
+              <span className={styles.creditCount}>100</span>
+              <img src={imgPricing011} alt="Credits" className={styles.creditIcon} />
+            </>
+          ) : (
+            <>
+              <button
+                className={styles.accountBtn}
+                onClick={() => setSidebarOpen(o => !o)}
+                aria-pressed={sidebarOpen}
+                title={sidebarOpen ? 'Hide sidebar' : 'Show sidebar'}
+              >
+                {sidebarOpen ? 'Hide' : 'Show'} Sidebar
+              </button>
+              <span className={styles.creditCount}>100</span>
+              <img src={imgPricing011} alt="Credits" className={styles.creditIcon} />
+              <img src={imgPolygon3} alt="Open" className={styles.caret} />
+            </>
+          )}
         </div>
       </header>
+      {isMobileLayout && (
+        <div
+          className={cx(styles.mobileNavBackdrop, mobileNavOpen && styles.mobileNavBackdropVisible)}
+          onClick={() => setMobileNavOpen(false)}
+        />
+      )}
 
       {/* MAIN GRID */}
       <main className={mainGridClass}>
+        {isMobileLayout && (
+          <div
+            className={cx(styles.sidebarBackdrop, sidebarOpen && styles.sidebarBackdropVisible)}
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
         {/* LEFT SIDEBAR */}
-        <aside className={cx(styles.sidebar, !sidebarOpen && styles.sidebarCollapsed)}>
+        <aside
+          id="chatHistoryDrawer"
+          className={sidebarClasses}
+          aria-hidden={isMobileLayout ? !sidebarOpen : false}
+        >
+          {isMobileLayout && (
+            <button
+              type="button"
+              className={styles.sidebarClose}
+              onClick={() => setSidebarOpen(false)}
+            >
+              Close
+            </button>
+          )}
           <button className={styles.newChat} onClick={createNewChat}>
             <span className={styles.newChatLabel}>New Chat</span>
             <span className={styles.newChatIcon}>

@@ -97,6 +97,7 @@ const LazyImage = ({ src, alt, className, onClick, type, style }) => {
 
 const ImageGallery = () => {
   const loaderRef = useRef(null);
+  const mobileFilterRef = useRef(null);
   const [loadError, setLoadError] = useState(false);
 
   const [user, setUser] = useState(null);
@@ -114,6 +115,7 @@ const ImageGallery = () => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [loadingStates, setLoadingStates] = useState({});
   const [notifications, setNotifications] = useState([]);
+  const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
   const limit = 8;
 
   useEffect(() => {
@@ -123,6 +125,30 @@ const ImageGallery = () => {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  useEffect(() => {
+    if (!isFilterMenuOpen) return;
+
+    const handleClickOutside = event => {
+      if (mobileFilterRef.current && !mobileFilterRef.current.contains(event.target)) {
+        setIsFilterMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('touchstart', handleClickOutside);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
+  }, [isFilterMenuOpen]);
+
+  useEffect(() => {
+    if (!isMobile) {
+      setIsFilterMenuOpen(false);
+    }
+  }, [isMobile]);
 
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
@@ -197,6 +223,9 @@ const ImageGallery = () => {
     setImages([]);
     setPage(1);
     setHasMore(true);
+    if (isMobile) {
+      setIsFilterMenuOpen(false);
+    }
   };
 
   useEffect(() => {
@@ -292,7 +321,7 @@ const ImageGallery = () => {
       case 'view':
         optimisticValue = currentValue + 1;
         endpoint = `${apiUrl}api/images/${imageId}/view`;
-        updateImages(img => ({ ...img, views: optimisticValue }));
+        updateImages(img => ({ ...img, views: optimisticValue, userViewed: true }));
         break;
       default:
         setLoadingStates(prev => ({ ...prev, [loadingKey]: false }));
@@ -321,7 +350,9 @@ const ImageGallery = () => {
         likes: updatedImage.likes || img.likes,
         views: updatedImage.views || img.views,
         fires: updatedImage.fires || img.fires,
-        shares: updatedImage.shares || img.shares
+        shares: updatedImage.shares || img.shares,
+        ...(action === 'view' ? { userViewed: true } : {}),
+        ...(action === 'like' ? { userLiked: true } : {}),
       }));
 
       showNotification(`${action.charAt(0).toUpperCase() + action.slice(1)} successful!`, 'success');
@@ -342,7 +373,7 @@ const ImageGallery = () => {
           updateImages(img => ({ ...img, shares: rollbackValue }));
           break;
         case 'view':
-          updateImages(img => ({ ...img, views: rollbackValue }));
+          updateImages(img => ({ ...img, views: rollbackValue, userViewed: false }));
           break;
       }
       
@@ -424,15 +455,54 @@ const ImageGallery = () => {
         </div>
       )}
 
-      <p className={styles.p3}>Gallery</p>
+      {/* <p className={styles.p3}>Gallery</p> */}
 
       <div className={styles.filterBar}>
         {isMobile ? (
-          <select className={styles.filterDropdownButton} onChange={e => handleFilterChange(e.target.value)} value={filter}>
-            {filters.map((filter, index) => (
-              <option key={index} value={filter}>{filter}</option>
-            ))}
-          </select>
+          <div className={styles.mobileControlBar} ref={mobileFilterRef}>
+            <div className={styles.mobileDropdownSegment}>
+              <button
+                type="button"
+                className={`${styles.mobileSelectedFilter} ${isFilterMenuOpen ? styles.mobileSelectedFilterOpen : ''}`}
+                onClick={() => setIsFilterMenuOpen(prev => !prev)}
+                aria-haspopup="listbox"
+                aria-expanded={isFilterMenuOpen}
+                aria-controls="mobile-filter-menu"
+              >
+                <span>{filter}</span>
+                <span className={`${styles.mobileCaret} ${isFilterMenuOpen ? styles.mobileCaretOpen : ''}`} />
+              </button>
+              {isFilterMenuOpen && (
+                <div
+                  id="mobile-filter-menu"
+                  className={styles.mobileDropdownList}
+                  role="listbox"
+                >
+                  {filters.map(option => (
+                    <button
+                      type="button"
+                      key={option}
+                      role="option"
+                      aria-selected={filter === option}
+                      className={`${styles.mobileDropdownOption} ${filter === option ? styles.mobileDropdownOptionActive : ''}`}
+                      onClick={() => handleFilterChange(option)}
+                    >
+                      {option}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className={styles.mobileDivider} />
+            
+            <button type="button" className={styles.mobileFiltersButton}>
+              <img src={filterIcon} alt="" aria-hidden="true" />
+              <span>Filters</span>
+            </button>
+            {/* <button type="button" className={styles.mobileSearchButton} aria-label="Search gallery (coming soon)">
+              <span className={styles.mobileSearchGlyph}></span>
+            </button> */}
+          </div>
         ) : (
           <div className={styles.filterItems}>
             {filters.map((f, index) => (
@@ -442,12 +512,14 @@ const ImageGallery = () => {
             ))}
           </div>
         )}
-        <div className={styles.rightIconCont}>
-          <img src={filterIcon} className={styles.filterIcon} alt="Filter" /> Filters
-        </div>
+        {!isMobile && (
+          <div className={styles.rightIconCont}>
+            <img src={filterIcon} className={styles.filterIcon} alt="Filter" /> Filters
+          </div>
+        )}
       </div>
 
-      <div className={styles.selectedFilterDiv}>{filter}</div>
+      {!isMobile && <div className={styles.selectedFilterDiv}>{filter}</div>}
 
       <Masonry
         breakpointCols={breakpointColumnsObj}
@@ -463,28 +535,28 @@ const ImageGallery = () => {
             </div>
             
             {/* Quick action overlay */}
-            <div className={styles.quickActions}>
+            <div className={`${styles.quickActions} ${isMobile ? styles.quickActionsVisible : ''}`}>
               <button 
-                className={`${styles.quickActionBtn} ${image.userLiked ? styles.active : ''}`}
+                className={`${styles.quickActionBtn} ${styles.likeButton} ${image.userLiked ? styles.likeActive : ''}`}
                 onClick={(e) => {
                   e.stopPropagation();
                   handleLike(image._id, image.likes || 0);
                 }}
                 disabled={loadingStates[`${image._id}_like`]}
               >
-                <img src={like} alt="Like" />
-                <span>{image.likes || 0}</span>
+                <img src={like} alt="Like" className={styles.quickActionIcon} />
+                <span className={styles.quickActionCount}>{image.likes || 0}</span>
               </button>
               <button 
-                className={styles.quickActionBtn}
+                className={`${styles.quickActionBtn} ${styles.viewButton} ${image.userViewed ? styles.viewActive : ''}`}
                 onClick={(e) => {
                   e.stopPropagation();
                   handleView(image._id, image.views || 0);
                 }}
                 disabled={loadingStates[`${image._id}_view`]}
               >
-                <img src={view} alt="View" />
-                <span>{image.views || 0}</span>
+                <img src={view} alt="View" className={styles.quickActionIcon} />
+                <span className={styles.quickActionCount}>{image.views || 0}</span>
               </button>
             </div>
           </div>

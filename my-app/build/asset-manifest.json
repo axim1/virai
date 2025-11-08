@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/static/css/main.03f45533.css",
-    "main.js": "/static/js/main.770f9a10.js",
+    "main.css": "/static/css/main.9abcc6aa.css",
+    "main.js": "/static/js/main.a3420be3.js",
     "static/js/787.cfd8f164.chunk.js": "/static/js/787.cfd8f164.chunk.js",
     "static/media/Hero BG.png": "/static/media/Hero BG.847286e837c213d66b00.png",
     "static/media/texttoimage (4).png": "/static/media/texttoimage (4).7f76f6057bce6db902d0.png",
@@ -74,12 +74,12 @@
     "static/media/Polygon 3.svg": "/static/media/Polygon 3.ae8779af274483936f80efd08c4d96bc.svg",
     "static/media/Ellipse 6-1.svg": "/static/media/Ellipse 6-1.3f54836b1c632d1c503553cc4b733794.svg",
     "static/media/Ellipse 6.svg": "/static/media/Ellipse 6.b353df477f3b6a66ba4b438922592e46.svg",
-    "main.03f45533.css.map": "/static/css/main.03f45533.css.map",
-    "main.770f9a10.js.map": "/static/js/main.770f9a10.js.map",
+    "main.9abcc6aa.css.map": "/static/css/main.9abcc6aa.css.map",
+    "main.a3420be3.js.map": "/static/js/main.a3420be3.js.map",
     "787.cfd8f164.chunk.js.map": "/static/js/787.cfd8f164.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.03f45533.css",
-    "static/js/main.770f9a10.js"
+    "static/css/main.9abcc6aa.css",
+    "static/js/main.a3420be3.js"
   ]
 }
