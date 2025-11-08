@@ -24,6 +24,7 @@ function App() {
   const [activeSection, setActiveSection] = useState('');
   // const location = useLocation();                      // ← new
 
+// for a new build
 
   // useEffect(() => {
   //   switch (location.pathname) {
