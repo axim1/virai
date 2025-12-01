@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/static/css/main.9abcc6aa.css",
-    "main.js": "/static/js/main.a3420be3.js",
+    "main.css": "/static/css/main.cd1ef7a4.css",
+    "main.js": "/static/js/main.a5172599.js",
     "static/js/787.cfd8f164.chunk.js": "/static/js/787.cfd8f164.chunk.js",
     "static/media/Hero BG.png": "/static/media/Hero BG.847286e837c213d66b00.png",
     "static/media/texttoimage (4).png": "/static/media/texttoimage (4).7f76f6057bce6db902d0.png",
@@ -14,7 +14,7 @@
     "static/media/texture.png": "/static/media/texture.2b4866b2ef6200c4a5d9.png",
     "static/media/texttoimage (2).png": "/static/media/texttoimage (2).07f604e30c778e65812c.png",
     "static/media/texture (1).png": "/static/media/texture (1).95dcbe3cb0f747aeb1c8.png",
-    "static/media/pricing-01 1.svg": "/static/media/pricing-01 1.a6cebf15759d8094506093cfff1e90d5.svg",
+    "static/media/pricing-01 1.svg": "/static/media/pricing-01 1.806ef036cd51ec316dda244f88d8ad19.svg",
     "static/media/Group 88.svg": "/static/media/Group 88.4a8df539ac4402d90b2f482572a3891f.svg",
     "static/media/Group-5.svg": "/static/media/Group-5.34e4e9cddc6971005e15ac438ebe2287.svg",
     "static/media/3D object generation-01 1.svg": "/static/media/3D object generation-01 1.bd759ef034a530190f100ed311aaffa2.svg",
@@ -25,7 +25,6 @@
     "static/media/Group-3.svg": "/static/media/Group-3.76c3335d5a7c2d235cbd724143d655c9.svg",
     "static/media/instagram 1.svg": "/static/media/instagram 1.5e7f5105f9934495aca29dd767696c09.svg",
     "static/media/Group-7.svg": "/static/media/Group-7.7807bda5ab6eec9c9980552590c0ba4f.svg",
-    "static/media/VituartAI WordMark Vector 1.svg": "/static/media/VituartAI WordMark Vector 1.2bdddbcb2053f94c7423c1720f2e97f6.svg",
     "static/media/virai-logo.svg": "/static/media/virai-logo.3156b9f8edb63772dcb2e000af086265.svg",
     "static/media/Group-10.svg": "/static/media/Group-10.5b6dbd89f04076c1a9c1b04d96c92c51.svg",
     "static/media/AI Replacement-01 1.svg": "/static/media/AI Replacement-01 1.e9f26b0c7c09f06394d8522dd61db012.svg",
@@ -71,15 +70,14 @@
     "static/media/Arrow 2.svg": "/static/media/Arrow 2.01b5823e49650031b7d84bc82aaf4de5.svg",
     "static/media/Sketch to image-01.svg": "/static/media/Sketch to image-01.41de6ec2776c515fa0e1a14358011467.svg",
     "static/media/Arrow_gold.svg": "/static/media/Arrow_gold.b043bcb8c54501ec8b6c326aed8e6435.svg",
-    "static/media/Polygon 3.svg": "/static/media/Polygon 3.ae8779af274483936f80efd08c4d96bc.svg",
     "static/media/Ellipse 6-1.svg": "/static/media/Ellipse 6-1.3f54836b1c632d1c503553cc4b733794.svg",
     "static/media/Ellipse 6.svg": "/static/media/Ellipse 6.b353df477f3b6a66ba4b438922592e46.svg",
-    "main.9abcc6aa.css.map": "/static/css/main.9abcc6aa.css.map",
-    "main.a3420be3.js.map": "/static/js/main.a3420be3.js.map",
+    "main.cd1ef7a4.css.map": "/static/css/main.cd1ef7a4.css.map",
+    "main.a5172599.js.map": "/static/js/main.a5172599.js.map",
     "787.cfd8f164.chunk.js.map": "/static/js/787.cfd8f164.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.9abcc6aa.css",
-    "static/js/main.a3420be3.js"
+    "static/css/main.cd1ef7a4.css",
+    "static/js/main.a5172599.js"
   ]
 }

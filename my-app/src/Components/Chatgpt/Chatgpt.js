@@ -5,9 +5,6 @@ import styles from './Chatgpt.module.css';
 
 // Local image assets
 import imgTexture from '../../assets/chatgpt-icons/texture.png';
-import imgPricing011 from '../../assets/chatgpt-icons/Login/pricing-01 1.svg';
-import imgPolygon3 from '../../assets/chatgpt-icons/Polygon 3.svg';
-import imgVituartAiWordMarkVector1 from '../../assets/chatgpt-icons/VituartAI WordMark Vector 1.svg';
 import imgNewChatIcon from '../../assets/chatgpt-icons/new chat icon.svg';
 import imgVector from '../../assets/chatgpt-icons/Vector.svg';
 import iconProjects from '../../assets/chatgpt-icons/Group-12.svg';
@@ -44,10 +41,10 @@ function Chatgpt() {
   const [user, setUser] = useState(null);
   const [isMobileLayout, setIsMobileLayout] = useState(detectMobileViewport);
   const [sidebarOpen, setSidebarOpen] = useState(() => !detectMobileViewport());
-  const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [editingTitle, setEditingTitle] = useState(null);
   const [editTitle, setEditTitle] = useState('');
   const [promoState, setPromoState] = useState('enter'); // enter | idle | exit | hidden
+  const [activeHistoryMenu, setActiveHistoryMenu] = useState(null);
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
@@ -60,7 +57,6 @@ function Chatgpt() {
         setSidebarOpen(false);
       } else {
         setSidebarOpen(true);
-        setMobileNavOpen(false);
       }
     };
 
@@ -99,6 +95,12 @@ function Chatgpt() {
     }
     return undefined;
   }, [promoState]);
+
+  useEffect(() => {
+    const closeMenu = () => setActiveHistoryMenu(null);
+    document.addEventListener('click', closeMenu);
+    return () => document.removeEventListener('click', closeMenu);
+  }, []);
 
   const loadChatHistory = async (userId) => {
     try {
@@ -145,12 +147,6 @@ function Chatgpt() {
   const handlePromoDismiss = () => {
     if (promoState === 'exit' || promoState === 'hidden') return;
     setPromoState('exit');
-  };
-
-  const handleNavSelect = () => {
-    if (isMobileLayout) {
-      setMobileNavOpen(false);
-    }
   };
 
   const sendMessage = async () => {
@@ -263,7 +259,6 @@ function Chatgpt() {
     promoState === 'enter' && styles.promoEntering,
     promoState === 'exit' && styles.promoExiting
   );
-  const navItems = ['Home', 'AI Tools', 'Creation', 'Gallery', 'Pricing', 'FAQ'];
   const sidebarClasses = cx(
     styles.sidebar,
     !isMobileLayout && !sidebarOpen && styles.sidebarCollapsed,
@@ -281,80 +276,16 @@ function Chatgpt() {
 
   return (
     <div className={styles.appShell} data-name="Chat Page Desktop">
-      {/* HEADER */}
-      <header className={styles.header}>
-        <div className={styles.headerLeft}>
-          {isMobileLayout && (
-            <button
-              type="button"
-              className={cx(styles.headerToggle, mobileNavOpen && styles.headerToggleActive)}
-              onClick={() => setMobileNavOpen(prev => !prev)}
-              aria-expanded={mobileNavOpen}
-              aria-controls="chatgpt-primary-nav"
-            >
-              <span className={styles.srOnly}>Toggle navigation</span>
-              <span className={styles.headerToggleBar} />
-              <span className={styles.headerToggleBar} />
-              <span className={styles.headerToggleBar} />
-            </button>
-          )}
-          <img src={imgVituartAiWordMarkVector1} alt="VituartAI" className={styles.brand} />
-        </div>
-
-        <nav
-          id="chatgpt-primary-nav"
-          className={cx(
-            styles.headerCenter,
-            isMobileLayout && styles.mobileNavPanel,
-            isMobileLayout && mobileNavOpen && styles.mobileNavPanelOpen
-          )}
-          aria-label="Primary"
-        >
-          {navItems.map(item => (
-            <button key={item} className={styles.navLink} onClick={handleNavSelect}>
-              {item}
-            </button>
-          ))}
-          <span className={styles.navCurrent}>Chat AI</span>
-        </nav>
-
-        <div className={styles.headerRight}>
-          {isMobileLayout ? (
-            <>
-              <button
-                type="button"
-                className={styles.mobileActionBtn}
-                onClick={() => setSidebarOpen(prev => !prev)}
-                aria-controls="chatHistoryDrawer"
-                aria-expanded={sidebarOpen}
-              >
-                {sidebarOpen ? 'Hide' : 'History'}
-              </button>
-              <span className={styles.creditCount}>100</span>
-              <img src={imgPricing011} alt="Credits" className={styles.creditIcon} />
-            </>
-          ) : (
-            <>
-              <button
-                className={styles.accountBtn}
-                onClick={() => setSidebarOpen(o => !o)}
-                aria-pressed={sidebarOpen}
-                title={sidebarOpen ? 'Hide sidebar' : 'Show sidebar'}
-              >
-                {sidebarOpen ? 'Hide' : 'Show'} Sidebar
-              </button>
-              <span className={styles.creditCount}>100</span>
-              <img src={imgPricing011} alt="Credits" className={styles.creditIcon} />
-              <img src={imgPolygon3} alt="Open" className={styles.caret} />
-            </>
-          )}
-        </div>
-      </header>
       {isMobileLayout && (
-        <div
-          className={cx(styles.mobileNavBackdrop, mobileNavOpen && styles.mobileNavBackdropVisible)}
-          onClick={() => setMobileNavOpen(false)}
-        />
+        <button
+          type="button"
+          className={`${styles.mobileSidebarToggle} ${sidebarOpen ? styles.mobileSidebarToggleOpen : ''}`}
+          onClick={() => setSidebarOpen(prev => !prev)}
+          aria-controls="chatHistoryDrawer"
+          aria-expanded={sidebarOpen}
+        >
+          <span className={styles.mobileSidebarToggleIcon} />
+        </button>
       )}
 
       {/* MAIN GRID */}
@@ -394,7 +325,7 @@ function Chatgpt() {
 
             <div className={styles.searchBox}>
               <input type="text" placeholder="Search chats" />
-                <img src={imgVector1} alt="" />  
+                <img   src={imgVector1} alt="" />  
 
             </div>
 
@@ -428,21 +359,46 @@ function Chatgpt() {
                     </div>
                     <div className={styles.historyActions}>
                       <button
-                        className={styles.iconBtn}
-                        onClick={(e) => startEditingTitle(chat, e)}
-                        title="Rename"
-                        aria-label="Rename chat"
+                        type="button"
+                        className={`${styles.historyMenuButton} ${activeHistoryMenu === chat._id ? styles.historyMenuButtonActive : ''}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setActiveHistoryMenu(prev => (prev === chat._id ? null : chat._id));
+                        }}
+                        aria-haspopup="menu"
+                        aria-expanded={activeHistoryMenu === chat._id}
+                        aria-label="Chat options"
                       >
-                        ✎
+                        ⋮
                       </button>
-                      <button
-                        className={styles.iconBtn}
-                        onClick={(e) => deleteChat(chat._id, e)}
-                        title="Delete"
-                        aria-label="Delete chat"
-                      >
-                        ⓧ
-                      </button>
+                      {activeHistoryMenu === chat._id && (
+                        <div
+                          className={styles.historyMenu}
+                          role="menu"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <button
+                            type="button"
+                            className={styles.historyMenuItem}
+                            onClick={(e) => {
+                              startEditingTitle(chat, e);
+                              setActiveHistoryMenu(null);
+                            }}
+                          >
+                            Rename
+                          </button>
+                          <button
+                            type="button"
+                            className={styles.historyMenuItem}
+                            onClick={(e) => {
+                              deleteChat(chat._id, e);
+                              setActiveHistoryMenu(null);
+                            }}
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 );
@@ -463,7 +419,7 @@ function Chatgpt() {
             <h3 className={styles.sectionTitle}>Settings &amp; Help</h3>
                       <div className={styles.sectionDivider} />
 
-            <button className={styles.quickItem}><img src={iconSettings} alt="" />Settings</button>
+            <button className={styles.quickItem} style={{marginTop:'1rem'}}><img src={iconSettings} alt="" />Settings</button>
             <button className={styles.quickItem}><img src={iconHelp} alt="" />Help</button>
           </nav>
 
@@ -487,6 +443,7 @@ function Chatgpt() {
                 <h1 className={styles.emptyTitle}>Welcome to VirtuartAI!</h1>
                 <p className={styles.emptySubtitle}>
                   Get started by giving VirtuartAI a task — and let Chat take care of the rest.
+                  <br/>
                   <span className={styles.linkish}> Not sure where to begin?</span>
                 </p>
 
@@ -618,13 +575,15 @@ function Chatgpt() {
             </button>
             <img src={imgTexture} alt="" className={styles.promoTexture} />
             <div className={styles.promoInner}>
-              <h3 className={styles.promoKick}>Start your 7-day free trial</h3>
-              <p className={styles.promoLead}>
+                            <p className={styles.promoLead}>
                 AI-powered creative toolkit for<br />
                 <strong>individuals &amp; teams.</strong>
               </p>
+              <h3 className={styles.promoKick}>Start your 7-day free trial</h3>
+<div style={{display:'flex',flexDirection:'column',gap:'5px',marginBottom:'1rem', marginTop:'1rem', alignItems:'center' }}>
               <div className={styles.promoPlan}>PRO</div>
               <div className={styles.promoSub}>Maximize creative efficiency</div>
+            </div>
               <div className={styles.promoPrice}>€150/mo.</div>
 
               <ul className={styles.promoList}>
@@ -633,6 +592,9 @@ function Chatgpt() {
                 <li><img src={imgCheckmark1} alt="" />Free assets & customization templates</li>
                 <li><img src={imgCheckmark1} alt="" />Access on web & mobile</li>
                 <li><img src={imgCheckmark1} alt="" />100 MB cloud storage</li>
+              <li ><img src={imgCheckmark1} alt="" />
+5 credits per week to use on 
+generative AI tools</li>
               </ul>
 
               <button className={styles.promoCTA}>
