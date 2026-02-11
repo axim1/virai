@@ -25,6 +25,8 @@ const Profile = () => {
   const [formErrors, setFormErrors] = useState({});
   const [previewUrl, setPreviewUrl] = useState(null);
   const [profilePicFilename, setProfilePicFilename] = useState(storedUser?.profilePic || "");
+  const [isSavingImage, setIsSavingImage] = useState(false);
+  const [imageSaveError, setImageSaveError] = useState("");
   const [activeTab, setActiveTab] = useState('subscription'); // Default to subscription tab
   const [subscriptions, setSubscriptions] = useState([]);
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
@@ -42,6 +44,12 @@ const Profile = () => {
   useEffect(() => {
     fetchSubscriptions();
   }, []);
+
+  useEffect(() => {
+    return () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+    };
+  }, [previewUrl]);
 
   const fetchSubscriptions = async () => {
     try {
@@ -147,10 +155,48 @@ const Profile = () => {
     const { name, value, files } = e.target;
 
     if (name === "profilePic" && files[0]) {
-      setForm((prev) => ({ ...prev, profilePic: files[0] }));
-      setPreviewUrl(URL.createObjectURL(files[0])); // show preview
+      const file = files[0];
+      setForm((prev) => ({ ...prev, profilePic: file }));
+      setPreviewUrl(URL.createObjectURL(file));
+      saveProfileImage(file);
     } else {
       setForm((prev) => ({ ...prev, [name]: value }));
+    }
+  };
+
+  const saveProfileImage = async (file) => {
+    if (!file || !userId) return;
+
+    setIsSavingImage(true);
+    setImageSaveError("");
+
+    const formData = new FormData();
+    formData.append("userId", userId);
+    formData.append("profilePic", file);
+
+    try {
+      const res = await fetch(`${API_BASE}api/updateUser`, {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setImageSaveError(data?.message || "Failed to save image.");
+        return;
+      }
+
+      if (data.user) {
+        localStorage.setItem("user", JSON.stringify(data.user));
+        setProfilePicFilename(data.user.profilePic || "");
+        setForm((prev) => ({ ...prev, profilePic: null }));
+        setPreviewUrl(null);
+      }
+    } catch (error) {
+      setImageSaveError("Failed to save image.");
+    } finally {
+      setIsSavingImage(false);
     }
   };
 
@@ -161,9 +207,14 @@ const Profile = () => {
     if (Object.keys(errors).length !== 0) return;
 
     const formData = new FormData();
-    Object.entries({ ...form, userId }).forEach(([key, val]) =>
-      formData.append(key, val)
-    );
+    Object.entries({ ...form, userId }).forEach(([key, val]) => {
+      if (key === "profilePic") {
+        if (val) formData.append(key, val);
+        return;
+      }
+      if (val === undefined || val === null) return;
+      formData.append(key, val);
+    });
 
     try {
       const res = await fetch(`${API_BASE}api/updateUser`, {
@@ -188,15 +239,31 @@ const Profile = () => {
     const error = {};
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
 
-    if (!values.fname) error.fname = "First Name is required";
-    if (!values.lname) error.lname = "Last Name is required";
+    if (!values.fname?.trim()) error.fname = "First Name is required";
+    if (!values.lname?.trim()) error.lname = "Last Name is required";
     if (!values.email) {
       error.email = "Email is required";
     } else if (!regex.test(values.email)) {
       error.email = "Invalid email format";
     }
-    if (!values.phone) error.phone = "Phone number is required";
-    else if (!/^\d{10}$/.test(values.phone)) error.phone = "Must be 10 digits";
+
+    if (!values.phone?.trim()) {
+      error.phone = "Phone number is required";
+    } else {
+      const phoneRaw = values.phone.trim();
+      const isExternal = phoneRaw.toLowerCase() === "external";
+      const digitsOnly = phoneRaw.replace(/[^\d]/g, "");
+
+      if (!isExternal && (digitsOnly.length < 7 || digitsOnly.length > 15)) {
+        error.phone = "Phone number looks invalid";
+      }
+    }
+
+    if (values.userType === "company") {
+      if (!values.companyName?.trim()) error.companyName = "Company Name is required";
+      if (!values.address?.trim()) error.address = "Company Address is required";
+      if (!values.vatNumber?.trim()) error.vatNumber = "VAT Number is required";
+    }
 
     return error;
   };
@@ -256,6 +323,16 @@ const Profile = () => {
               onChange={handleChange}
               style={{ display: "none" }}
             />
+            {isSavingImage && (
+              <p className="form-errors" style={{ marginTop: 10 }}>
+                Saving image...
+              </p>
+            )}
+            {imageSaveError && (
+              <p className="form-errors" style={{ marginTop: 10 }}>
+                {imageSaveError}
+              </p>
+            )}
           </div>
         </div>
         <div className="profile-text">

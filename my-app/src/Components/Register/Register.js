@@ -42,8 +42,8 @@ const Register = () => {
   const validateForm = (values) => {
     const error = {};
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
-    if (!values.fname) error.fname = "First Name is required";
-    if (!values.lname) error.lname = "Last Name is required";
+    if (!values.fname?.trim()) error.fname = "First Name is required";
+    if (!values.lname?.trim()) error.lname = "Last Name is required";
     if (!values.email) {
       error.email = "Email is required";
     } else if (!regex.test(values.email)) {
@@ -61,10 +61,19 @@ const Register = () => {
     } else if (values.cpassword !== values.password) {
       error.cpassword = "Passwords must match";
     }
-    if (!values.phone) {
+    if (!values.phone?.trim()) {
       error.phone = "Phone number is required";
-    } else if (!/^\d{10}$/.test(values.phone)) {
-      error.phone = "Phone number must be 10 digits";
+    } else {
+      const digitsOnly = values.phone.trim().replace(/[^\d]/g, "");
+      if (digitsOnly.length < 7 || digitsOnly.length > 15) {
+        error.phone = "Phone number looks invalid";
+      }
+    }
+
+    if (values.userType === "company") {
+      if (!values.companyName?.trim()) error.companyName = "Company Name is required";
+      if (!values.address?.trim()) error.address = "Company Address is required";
+      if (!values.vatNumber?.trim()) error.vatNumber = "VAT Number is required";
     }
     return error;
   };

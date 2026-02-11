@@ -5,7 +5,6 @@ const axios = require("axios");
 const path = require('path');
 const { User, Subscription, GeneratedImage, Chat } = require('./models');
 const multer = require('multer');
-const upload = multer({ dest: 'uploads/' });
 const app = express();
 const FormData = require('form-data');
 const { v4: uuidv4 } = require('uuid'); // Import UUID
@@ -26,6 +25,22 @@ const fs = require('fs');
 const callbackUrl = process.env.CALLBACK_URL;
 // const multer = require("multer");
 // const path = require("path");
+
+const UPLOADS_DIR = path.join(__dirname, "uploads");
+if (!fs.existsSync(UPLOADS_DIR)) {
+  fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+}
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, UPLOADS_DIR),
+  filename: (req, file, cb) => {
+    const ext = path.extname(file?.originalname || "").toLowerCase();
+    cb(null, `${Date.now()}-${uuidv4()}${ext}`);
+  },
+});
+
+const upload = multer({ storage });
+
 const VIDEO_OUTPUT_DIR = path.join(__dirname, 'videos');
 
 if (!fs.existsSync(VIDEO_OUTPUT_DIR)) {
@@ -78,17 +93,6 @@ const uri = "mongodb+srv://asim6832475:1234@cluster0.ukza83p.mongodb.net/?retryW
 mongoose.connect(uri, clientOptions)
   .then(() => console.log("Connected to MongoDB"))
   .catch(error => console.error("Error connecting to MongoDB:", error));
-
-  const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-      cb(null, "uploads/"); // Directory to store uploaded files
-    },
-    filename: (req, file, cb) => {
-      cb(null, `${Date.now()}-${file.originalname}`);
-    },
-  });
-  
-// const upload = multer({ storage });
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -359,17 +363,24 @@ console.log('updateing user')
     const user = await User.findById(userId);
     if (!user) return res.status(404).send({ message: "User not found" });
 
-    const profilePicPath = req.file ? req.file.path : user.profilePic;
+    const nextUserType = userType || user.userType;
+    const profilePicFilename = req.file ? req.file.filename : user.profilePic;
 
     user.fname = fname || user.fname;
     user.lname = lname || user.lname;
     user.email = email || user.email;
     user.phone = phone || user.phone;
-    user.userType = userType || user.userType;
-    user.companyName = userType === "company" ? companyName : null;
-    user.address = userType === "company" ? address : null;
-    user.vatNumber = userType === "company" ? vatNumber : null;
-    user.profilePic = profilePicPath;
+    user.userType = nextUserType;
+    if (nextUserType === "company") {
+      user.companyName = companyName ?? user.companyName;
+      user.address = address ?? user.address;
+      user.vatNumber = vatNumber ?? user.vatNumber;
+    } else {
+      user.companyName = null;
+      user.address = null;
+      user.vatNumber = null;
+    }
+    user.profilePic = profilePicFilename;
     console.log("saving user")
     await user.save();
     res.send({ message: "User updated successfully", user });
@@ -397,7 +408,7 @@ app.post("/api/signup", upload.single("profilePic"), async (req, res) => {
       return res.send({ message: "Invalid subscription package" });
     }
 
-    const profilePicPath = req.file ? req.file.path : null;
+    const profilePicFilename = req.file ? req.file.filename : null;
 
 
 
@@ -415,7 +426,7 @@ app.post("/api/signup", upload.single("profilePic"), async (req, res) => {
       subscribed_monthly: ["STARTER", "BUSINESS", "PREMIUM"].includes(subscriptionName),
       subscribed_yearly: ["BUSINESS", "PREMIUM"].includes(subscriptionName),
       subscription: subscription._id,
-      profilePic: profilePicPath,
+      profilePic: profilePicFilename,
     });
     
 
@@ -428,13 +439,45 @@ app.post("/api/signup", upload.single("profilePic"), async (req, res) => {
 
 // Custom profile pic route
 app.get("/api/uploads/profilepic/:filename", (req, res) => {
-  const filePath = path.join(__dirname, "uploads", req.params.filename);
+  const safeFilename = path.basename(req.params.filename || "");
+  if (!safeFilename || safeFilename === "." || safeFilename === "..") {
+    return res.status(400).json({ message: "Invalid filename" });
+  }
+  const filePath = path.join(UPLOADS_DIR, safeFilename);
 
-  fs.access(filePath, fs.constants.F_OK, (err) => {
-    if (err) {
-      return res.status(404).json({ message: "Image not found" });
+  fs.access(filePath, fs.constants.F_OK, async (err) => {
+    if (err) return res.status(404).json({ message: "Image not found" });
+
+    const ext = path.extname(safeFilename).toLowerCase();
+    const mimeByExt = {
+      ".jpg": "image/jpeg",
+      ".jpeg": "image/jpeg",
+      ".png": "image/png",
+      ".gif": "image/gif",
+      ".webp": "image/webp",
+      ".svg": "image/svg+xml",
+    };
+
+    let mime = mimeByExt[ext];
+
+    if (!mime) {
+      try {
+        const handle = await fs.promises.open(filePath, "r");
+        const buffer = Buffer.alloc(16);
+        await handle.read(buffer, 0, buffer.length, 0);
+        await handle.close();
+
+        if (buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) mime = "image/jpeg";
+        else if (buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4e && buffer[3] === 0x47) mime = "image/png";
+        else if (buffer[0] === 0x47 && buffer[1] === 0x49 && buffer[2] === 0x46) mime = "image/gif";
+        else if (buffer.toString("ascii", 0, 4) === "RIFF" && buffer.toString("ascii", 8, 12) === "WEBP") mime = "image/webp";
+      } catch (e) {
+        // fallback below
+      }
     }
-    res.sendFile(filePath);
+
+    res.setHeader("Content-Type", mime || "application/octet-stream");
+    fs.createReadStream(filePath).on("error", () => res.sendStatus(404)).pipe(res);
   });
 });
 // const { v4: uuidv4 } = require('uuid');
@@ -1144,4 +1187,3 @@ app.get('*', (req, res) => {
 app.listen(8000, () => {
   console.log("Server starting at 8000");
 });
-
