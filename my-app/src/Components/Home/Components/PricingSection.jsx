@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import axios from "axios";
 import checkmark from '../../../assets/vector_icons/checkmark 1.svg';
 import './PricingSection.css';
@@ -9,6 +9,7 @@ import arrow_gold from '../../../assets/vector_icons/Arrow_gold.svg';
 import checkmark_black from '../../../assets/vector_icons/checkmark_black.svg';
 
 const PricingSection = () => {
+  const navigate = useNavigate();
   const apiUrl = process.env.REACT_APP_API_URL;
   const [billingCycle, setBillingCycle] = useState('monthly');
   const [loading, setLoading] = useState(null);
@@ -269,7 +270,9 @@ const PricingSection = () => {
       <div style={{margin:'32px 0px'}}>
         <p className="p1">AI-powered creative toolkit for</p>
         <p className="p2">individuals & teams</p>
-        <button className='topButton'>Start your 7-day free trial</button>
+        <button className='topButton' onClick={() => navigate(user ? '/gen' : '/signup')}>
+          Start your 7-day free trial
+        </button>
       </div>
 
       {/* Billing cycle toggle */}

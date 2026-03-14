@@ -30,7 +30,7 @@ const tools = [
     },
     {
       name: "3D Object Generation",
-      apiType: "3d-object-generation",
+      apiType: "object-creation",
       description: "VirtuartAI’s 3D Object Generation Creates Realistic 3D Models From Text Or Images.",
       image: wsImage2, // Replace with actual image path
     },
@@ -48,13 +48,13 @@ const tools = [
     },
     {
       name: "Image Expansion",
-      apiType: "image-expansion",
+      apiType: "inpainting",
       description: "VirtuartAI’s Image Expansion Tools Seamlessly Enlarge Images Without Losing Quality.",
       image: wsImage5, // Replace with actual image path
     },
     {
       name: "AI Replacement",
-      apiType: "ai-replacement",
+      apiType: "image-enhancement",
       description: "VirtuartAI’s AI Replacement Tools Effortlessly Swap Elements In Images With Precision.",
       image: wsImage6, // Replace with actual image path
     },

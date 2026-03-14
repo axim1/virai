@@ -735,6 +735,19 @@ const formatApiType = (apiType) => {
    // right before your return:
 
    const bottomToolNames = ['Pricing', 'FAQ', 'Support'];
+   const handleBottomToolClick = (label) => {
+    if (label === 'Pricing') {
+      navigate('/', { state: { scrollToSection: 'pricing-section' } });
+      return;
+    }
+    if (label === 'FAQ') {
+      navigate('/', { state: { scrollToSection: 'faq-section' } });
+      return;
+    }
+    if (label === 'Support') {
+      window.location.href = 'mailto:support@virtuartai.com';
+    }
+   };
 
   return (
     <>
@@ -784,6 +797,7 @@ const formatApiType = (apiType) => {
             {iconsbottom.map((iconUrl, index) => (
               <div key={index} style={{ width: '100%' }}>
                 <button
+                  onClick={() => handleBottomToolClick(bottomToolNames[index])}
                   style={{
                     background: 'none',
                     border: 'none',

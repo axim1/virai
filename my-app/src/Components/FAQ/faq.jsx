@@ -185,8 +185,8 @@ const FAQ = () => {
         </div>
       ))}
     </Container>
-    <button className={styles.ButtonContact}> 
-    Still have a question? Contact Us</button>
+    <a href="mailto:support@virtuartai.com" className={styles.ButtonContact}> 
+    Still have a question? Contact Us</a>
 
     </div>
 

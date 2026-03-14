@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import cx from 'classnames';
+import { useNavigate } from 'react-router-dom';
 import styles from './Chatgpt.module.css';
 
 // Local image assets
@@ -30,6 +31,7 @@ import imgArrow2 from '../../assets/chatgpt-icons/Arrow 2.svg';
 const apiUrl = process.env.REACT_APP_API_URL;
 
 function Chatgpt() {
+  const navigate = useNavigate();
   const detectMobileViewport = () =>
     (typeof window !== 'undefined' ? window.innerWidth < 900 : false);
 
@@ -249,6 +251,10 @@ function Chatgpt() {
     return date.toLocaleDateString();
   };
 
+  const goToPricing = () => navigate('/', { state: { scrollToSection: 'pricing-section' } });
+  const goToFaq = () => navigate('/', { state: { scrollToSection: 'faq-section' } });
+  const goToSupport = () => { window.location.href = 'mailto:support@virtuartai.com'; };
+
   const promoIsRendered = promoState !== 'hidden';
   const mainGridClass = cx(
     styles.mainGrid,
@@ -408,10 +414,10 @@ function Chatgpt() {
 
 
           <nav className={styles.quickNav} aria-label="Quick nav">
-            <button className={styles.quickItem}><img src={iconProjects} alt="" />Projects</button>
-            <button className={styles.quickItem}><img src={iconTemplates} alt="" />Templates</button>
-            <button className={styles.quickItem}><img src={iconDocuments} alt="" />Documents</button>
-            <button className={styles.quickItem}><img src={iconCommunity} alt="" />Community</button>
+            <button className={styles.quickItem} onClick={() => navigate('/gallery')}><img src={iconProjects} alt="" />Projects</button>
+            <button className={styles.quickItem} onClick={() => navigate('/gen')}><img src={iconTemplates} alt="" />Templates</button>
+            <button className={styles.quickItem} onClick={() => navigate('/terms-of-service')}><img src={iconDocuments} alt="" />Documents</button>
+            <button className={styles.quickItem} onClick={goToFaq}><img src={iconCommunity} alt="" />Community</button>
           </nav>
 
 
@@ -419,8 +425,8 @@ function Chatgpt() {
             <h3 className={styles.sectionTitle}>Settings &amp; Help</h3>
                       <div className={styles.sectionDivider} />
 
-            <button className={styles.quickItem} style={{marginTop:'1rem'}}><img src={iconSettings} alt="" />Settings</button>
-            <button className={styles.quickItem}><img src={iconHelp} alt="" />Help</button>
+            <button className={styles.quickItem} style={{marginTop:'1rem'}} onClick={() => navigate('/user')}><img src={iconSettings} alt="" />Settings</button>
+            <button className={styles.quickItem} onClick={goToSupport}><img src={iconHelp} alt="" />Help</button>
           </nav>
 
         </aside>
@@ -431,7 +437,7 @@ function Chatgpt() {
             <div className={styles.chatTitle}>
               {currentChat ? currentChat.title : 'VirtuartAI Assistant'}
             </div>
-            <button className={styles.upgradeBtn}>
+            <button className={styles.upgradeBtn} onClick={goToPricing}>
               <img src={iconUpgrade} alt="" />
               Upgrade
             </button>
@@ -554,9 +560,9 @@ function Chatgpt() {
             </div>
 
             <div className={styles.toolbar}>
-              <button className={styles.toolBtn}><img src={iconAttach} alt="" />Attach</button>
-              <button className={styles.toolBtn}><img src={iconVoice} alt="" />Voice Message</button>
-              <button className={styles.toolBtn}><img src={iconBrowse} alt="" />Browse Prompts</button>
+              <button className={styles.toolBtn} onClick={() => navigate('/gallery')}><img src={iconAttach} alt="" />Attach</button>
+              <button className={styles.toolBtn} onClick={goToSupport}><img src={iconVoice} alt="" />Voice Message</button>
+              <button className={styles.toolBtn} onClick={() => navigate('/gen')}><img src={iconBrowse} alt="" />Browse Prompts</button>
             </div>
           </footer>
         </section>
@@ -597,7 +603,7 @@ function Chatgpt() {
 generative AI tools</li>
               </ul>
 
-              <button className={styles.promoCTA}>
+              <button className={styles.promoCTA} onClick={goToPricing}>
                 Try for free <img src={imgArrow2} alt="" />
               </button>
             </div>

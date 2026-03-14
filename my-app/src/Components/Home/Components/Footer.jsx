@@ -8,6 +8,7 @@ import { useNavigate, NavLink } from "react-router-dom";
 // my-app/src/assets/vector_icons/virai-logo.svg
 const Footer = ({loggedIn,setLoggedIn = () => {}}) => {
     const navigate = useNavigate();
+    const supportBase = "mailto:support@virtuartai.com";
   
     const [user, setUser] = useState(null);
     useEffect(() => {
@@ -19,7 +20,7 @@ const Footer = ({loggedIn,setLoggedIn = () => {}}) => {
         setUser(null);
         setLoggedIn(false);
       }
-    }, [loggedIn,user]); // ✅ Add 'loggedIn' as a dependency
+    }, [loggedIn, setLoggedIn]);
     const handleLogout = () => {
       localStorage.removeItem('user');
       setUser(null);
@@ -35,7 +36,9 @@ const Footer = ({loggedIn,setLoggedIn = () => {}}) => {
         <div className={styles.branding}>
         <img src={virai_log} alt="App Store" className={styles.virai_logo} />
         <div className={styles.appLinks}>
-            <img src={iconsApps} alt="App Store" className={styles.appIcon} />
+            <a href="https://virtuartai.com/" target="_blank" rel="noreferrer">
+              <img src={iconsApps} alt="App Store" className={styles.appIcon} />
+            </a>
             {/* <img src="/google-play.png" alt="Google Play" className={styles.appIcon} />
             <img src="/microsoft.png" alt="Microsoft Store" className={styles.appIcon} /> */}
           </div>
@@ -48,12 +51,12 @@ const Footer = ({loggedIn,setLoggedIn = () => {}}) => {
           <div className={styles.divider_sml} />
 
           <ul className={styles.linkList}>
-            <li><a href="/" className={styles.link}>Home</a></li>
-            <li><a href="/gallery" className={styles.link}>Gallery</a></li>
-            <li><a href="/pricing" className={styles.link}>Pricing</a></li>
+            <li><NavLink to="/" className={styles.link}>Home</NavLink></li>
+            <li><NavLink to="/gallery" className={styles.link}>Gallery</NavLink></li>
+            <li><NavLink to="/" state={{ scrollToSection: 'pricing-section' }} className={styles.link}>Pricing</NavLink></li>
             <li>
-            {user ? (<a   onClick={handleLogout} className={styles.link}>Log Out</a>):(
-              <a href="/login" className={styles.link}>Log In</a>
+            {user ? (<button type="button" onClick={handleLogout} className={styles.link} style={{ background: 'none', border: 'none', padding: 0 }}>Log Out</button>):(
+              <NavLink to="/login" className={styles.link}>Log In</NavLink>
             )}
             </li>
           </ul>
@@ -65,10 +68,10 @@ const Footer = ({loggedIn,setLoggedIn = () => {}}) => {
           <div className={styles.divider_sml} />
 
           <ul className={styles.linkList}>
-            <li><a href="/terms-of-service" className={styles.link}>Terms Of Service</a></li>
-            <li><a href="/refund-policy" className={styles.link}>Refund Policy</a></li>
-            <li><a href="/privacy-policy" className={styles.link}>Privacy Policy</a></li>
-            <li><a href="/cookie-policy" className={styles.link}>Cookie Policy</a></li>
+            <li><NavLink to="/terms-of-service" className={styles.link}>Terms Of Service</NavLink></li>
+            <li><NavLink to="/terms-of-service" className={styles.link}>Refund Policy</NavLink></li>
+            <li><NavLink to="/terms-of-service" className={styles.link}>Privacy Policy</NavLink></li>
+            <li><NavLink to="/terms-of-service" className={styles.link}>Cookie Policy</NavLink></li>
           </ul>
         </div>
 
@@ -78,20 +81,20 @@ const Footer = ({loggedIn,setLoggedIn = () => {}}) => {
           <div className={styles.divider_sml} />
 
           <ul className={styles.linkList}>
-            <li><a href="/affiliate" className={styles.link}>Affiliate Program</a></li>
-            <li><a href="/whitelabel" className={styles.link}>Whitelabel Program</a></li>
-            <li><a href="/api-access" className={styles.link}>API Access</a></li>
-            <li><a href="/mls-partnership" className={styles.link}>MLS Partnership</a></li>
+            <li><a href={`${supportBase}?subject=Affiliate%20Program`} className={styles.link}>Affiliate Program</a></li>
+            <li><a href={`${supportBase}?subject=Whitelabel%20Program`} className={styles.link}>Whitelabel Program</a></li>
+            <li><a href={`${supportBase}?subject=API%20Access`} className={styles.link}>API Access</a></li>
+            <li><a href={`${supportBase}?subject=MLS%20Partnership`} className={styles.link}>MLS Partnership</a></li>
           </ul></div>
         <div className={styles.links}>
           <h3 className={styles.heading}>Blog</h3>
           <div className={styles.divider_sml} />
 
           <ul className={styles.linkList}>
-            <li><a href="/blog/how-to" className={styles.link}>How To Do VirtuartAI</a></li>
-            <li><a href="/blog/pricing" className={styles.link}>VirtuartAI Pricing</a></li>
-            <li><a href="/blog/overview" className={styles.link}>VirtuartAI</a></li>
-            <li><a href="/blog/competitors" className={styles.link}>VirtuartAI Competitors</a></li>
+            <li><a href="https://virtuartai.com/" className={styles.link} target="_blank" rel="noreferrer">How To Do VirtuartAI</a></li>
+            <li><a href="https://virtuartai.com/" className={styles.link} target="_blank" rel="noreferrer">VirtuartAI Pricing</a></li>
+            <li><a href="https://virtuartai.com/" className={styles.link} target="_blank" rel="noreferrer">VirtuartAI</a></li>
+            <li><a href="https://virtuartai.com/" className={styles.link} target="_blank" rel="noreferrer">VirtuartAI Competitors</a></li>
           </ul>
         </div>
       </div>

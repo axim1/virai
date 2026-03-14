@@ -88,6 +88,7 @@ const Navbar = ({ loggedIn, setLoggedIn = () => {}, onHomeClick = () => {}, acti
   };
 
   const handleHomeClick = () => {
+    navigate('/');
     onHomeClick();
     setActiveLink('home');
     closeMenu();
