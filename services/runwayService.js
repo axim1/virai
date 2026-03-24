@@ -122,6 +122,17 @@ function normalizeTextToVideoParams(model, ratio, duration) {
   return { safeRatio, safeDuration };
 }
 
+function getExtensionFromMime(mimeType) {
+  const mime = (mimeType || '').toLowerCase().split(';')[0].trim();
+  const mimeMap = {
+    'video/mp4': 'mp4',
+    'video/webm': 'webm',
+    'video/quicktime': 'mov',
+    'video/x-msvideo': 'avi',
+  };
+  return mimeMap[mime] || 'mp4';
+}
+
 async function uploadPromptImage(client, file) {
   logInfo('Uploading prompt image to Runway ephemeral storage', {
     filename: file.originalname,
@@ -249,7 +260,13 @@ function extractVideoUrl(output) {
 async function downloadAndPersistVideo({ sourceUrl, prompt, userId }) {
   await fs.promises.mkdir(MEDIA_DIR, { recursive: true });
 
-  const filename = `runway-video-${Date.now()}-${uuidv4()}.mp4`;
+  const headResponse = await axios.get(sourceUrl, {
+    responseType: 'stream',
+    timeout: Number(process.env.RUNWAY_DOWNLOAD_TIMEOUT_MS || 120000),
+  });
+  const mimeType = (headResponse.headers['content-type'] || '').split(';')[0].trim() || 'video/mp4';
+  const extension = getExtensionFromMime(mimeType);
+  const filename = `runway-video-${Date.now()}-${uuidv4()}.${extension}`;
   const outputPath = path.join(MEDIA_DIR, filename);
   const relativePath = `/images/${filename}`;
   const downloadUrl = BACKEND_URL ? `${BACKEND_URL}${relativePath}` : relativePath;
@@ -264,11 +281,13 @@ async function downloadAndPersistVideo({ sourceUrl, prompt, userId }) {
     outputPath,
   });
 
-  const response = await axios.get(sourceUrl, {
-    responseType: 'arraybuffer',
-    timeout: Number(process.env.RUNWAY_DOWNLOAD_TIMEOUT_MS || 120000),
+  await new Promise((resolve, reject) => {
+    const writer = fs.createWriteStream(outputPath);
+    headResponse.data.pipe(writer);
+    writer.on('finish', resolve);
+    writer.on('error', reject);
+    headResponse.data.on('error', reject);
   });
-  await fs.promises.writeFile(outputPath, response.data);
   logInfo('Video saved locally', { outputPath, relativePath });
 
   let dbId = null;
@@ -283,7 +302,7 @@ async function downloadAndPersistVideo({ sourceUrl, prompt, userId }) {
     logInfo('Video metadata persisted to database', { dbId, userId: userId || null });
   }
 
-  return { downloadUrl, dbId };
+  return { downloadUrl, dbId, mimeType };
 }
 
 async function getVideoStatusByUuid(uuid) {
@@ -295,7 +314,10 @@ async function getVideoStatusByUuid(uuid) {
   }
 
   if (task.status === 'ready') {
-    return { statusCode: 200, payload: { status: 'ready', downloadUrl: task.downloadUrl, dbId: task.dbId } };
+    return {
+      statusCode: 200,
+      payload: { status: 'ready', downloadUrl: task.downloadUrl, dbId: task.dbId, mimeType: task.mimeType || 'video/mp4' },
+    };
   }
 
   if (task.status === 'error') {
@@ -354,7 +376,7 @@ async function getVideoStatusByUuid(uuid) {
 
   taskStore.update(uuid, { finalizing: true, status: 'processing' });
   try {
-    const { downloadUrl, dbId } = await downloadAndPersistVideo({
+    const { downloadUrl, dbId, mimeType } = await downloadAndPersistVideo({
       sourceUrl,
       prompt: task.prompt,
       userId: task.userId,
@@ -364,6 +386,7 @@ async function getVideoStatusByUuid(uuid) {
       finalizing: false,
       downloadUrl,
       dbId,
+      mimeType,
       sourceUrl,
     });
     logInfo('Runway task completed and finalized', {
@@ -371,8 +394,9 @@ async function getVideoStatusByUuid(uuid) {
       runwayTaskId: task.runwayTaskId,
       downloadUrl,
       dbId,
+      mimeType,
     });
-    return { statusCode: 200, payload: { status: 'ready', downloadUrl, dbId } };
+    return { statusCode: 200, payload: { status: 'ready', downloadUrl, dbId, mimeType } };
   } catch (error) {
     taskStore.update(uuid, { status: 'error', finalizing: false, error: error.message });
     logError('Failed while finalizing Runway task output', {

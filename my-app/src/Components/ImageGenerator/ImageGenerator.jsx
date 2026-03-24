@@ -52,6 +52,7 @@ function ImageGenerator({ onGenerateImage }) {
     setGeneratedImages([]);
     setGeneratedModelUrl(null);
     setGeneratedVideoUrl(null);
+    setGeneratedVideoMimeType('video/mp4');
   }, [apiType]);
 
   // const location = useLocation(); // Use useLocation to retrieve passed state
@@ -62,6 +63,7 @@ function ImageGenerator({ onGenerateImage }) {
   const [generatedImages, setGeneratedImages] = useState([]);
   const [generatedModelUrl, setGeneratedModelUrl] = useState(null);
   const [generatedVideoUrl, setGeneratedVideoUrl] = useState(null);
+  const [generatedVideoMimeType, setGeneratedVideoMimeType] = useState('video/mp4');
   // const [enhancedImage, setEnhancedImage] = useState(null);
 
 
@@ -570,7 +572,9 @@ function ImageGenerator({ onGenerateImage }) {
         if (statusRes.status === 200) {
           clearInterval(pollInterval);
           const downloadUrl = statusRes.data.downloadUrl;
+          const mimeType = statusRes.data.mimeType || 'video/mp4';
           setGeneratedVideoUrl(downloadUrl);
+          setGeneratedVideoMimeType(mimeType);
           clearTimeout(retrieveTimeoutRef.current);
           setIsRetrieving(false);
           setIsLoading(false);
@@ -630,6 +634,7 @@ function ImageGenerator({ onGenerateImage }) {
     setGeneratedImages([]);
     setGeneratedModelUrl(null);   // Reset model URL if applicable
     setGeneratedVideoUrl(null);   // Reset video URL if applicable
+    setGeneratedVideoMimeType('video/mp4');
   };
 
   const handleStyleTypeChange = (style) => {
@@ -1342,7 +1347,7 @@ Coming soon ...
                 {apiType === 'video-generation' && generatedVideoUrl && (
                   <div className={styles.generatedVideoContainer}>
                     <video controls className={styles.generatedVideo}>
-                      <source src={generatedVideoUrl} type="video/mp4" />
+                      <source src={generatedVideoUrl} type={generatedVideoMimeType} />
                       Your browser does not support the video tag.
                     </video>
                   </div>
