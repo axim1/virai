@@ -12,6 +12,7 @@ const { OpenAI } = require('openai');
 const imageEnhancementRoutes = require('./routes/serverless_apis');
 const sketchToImageServerless = require('./routes/serverless_sketch_to_image');
 const d3Serverless = require('./routes/3d-model-generator');
+const runwayRoutes = require('./routes/runway');
 const paymentRoutes = require('./routes/paymentRoutes');
 const chatRoutes = require('./routes/chatRoutes');
 require('./cron/recurringBillingJob');
@@ -83,6 +84,7 @@ app.use('/api/sl', imageEnhancementRoutes);
 app.use('/api/serverless', sketchToImageServerless);
 app.use('/api/serverless', d3Serverless);
 app.use('/api/serverless', t2i);
+app.use('/runway', runwayRoutes);
 app.use('/api', paymentRoutes); // Prefix route
 app.use('/api', chatRoutes); // Add chat routes
 
@@ -483,183 +485,6 @@ app.get("/api/uploads/profilepic/:filename", (req, res) => {
 // const { v4: uuidv4 } = require('uuid');
 
 
-const taskStatusMap ={};
-const pollVideoStatus = (uuid, taskId, headers) => {
-  const poll = setInterval(async () => {
-    try {
-      const queryRes = await axios.get(
-        `https://api.minimaxi.chat/v1/query/video_generation?task_id=${taskId}`,
-        { headers }
-      );
-      const status = queryRes.data.status;
-
-      if (status === 'Success') {
-        clearInterval(poll);
-        const fileId = queryRes.data.file_id;
-
-        // const fileRes = await axios.get(
-        //   `https://api.minimaxi.chat/v1/files/retrieve?file_id=${fileId}`,
-        //   { headers }
-        // );
-
-        // taskStatusMap[uuid] = {
-        //   taskId,
-        //   downloadUrl: fileRes.data.file.download_url,
-        //   status: 'ready',
-        // };
-        const fileRes = await axios.get(
-  `https://api.minimaxi.chat/v1/files/retrieve?file_id=${fileId}`,
-  { headers }
-);
-
-const videoUrl = fileRes.data.file.download_url;
-const videoFilename = `video-${Date.now()}.mp4`;
-const videoPath = path.join(IMAGES_DIR, videoFilename);
-console.log('video path: ', videoPath)
-// Download and save the video locally
-const writer = fs.createWriteStream(videoPath);
-const videoStream = await axios({
-  method: 'get',
-  url: videoUrl,
-  responseType: 'stream'
-});
-videoStream.data.pipe(writer);
-
-writer.on('finish', async () => {
-  const relativePath = `/images/${videoFilename}`;
-  const fullVideoUrl = `${process.env.BACKEND_URL}${relativePath}`;
-
-  try {
-    const newVideoEntry = new GeneratedImage({
-      type: 'video',
-      imageUrl: relativePath,
-      prompt: taskStatusMap[uuid].prompt || 'Video generated from prompt',
-      userId: taskStatusMap[uuid].userId || null, // Must be passed earlier in payload
-    });
-
-    await newVideoEntry.save();
-
-    taskStatusMap[uuid] = {
-      taskId,
-      downloadUrl: fullVideoUrl,
-      status: 'ready',
-      dbId: newVideoEntry._id
-    };
-  } catch (err) {
-    console.error('Failed to save video entry to DB:', err);
-    taskStatusMap[uuid] = {
-      taskId,
-      status: 'error'
-    };
-  }
-});
-
-
-writer.on('error', (err) => {
-  console.error('Video save failed:', err);
-  taskStatusMap[uuid] = {
-    taskId,
-    status: 'error'
-  };
-});
-
-      } else if (['Fail', 'Unknown'].includes(status)) {
-        clearInterval(poll);
-        taskStatusMap[uuid] = { taskId, status: 'error' };
-      }
-    } catch (err) {
-      clearInterval(poll);
-      taskStatusMap[uuid] = { taskId, status: 'error' };
-      console.error('Polling error:', err.message || err);
-    }
-  }, 10000);
-};
-
-
-
-app.post('/generate-video', upload.single('image'), async (req, res) => {
-  const { prompt } = req.body;
-  const imageProvided = !!req.file;
-
-  if (!prompt) {
-    return res.status(400).send({ message: 'Prompt is required' });
-  }
-
-  const taskPayload = {
-    prompt,
-    model: imageProvided ? 'S2V-01' : 'T2V-01',
-  };
-
-  if (imageProvided) {
-    const imageBuffer = fs.readFileSync(req.file.path);
-    const base64Image = imageBuffer.toString('base64');
-    taskPayload.subject_reference = [
-      {
-        type: 'character',
-        image: [`data:image/jpeg;base64,${base64Image}`],
-      },
-    ];
-  }
-
-  const headers = {
-    'authorization': `Bearer ${process.env.HAILOU_API_KEY}`,
-    'content-type': 'application/json',
-  };
-
-  try {
-    const submitRes = await axios.post(
-      'https://api.minimaxi.chat/v1/video_generation',
-      taskPayload,
-      { headers }
-    );
-
-    const taskId = submitRes.data.task_id;
-    console.log(submitRes)
-    // Save taskId in memory or database keyed by a UUID
-    const videoUuid = uuidv4();
-taskStatusMap[videoUuid] = {
-  taskId,
-  status: 'pending',
-  userId: req.body.userId || null,
-  prompt
-};
-
-    // Begin polling in background
-    pollVideoStatus(videoUuid, taskId, headers);
-
-    res.status(202).send({ uuid: videoUuid });
-  } catch (err) {
-    console.error('Error starting video generation:', err.response?.data || err.message);
-    res.status(500).send({ message: 'Video generation failed to start' });
-  } finally {
-    if (req.file) fs.unlink(req.file.path, () => {});
-  }
-});
-
-app.get('/check-video/:uuid', (req, res) => {
-  const { uuid } = req.params;
-  const statusEntry = taskStatusMap[uuid];
-  console.log(taskStatusMap)
-
-  if (!statusEntry) {
-    return res.status(404).send({ message: 'Unknown video UUID' });
-  }
-
-  if (statusEntry.status === 'pending') {
-    return res.status(202).send({ status: 'pending' });
-  }
-
-  if (statusEntry.status === 'ready') {
-    console.log(statusEntry.downloadUrl)
-    return res.status(200).send({ downloadUrl: statusEntry.downloadUrl });
-  }
-
-  return res.status(500).send({ status: 'error', message: 'Video generation failed' });
-});
-
-
-
-
 let respTextData;
 app.post('/text-callback', async (req, res) => {
   try {
@@ -780,7 +605,23 @@ app.get("/topimages/:userId", async (req, res) => {
       return;
     }
 
-    const imageUrls = user.generatedImages.map((image) => `data:image/jpeg;base64,${image.image.toString('base64')}`);
+    const baseUrl = (process.env.BACKEND_URL || '').replace(/\/+$/, '');
+    const imageUrls = user.generatedImages
+      .map((item) => {
+        if (item?.image && Buffer.isBuffer(item.image)) {
+          return `data:image/jpeg;base64,${item.image.toString('base64')}`;
+        }
+
+        if (typeof item?.imageUrl === 'string' && item.imageUrl.trim()) {
+          if (/^https?:\/\//i.test(item.imageUrl)) return item.imageUrl;
+          if (item.imageUrl.startsWith('/')) return baseUrl ? `${baseUrl}${item.imageUrl}` : item.imageUrl;
+          return item.imageUrl;
+        }
+
+        return null;
+      })
+      .filter(Boolean);
+
     res.send({ images: imageUrls });
   } catch (error) {
     console.error("Error fetching images:", error);

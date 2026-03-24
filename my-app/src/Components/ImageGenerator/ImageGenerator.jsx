@@ -36,6 +36,7 @@ import AiRepIcon from '../../assets/vector_icons/AI Replacement-01 1.svg'
 import Dropdown from './Dropdown.js';
 
 const apiUrl = process.env.REACT_APP_API_URL;
+const runwayAllowedImageMimeTypes = new Set(['image/jpeg', 'image/jpg', 'image/png', 'image/webp']);
 const user = JSON.parse(localStorage.getItem('user')) || {};
 const userId = user._id || '672f8fa5d0f99f32389f2ac0'; // Fallback to default ID if not logged in
 
@@ -351,6 +352,11 @@ function ImageGenerator({ onGenerateImage }) {
 
 
   const handleGenerateClick = async () => {
+    if (apiType === 'video-generation' && !promptText.trim()) {
+      alert('Prompt is required for video generation');
+      return;
+    }
+
     setIsLoading(true);
     setIsRetrieving(false);
 
@@ -416,7 +422,11 @@ function ImageGenerator({ onGenerateImage }) {
       if (apiType === 'sketch-to-image' && uploadedImage) {
         formData.append('sketch_image', uploadedImage);
       } else if (uploadedImage) {
-        formData.append('image', uploadedImage);
+        if (uploadedImage instanceof File || uploadedImage instanceof Blob) {
+          formData.append('image', uploadedImage);
+        } else {
+          console.warn('Skipping non-file upload payload', { apiType, uploadedImageType: typeof uploadedImage });
+        }
       }
 
       // Handle different API types
@@ -447,7 +457,7 @@ function ImageGenerator({ onGenerateImage }) {
         onGenerateImage(imageUrls);
       }
     } catch (error) {
-      console.error('Error generating image:', error);
+      console.error('Error generating image:', error?.response?.data || error.message || error);
     }
     if (apiType != 'video-generation' && apiType != 'object-creation') {
       clearTimeout(retrieveTimeoutRef.current);
@@ -535,10 +545,10 @@ function ImageGenerator({ onGenerateImage }) {
   };
 
 
-  // Existing video generation handler (kept for reference)
+  // Runway video generation handler
   const handleVideoGeneration = async (formData) => {
     try {
-      const res = await axios.post(`${apiUrl}generate-video`, formData);
+      const res = await axios.post(`${apiUrl}runway/generate-video`, formData);
       const videoUuid = res.data.uuid;
 
       const endTime = Date.now() + 1940000;
@@ -553,7 +563,7 @@ function ImageGenerator({ onGenerateImage }) {
           return;
         }
 
-        const statusRes = await axios.get(`${apiUrl}check-video/${videoUuid}`);
+        const statusRes = await axios.get(`${apiUrl}runway/check-video/${videoUuid}`);
 
         if (statusRes.status === 202) return;
 
@@ -567,7 +577,10 @@ function ImageGenerator({ onGenerateImage }) {
         }
       }, 3000);
     } catch (error) {
-      console.error('Error generating video:', error);
+      console.error('Error generating video:', error?.response?.data || error.message || error);
+      if (error?.response?.data?.message) {
+        alert(`Video generation failed: ${error.response.data.message}`);
+      }
       throw error;
     }
   };
@@ -650,6 +663,11 @@ function ImageGenerator({ onGenerateImage }) {
   const handleImageUpload = (event) => {
     const file = event.target.files[0];
     if (file) {
+      if (apiType === 'video-generation' && !runwayAllowedImageMimeTypes.has(file.type)) {
+        alert('Invalid image type. Only JPEG, PNG, and WEBP are allowed for video generation.');
+        event.target.value = '';
+        return;
+      }
       const previewUrl = URL.createObjectURL(file);
       if (apiType === 'image-enhancement') {
         const img = new Image();
