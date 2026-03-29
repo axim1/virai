@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import styles from "./Footer.module.css";
 import iconsApps from '../../../assets/vector_icons/downloadapp 1.png';
 import virai_log from '../../../assets/vector_icons/virai-logo.svg';
-import { useNavigate, NavLink } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 // my-app/src/assets/vector_icons/virai-logo.svg
 const Footer = ({loggedIn,setLoggedIn = () => {}}) => {
@@ -51,12 +51,12 @@ const Footer = ({loggedIn,setLoggedIn = () => {}}) => {
           <div className={styles.divider_sml} />
 
           <ul className={styles.linkList}>
-            <li><NavLink to="/" className={styles.link}>Home</NavLink></li>
-            <li><NavLink to="/gallery" className={styles.link}>Gallery</NavLink></li>
-            <li><NavLink to="/" state={{ scrollToSection: 'pricing-section' }} className={styles.link}>Pricing</NavLink></li>
+            <li><Link to="/" className={styles.link}>Home</Link></li>
+            <li><Link to="/gallery" className={styles.link}>Gallery</Link></li>
+            <li><Link to="/" state={{ scrollToSection: 'pricing-section' }} className={styles.link}>Pricing</Link></li>
             <li>
             {user ? (<button type="button" onClick={handleLogout} className={styles.link} style={{ background: 'none', border: 'none', padding: 0 }}>Log Out</button>):(
-              <NavLink to="/login" className={styles.link}>Log In</NavLink>
+              <Link to="/login" className={styles.link}>Log In</Link>
             )}
             </li>
           </ul>
@@ -68,10 +68,10 @@ const Footer = ({loggedIn,setLoggedIn = () => {}}) => {
           <div className={styles.divider_sml} />
 
           <ul className={styles.linkList}>
-            <li><NavLink to="/terms-of-service" className={styles.link}>Terms Of Service</NavLink></li>
-            <li><NavLink to="/terms-of-service" className={styles.link}>Refund Policy</NavLink></li>
-            <li><NavLink to="/terms-of-service" className={styles.link}>Privacy Policy</NavLink></li>
-            <li><NavLink to="/terms-of-service" className={styles.link}>Cookie Policy</NavLink></li>
+            <li><Link to="/terms-of-service" className={styles.link}>Terms Of Service</Link></li>
+            <li><Link to="/terms-of-service" className={styles.link}>Refund Policy</Link></li>
+            <li><Link to="/terms-of-service" className={styles.link}>Privacy Policy</Link></li>
+            <li><Link to="/terms-of-service" className={styles.link}>Cookie Policy</Link></li>
           </ul>
         </div>
 

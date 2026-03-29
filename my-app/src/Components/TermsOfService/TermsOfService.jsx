@@ -6,8 +6,10 @@ const FullScreenContainer = styled.div`
   background-color: #0d0d0d;
   color: white;
   font-family: Arial, sans-serif;
-  height: 100vh;
-  width: 100vw;
+  min-height: 100vh;
+  width: 100%;
+  padding-top: 82px; /* Keep content below fixed 70px navbar */
+  box-sizing: border-box;
   overflow-y: auto;
 `;
 

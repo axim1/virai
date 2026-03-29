@@ -2,6 +2,8 @@
     background-color: #000;
     color: white;
     padding-bottom: 32px;
+    position: relative;
+    z-index: 20;
 
   }
 .divider{
@@ -91,6 +93,7 @@ aspect-ratio: 225.33/26.00;
   }
   
 .link {
+    display: inline-block;
     color: #999;
     font-family: Poppins;
     font-size: 14px;
@@ -100,6 +103,9 @@ aspect-ratio: 225.33/26.00;
     letter-spacing: 1.4px;
     text-transform: capitalize;
     text-decoration: none;
+    cursor: pointer;
+    background: transparent;
+    border: 0;
   }
   
 .link:hover {

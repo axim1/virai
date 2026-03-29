@@ -269,6 +269,7 @@ const isPinned = scrollY < 1200;
     width: '100%',
     height: '100%',
     opacity: backgroundFadeOpacity,
+    pointerEvents: backgroundFadeOpacity <= 0.05 ? 'none' : 'auto',
     transition: 'opacity 0.7s ease',
     // backgroundImage: `url('/your-bg.jpg')`,
     // backgroundSize: `${backgroundZoom}%`,
