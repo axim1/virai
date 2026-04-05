@@ -24,6 +24,27 @@ const Navbar = ({ loggedIn, setLoggedIn = () => {}, onHomeClick = () => {}, acti
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Keep active nav state aligned with the current route so home-section
+  // highlights (Home / AI Tools / Pricing / FAQ) do not leak into other pages.
+  useEffect(() => {
+    if (location.pathname === '/gen') {
+      setActiveLink('compo');
+      return;
+    }
+    if (location.pathname === '/gallery') {
+      setActiveLink('gallery');
+      return;
+    }
+    if (location.pathname === '/chat-ai') {
+      setActiveLink('chat-ai');
+      return;
+    }
+    if (location.pathname === '/' || location.pathname === '/home') {
+      return;
+    }
+    setActiveLink('');
+  }, [location.pathname, setActiveLink]);
+
   // Close mobile menu on any route/hash change
   useEffect(() => {
     setMenuOpen(false);

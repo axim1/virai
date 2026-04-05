@@ -69,9 +69,9 @@ const Footer = ({loggedIn,setLoggedIn = () => {}}) => {
 
           <ul className={styles.linkList}>
             <li><Link to="/terms-of-service" className={styles.link}>Terms Of Service</Link></li>
-            <li><Link to="/terms-of-service" className={styles.link}>Refund Policy</Link></li>
-            <li><Link to="/terms-of-service" className={styles.link}>Privacy Policy</Link></li>
-            <li><Link to="/terms-of-service" className={styles.link}>Cookie Policy</Link></li>
+            <li><a href={`${supportBase}?subject=Refund%20Policy`} className={styles.link}>Refund Policy</a></li>
+            <li><a href="/terms-of-service#privacy-policy" className={styles.link}>Privacy Policy</a></li>
+            <li><a href={`${supportBase}?subject=Cookie%20Policy`} className={styles.link}>Cookie Policy</a></li>
           </ul>
         </div>
 
@@ -91,10 +91,10 @@ const Footer = ({loggedIn,setLoggedIn = () => {}}) => {
           <div className={styles.divider_sml} />
 
           <ul className={styles.linkList}>
-            <li><a href="https://virtuartai.com/" className={styles.link} target="_blank" rel="noreferrer">How To Do VirtuartAI</a></li>
-            <li><a href="https://virtuartai.com/" className={styles.link} target="_blank" rel="noreferrer">VirtuartAI Pricing</a></li>
-            <li><a href="https://virtuartai.com/" className={styles.link} target="_blank" rel="noreferrer">VirtuartAI</a></li>
-            <li><a href="https://virtuartai.com/" className={styles.link} target="_blank" rel="noreferrer">VirtuartAI Competitors</a></li>
+            <li><Link to="/" state={{ scrollToSection: 'faq-section' }} className={styles.link}>How To Do VirtuartAI</Link></li>
+            <li><Link to="/" state={{ scrollToSection: 'pricing-section' }} className={styles.link}>VirtuartAI Pricing</Link></li>
+            <li><Link to="/" className={styles.link}>VirtuartAI</Link></li>
+            <li><a href={`${supportBase}?subject=VirtuartAI%20Competitors`} className={styles.link}>VirtuartAI Competitors</a></li>
           </ul>
         </div>
       </div>

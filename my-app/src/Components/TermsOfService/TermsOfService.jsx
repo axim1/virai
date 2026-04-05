@@ -210,7 +210,7 @@ const TermsOfService = () => {
           VirtuartAI is based in Slovakia and the information we provide is governed by Slovak law. If you access our Services from outside Slovakia, you acknowledge and agree that your information may be transferred to, stored, and processed in Slovakia, where our servers are located and our central database is operated. By using our Services, you consent to the transfer of your information to our facilities and those third parties with whom we share it, as described in our Privacy Policy.
         </Paragraph>
         
-        <SubSectionTitle>GDPR</SubSectionTitle>
+        <SubSectionTitle id="privacy-policy">GDPR</SubSectionTitle>
         <SubSectionTitle>Data Collection and Processing</SubSectionTitle>
         <Paragraph>
           In accordance with the Regulation (EU) 2016/679 of the European Parliament and of the Council (General Data Protection Regulation or GDPR), we collect, process, and store personal data of our users only to the extent necessary for providing and improving our Services. Your personal data will be processed lawfully, fairly, and transparently, and collected for specified, explicit, and legitimate purposes.
