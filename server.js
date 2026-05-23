@@ -60,9 +60,13 @@ if (!fs.existsSync(IMAGES_DIR)) {
 
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
-app.use('/images', express.static(IMAGES_DIR));
-
 app.use(cors({ origin: '*' }));
+app.use('/images', express.static(IMAGES_DIR, {
+  setHeaders: (res) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+  }
+}));
 const { isStringObject } = require("util/types");
 // Serve static files
 app.use('/api/models', (req, res, next) => {

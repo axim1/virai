@@ -111,7 +111,6 @@ const ImageGallery = () => {
   const [hasMore, setHasMore] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [selectedModel, setSelectedModel] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
   const [loadingStates, setLoadingStates] = useState({});
   const [notifications, setNotifications] = useState([]);
@@ -409,13 +408,15 @@ const ImageGallery = () => {
   const renderContent = image => {
     if (image.type === '3d_model') {
       return (
-        <div className={styles.modelContainer} onClick={() => setSelectedModel(image)}>
-          <img
+        <div className={styles.modelContainer} onClick={() => handleImageSelect(image)}>
+          <LazyImage
             src={image.image || placeholder3d}
             alt={`3D Model ${image._id}`}
             className={styles.galleryImage}
-            style={{ cursor: 'pointer' }}
+            onClick={() => handleImageSelect(image)}
+            type="image"
           />
+          <div className={styles.modelBadge}>3D Model</div>
         </div>
       );
     }
@@ -580,7 +581,11 @@ const ImageGallery = () => {
           <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
             <button className={styles.closeButton} onClick={() => setSelectedImage(null)}>×</button>
             <div className={styles.modalImageWrapper}>
-              {selectedImage.type === 'video' ? (
+              {selectedImage.type === '3d_model' ? (
+                <div className={styles.modalModelViewer}>
+                  <ModelViewer modelPath={selectedImage.modelUrl} interactive autoRotate={false} showGround />
+                </div>
+              ) : selectedImage.type === 'video' ? (
                 <video
                   src={selectedImage.image}
                   controls
@@ -599,6 +604,7 @@ const ImageGallery = () => {
                 <ul>
                   {selectedImage.prompt && <li><strong>Prompt:</strong> {selectedImage.prompt}</li>}
                   {selectedImage.negativePrompt && <li><strong>Negative Prompt:</strong> {selectedImage.negativePrompt}</li>}
+                  <li><strong>Type:</strong> {selectedImage.type === '3d_model' ? '3D Model' : selectedImage.type === 'video' ? 'Video' : 'Image'}</li>
                   <li><strong>Dimensions:</strong> {selectedImage.width || 512} × {selectedImage.height || 512}</li>
                   <li><strong>Steps:</strong> {selectedImage.steps || 25}</li>
                   <li><strong>Guidance Scale:</strong> {selectedImage.guidanceScale || 7.5}</li>
@@ -607,6 +613,7 @@ const ImageGallery = () => {
                   <li><strong>Clip Skip:</strong> {selectedImage.clipSkip || 0}</li>
                   <li><strong>Style:</strong> {selectedImage.style || 'default'}</li>
                   <li><strong>Model:</strong> {selectedImage.model || 'default'}</li>
+                  {selectedImage.modelUrl && <li><strong>File:</strong> GLB</li>}
                   <li><strong>Created:</strong> {new Date(selectedImage.createdAt).toLocaleString()}</li>
                 </ul>
               </div>
@@ -651,17 +658,6 @@ const ImageGallery = () => {
                   <span>Download</span>
                 </button>
               </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {selectedModel && (
-        <div className={styles.modal} onClick={() => setSelectedModel(null)}>
-          <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
-            <button className={styles.closeButton} onClick={() => setSelectedModel(null)}>×</button>
-            <div className={styles.modelViewerContainer}>
-              <ModelViewer modelPath={selectedModel.modelUrl} />
             </div>
           </div>
         </div>
