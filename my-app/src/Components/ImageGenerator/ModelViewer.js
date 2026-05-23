@@ -17,28 +17,57 @@ const resolveModelPath = (modelPath) => {
   return modelPath;
 };
 
-const fitCameraToObject = (camera, controls, object, offset = 1.35) => {
+const centerAndNormalizeObject = (object, targetMaxSize = null) => {
   const box = new THREE.Box3().setFromObject(object);
   const size = box.getSize(new THREE.Vector3());
   const center = box.getCenter(new THREE.Vector3());
 
+  object.position.sub(center);
+
+  if (targetMaxSize) {
+    const maxAxis = Math.max(size.x, size.y, size.z) || 1;
+    const scale = targetMaxSize / maxAxis;
+    object.scale.multiplyScalar(scale);
+  }
+
+  object.updateMatrixWorld(true);
+  const normalizedBox = new THREE.Box3().setFromObject(object);
+  return {
+    box: normalizedBox,
+    size: normalizedBox.getSize(new THREE.Vector3()),
+    center: normalizedBox.getCenter(new THREE.Vector3())
+  };
+};
+
+const fitCameraToObject = (camera, controls, object, offset = 1.1) => {
+  const box = new THREE.Box3().setFromObject(object);
+  const size = box.getSize(new THREE.Vector3());
+  const center = box.getCenter(new THREE.Vector3());
+  const min = box.min.clone();
+
   const maxSize = Math.max(size.x, size.y, size.z) || 1;
-  const fitHeightDistance = maxSize / (2 * Math.tan((Math.PI * camera.fov) / 360));
-  const fitWidthDistance = fitHeightDistance / camera.aspect;
+  const fitHeightDistance = size.y / (2 * Math.tan((Math.PI * camera.fov) / 360));
+  const fitWidthDistance = size.x / (2 * Math.tan((Math.PI * camera.fov) / 360) * camera.aspect);
   const distance = offset * Math.max(fitHeightDistance, fitWidthDistance);
 
-  const direction = new THREE.Vector3(1, 0.55, 1).normalize();
-  camera.position.copy(center).add(direction.multiplyScalar(distance));
+  const focusPoint = new THREE.Vector3(
+    center.x,
+    min.y + size.y * 0.32,
+    center.z
+  );
+
+  const direction = new THREE.Vector3(0.72, 0.24, 1.05).normalize();
+  camera.position.copy(focusPoint).add(direction.multiplyScalar(distance));
   camera.near = Math.max(distance / 100, 0.01);
   camera.far = Math.max(distance * 20, 100);
   camera.updateProjectionMatrix();
 
-  controls.target.copy(center);
+  controls.target.copy(focusPoint);
   controls.minDistance = distance * 0.45;
   controls.maxDistance = distance * 4;
   controls.update();
 
-  return { center, size, distance };
+  return { center, size, distance, focusPoint };
 };
 
 const applyModelMaterials = (model) => {
@@ -142,6 +171,12 @@ const ModelViewer = ({
       controls.enableDamping = false;
     }
 
+    const swallowWheel = (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+    };
+    renderer.domElement.addEventListener('wheel', swallowWheel, { passive: false });
+
     const loader = new GLTFLoader();
     let mounted = true;
 
@@ -153,10 +188,11 @@ const ModelViewer = ({
         applyModelMaterials(model);
         scene.add(model);
 
-        const { center, size } = fitCameraToObject(camera, controls, model, interactive ? 1.45 : 1.25);
+        centerAndNormalizeObject(model, interactive ? 2.8 : 2.2);
+        const { center, size } = fitCameraToObject(camera, controls, model, interactive ? 1.15 : 1.05);
 
         if (showGround && ground) {
-          ground.position.y = center.y - size.y / 2 - 0.01;
+          ground.position.y = center.y - size.y / 2 - 0.06;
           grid.position.y = ground.position.y;
         }
 
@@ -198,6 +234,7 @@ const ModelViewer = ({
         cancelAnimationFrame(animationFrameRef.current);
       }
       controls.dispose();
+      renderer.domElement.removeEventListener('wheel', swallowWheel);
       renderer.dispose();
       scene.traverse((object) => {
         if (!object.isMesh) return;
@@ -224,6 +261,7 @@ const ModelViewer = ({
         borderRadius: '10px',
         position: 'relative',
         overflow: 'hidden',
+        touchAction: 'none',
         background: 'linear-gradient(180deg, #171717 0%, #0f0f0f 100%)',
         ...style
       }}

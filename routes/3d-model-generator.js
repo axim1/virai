@@ -310,6 +310,12 @@ function extensionForMimeType(mimeType) {
   }
 }
 
+function sanitizeJobId(jobId) {
+  return String(jobId || '')
+    .replace(/[^a-zA-Z0-9_-]/g, '_')
+    .slice(0, 120);
+}
+
 async function streamS3BodyToResponse(body, res) {
   if (!body) {
     throw new Error('R2 object response body is empty.');
@@ -443,6 +449,9 @@ router.get('/3d-model-status/:job_id', async (req, res) => {
     let glbSizeBytes = output?.glb_size_bytes || null;
     let modelBuffer = null;
     let previewImageUrl = null;
+    const existingModel = userId
+      ? await GeneratedImage.findOne({ userId, jobId: job_id }).sort({ createdAt: -1 })
+      : null;
 
     if (!glbBase64 && !output?.glb_url && !output?.glb_object_key) {
       return res.status(500).json({
@@ -501,7 +510,7 @@ router.get('/3d-model-status/:job_id', async (req, res) => {
     if (previewImage) {
       const parsedPreview = parseDataUrl(previewImage);
       if (parsedPreview) {
-        const previewFileName = `image-${Date.now()}.${extensionForMimeType(parsedPreview.mimeType)}`;
+        const previewFileName = `image-${sanitizeJobId(job_id)}.${extensionForMimeType(parsedPreview.mimeType)}`;
         const previewOutputDir = getModelOutputDir();
         ensureDirExists(previewOutputDir);
         const previewSavePath = path.join(previewOutputDir, previewFileName);
@@ -514,11 +523,16 @@ router.get('/3d-model-status/:job_id', async (req, res) => {
       }
     }
 
-    let savedModel = null;
+    if (!previewImageUrl && existingModel?.imageUrl) {
+      previewImageUrl = existingModel.imageUrl;
+    }
+
+    let savedModel = existingModel;
     if (userId) {
       try {
-        savedModel = await GeneratedImage.create({
+        const payload = {
           userId,
+          jobId: job_id,
           type: '3d_model',
           modelUrl,
           imageUrl: previewImageUrl,
@@ -529,9 +543,21 @@ router.get('/3d-model-status/:job_id', async (req, res) => {
             decimation_target: output?.decimation_target,
             glb_size_bytes: glbSizeBytes,
             glb_object_key: output?.glb_object_key || null
-          }),
-          createdAt: new Date()
-        });
+          })
+        };
+
+        if (existingModel) {
+          savedModel = await GeneratedImage.findByIdAndUpdate(
+            existingModel._id,
+            { $set: payload },
+            { new: true }
+          );
+        } else {
+          savedModel = await GeneratedImage.create({
+            ...payload,
+            createdAt: new Date()
+          });
+        }
       } catch (saveError) {
         console.error('⚠️ [3D-MODEL-STATUS] Model finished but DB save failed:', {
           error: saveError.message

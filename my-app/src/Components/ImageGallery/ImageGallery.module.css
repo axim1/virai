@@ -504,38 +504,42 @@ text-transform: capitalize;
 
 @media (min-width: 900px) {
   .modalContent {
-    flex-direction: row;
-    justify-content: center;
-    max-width: 1200px;
+    display: grid;
+    grid-template-columns: minmax(0, 1.8fr) minmax(280px, 0.8fr);
+    align-items: stretch;
+    max-width: 1320px;
     padding: 3rem;
+    gap: 2rem;
   }
 }
 
 .modalImageWrapper {
-  flex: 1 1 65%;
+  flex: 1 1 auto;
   display: flex;
   justify-content: center;
   align-items: center;
   border-radius: 16px;
   overflow: hidden;
   background: #000;
+  min-width: 0;
+  min-height: min(72vh, 760px);
 }
 
 .modalModelViewer {
   width: 100%;
-  height: min(70vh, 720px);
+  height: 100%;
 }
 
 .modalImage {
   width: 100%;
-  height: auto;
-  max-height: 70vh;
+  height: 100%;
   object-fit: contain;
   border-radius: 12px;
+  display: block;
 }
 
 .imageMetadata {
-  flex: 1 1 35%;
+  flex: 1 1 auto;
   display: flex;
   justify-content: space-between;
   flex-direction: column;
@@ -546,12 +550,20 @@ text-transform: capitalize;
   background: linear-gradient(135deg, #333 0%, #2a2a2a 100%);
   border-radius: 16px;
   border: 1px solid #444;
+  max-height: min(72vh, 760px);
 }
 
 @media (min-width: 900px) {
   .imageMetadata {
     margin-top: 0;
-    margin-left: 2rem;
+    margin-left: 0;
+  }
+}
+
+@media (min-width: 900px) {
+  .modalImageWrapper,
+  .imageMetadata {
+    height: min(72vh, 760px);
   }
 }
 
