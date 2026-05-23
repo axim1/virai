@@ -310,6 +310,27 @@ async function streamS3BodyToResponse(body, res) {
   throw new Error('Unsupported R2 response body type.');
 }
 
+async function s3BodyToBuffer(body) {
+  if (!body) {
+    throw new Error('R2 object response body is empty.');
+  }
+
+  if (typeof body.transformToByteArray === 'function') {
+    const bytes = await body.transformToByteArray();
+    return Buffer.from(bytes);
+  }
+
+  if (typeof body.pipe === 'function') {
+    const chunks = [];
+    for await (const chunk of body) {
+      chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+    }
+    return Buffer.concat(chunks);
+  }
+
+  throw new Error('Unsupported R2 response body type.');
+}
+
 // POST /generate-3d-model
 router.post('/generate-3d-model', upload.single('image'), async (req, res) => {
   console.log('🎨 [3D-MODEL] New 3D model generation request received');
@@ -410,23 +431,6 @@ router.get('/3d-model-status/:job_id', async (req, res) => {
       modelBuffer = Buffer.from(glbBase64, 'base64');
       const glbBase64Length = glbBase64.length;
       glbSizeBytes = glbSizeBytes || modelBuffer.length;
-
-      const modelOutputDir = getModelOutputDir();
-      ensureDirExists(modelOutputDir);
-      const savePath = path.join(modelOutputDir, fileName);
-      console.log('💾 [3D-MODEL-STATUS] Writing completed model to disk:', {
-        jobId: job_id,
-        outputDir: modelOutputDir,
-        savePath,
-        glbBase64Length,
-        glbSizeBytes
-      });
-      fs.writeFileSync(savePath, modelBuffer);
-      console.log('✅ [3D-MODEL-STATUS] Model file written:', {
-        jobId: job_id,
-        savePath
-      });
-      modelUrl = `/images/${fileName}`;
     } else {
       console.log('🌩️ [3D-MODEL-STATUS] Using remote model storage for completed GLB:', {
         jobId: job_id,
@@ -434,6 +438,40 @@ router.get('/3d-model-status/:job_id', async (req, res) => {
         glbObjectKey: output?.glb_object_key || null,
         glbSizeBytes
       });
+
+      if (output?.glb_object_key && isR2Configured()) {
+        const r2 = getR2Client();
+        const { bucket } = getR2Config();
+        const response = await r2.send(
+          new GetObjectCommand({
+            Bucket: bucket,
+            Key: output.glb_object_key
+          })
+        );
+        modelBuffer = await s3BodyToBuffer(response.Body);
+        glbSizeBytes = glbSizeBytes || modelBuffer.length;
+      }
+    }
+
+    if (modelBuffer) {
+      const modelOutputDir = getModelOutputDir();
+      ensureDirExists(modelOutputDir);
+      const savePath = path.join(modelOutputDir, fileName);
+      console.log('💾 [3D-MODEL-STATUS] Writing completed model to disk:', {
+        jobId: job_id,
+        outputDir: modelOutputDir,
+        savePath,
+        glbBase64Length: glbBase64 ? glbBase64.length : null,
+        glbSizeBytes
+      });
+      if (!fs.existsSync(savePath)) {
+        fs.writeFileSync(savePath, modelBuffer);
+      }
+      console.log('✅ [3D-MODEL-STATUS] Model file written:', {
+        jobId: job_id,
+        savePath
+      });
+      modelUrl = `/images/${fileName}`;
     }
 
     let savedModel = null;
