@@ -40,6 +40,17 @@ const runwayAllowedImageMimeTypes = new Set(['image/jpeg', 'image/jpg', 'image/p
 const user = JSON.parse(localStorage.getItem('user')) || {};
 const userId = user._id || '672f8fa5d0f99f32389f2ac0'; // Fallback to default ID if not logged in
 
+const resolveBackendMediaUrl = (value) => {
+  if (!value) return value;
+  if (value.startsWith('blob:') || value.startsWith('data:') || value.startsWith('http://') || value.startsWith('https://')) {
+    return value;
+  }
+  if (value.startsWith('/')) {
+    return `${apiUrl.replace(/\/$/, '')}${value}`;
+  }
+  return value;
+};
+
 function ImageGenerator({ onGenerateImage }) {
   const navigate = useNavigate();
   const location = useLocation(); // Use useLocation to retrieve passed state
@@ -130,7 +141,7 @@ function ImageGenerator({ onGenerateImage }) {
       const jobId = initRes.data.job_id;
       if (!jobId) throw new Error('No job ID received from server');
 
-      const endTime = Date.now() + 240000; // 4-minute timeout
+      const endTime = Date.now() + 600000; // 10-minute timeout
 
       // Step 2: Poll job status
       const pollForResult = async () => {
@@ -149,9 +160,12 @@ function ImageGenerator({ onGenerateImage }) {
 
               if (statusRes.status === 202) return;
 
-              if (statusRes.status === 200 && statusRes.data.glb_base64) {
+              if (statusRes.status === 200 && (statusRes.data.glb_base64 || statusRes.data.modelUrl)) {
                 clearInterval(interval);
-                resolve(statusRes.data.glb_base64);
+                resolve({
+                  glbBase64: statusRes.data.glb_base64 || null,
+                  modelUrl: statusRes.data.modelUrl || null
+                });
               }
             } catch (err) {
               if (err.response?.status === 202) return;
@@ -162,10 +176,16 @@ function ImageGenerator({ onGenerateImage }) {
         });
       };
 
-      const glbBase64 = await pollForResult();
-      const blob = base64ToBlob(glbBase64, 'model/gltf-binary');
-      const url = URL.createObjectURL(blob);
-      setGeneratedModelUrl(url);
+      const result = await pollForResult();
+      if (result.glbBase64) {
+        const blob = base64ToBlob(result.glbBase64, 'model/gltf-binary');
+        const url = URL.createObjectURL(blob);
+        setGeneratedModelUrl(url);
+      } else if (result.modelUrl) {
+        setGeneratedModelUrl(resolveBackendMediaUrl(result.modelUrl));
+      } else {
+        throw new Error('3D model generation finished without a model URL or GLB payload');
+      }
     } catch (err) {
       console.error('RunPod 3D generation failed:', err);
       throw err;

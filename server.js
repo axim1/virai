@@ -53,11 +53,14 @@ const passport = require("passport");
 require("./passport-config"); // Load the Passport config
 
 // Middleware
-const IMAGES_DIR = path.join(__dirname, '../images'); // or wherever you serve from
+const IMAGES_DIR = path.join(__dirname, 'images');
+if (!fs.existsSync(IMAGES_DIR)) {
+  fs.mkdirSync(IMAGES_DIR, { recursive: true });
+}
 
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
-app.use('/images', express.static(path.join(__dirname, '../images')));
+app.use('/images', express.static(IMAGES_DIR));
 
 app.use(cors({ origin: '*' }));
 const { isStringObject } = require("util/types");
@@ -844,15 +847,16 @@ const images = await GeneratedImage.find(query)
 
 
     const backendUrl = process.env.BACKEND_URL || "http://localhost:8000";
+    const normalizeMediaUrl = (value) => {
+      if (!value) return null;
+      if (value.startsWith('data:') || value.startsWith('http://') || value.startsWith('https://')) {
+        return value;
+      }
+      return `${backendUrl}${value}`;
+    };
 
     const imageUrls = images.map(img => {
-      let imageData;
-
-      if (img.type === '3d_model') {
-        imageData = `${backendUrl}${img.imageUrl}`;  // .glb
-      } else {
-        imageData = `${backendUrl}${img.imageUrl}`;  // .png/.jpg
-      }
+      const imageData = normalizeMediaUrl(img.imageUrl);
 
       return {
         _id: img._id,
@@ -885,7 +889,7 @@ const images = await GeneratedImage.find(query)
         clipSkip: img.clipSkip || 0,
         style: img.style || 'default',
         model: img.model || 'default',
-        modelUrl: img.modelUrl || null,
+        modelUrl: normalizeMediaUrl(img.modelUrl),
       };
     });
 

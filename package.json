@@ -10,6 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.967.0",
     "@runwayml/sdk": "^3.15.0",
     "apple-signin-auth": "^2.0.0",
     "axios": "^1.6.8",

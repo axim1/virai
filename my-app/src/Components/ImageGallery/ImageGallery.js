@@ -409,8 +409,13 @@ const ImageGallery = () => {
   const renderContent = image => {
     if (image.type === '3d_model') {
       return (
-        <div className={styles.modelContainer} onClick={() => setSelectedModel({ ...image, modelUrl: image.image })}>
-          <img src={placeholder3d} alt={`3D Model ${image._id}`} className={styles.galleryImage} style={{ cursor: 'pointer' }} />
+        <div className={styles.modelContainer} onClick={() => setSelectedModel(image)}>
+          <img
+            src={image.image || placeholder3d}
+            alt={`3D Model ${image._id}`}
+            className={styles.galleryImage}
+            style={{ cursor: 'pointer' }}
+          />
         </div>
       );
     }
