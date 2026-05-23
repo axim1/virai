@@ -15,12 +15,29 @@ import placeholder3d from '../../assets/vector_icons/3D object generation-01 1.s
 const apiUrl = process.env.REACT_APP_API_URL;
 const API_BASE = process.env.REACT_APP_API_URL;
 
+const mergeUniqueById = (existing, incoming) => {
+  const merged = new Map();
+  [...existing, ...incoming].forEach(item => {
+    if (item?._id) {
+      merged.set(item._id, item);
+    }
+  });
+  return Array.from(merged.values());
+};
+
 // Lazy loading component for individual images
-const LazyImage = ({ src, alt, className, onClick, type, style }) => {
+const LazyImage = ({ src, alt, className, onClick, type, style, fallbackSrc }) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isInView, setIsInView] = useState(false);
   const [hasError, setHasError] = useState(false);
+  const [currentSrc, setCurrentSrc] = useState(src);
   const imgRef = useRef();
+
+  useEffect(() => {
+    setCurrentSrc(src);
+    setHasError(false);
+    setIsLoaded(false);
+  }, [src]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -52,6 +69,10 @@ const LazyImage = ({ src, alt, className, onClick, type, style }) => {
   };
 
   const handleError = () => {
+    if (fallbackSrc && currentSrc !== fallbackSrc) {
+      setCurrentSrc(fallbackSrc);
+      return;
+    }
     setHasError(true);
     setIsLoaded(true);
   };
@@ -65,7 +86,7 @@ const LazyImage = ({ src, alt, className, onClick, type, style }) => {
       )}
       {isInView && !hasError && type === 'video' ? (
         <video
-          src={src}
+          src={currentSrc}
           className={`${className} ${isLoaded ? styles.imageLoaded : styles.imageLoading}`}
           controls={false}
           muted
@@ -77,8 +98,9 @@ const LazyImage = ({ src, alt, className, onClick, type, style }) => {
         />
       ) : isInView && !hasError ? (
         <img
-          src={src}
+          src={currentSrc}
           alt={alt}
+          loading="lazy"
           className={`${className} ${isLoaded ? styles.imageLoaded : styles.imageLoading}`}
           onClick={onClick}
           onLoad={handleLoad}
@@ -98,6 +120,8 @@ const LazyImage = ({ src, alt, className, onClick, type, style }) => {
 const ImageGallery = () => {
   const loaderRef = useRef(null);
   const mobileFilterRef = useRef(null);
+  const inFlightPagesRef = useRef(new Set());
+  const activeRequestRef = useRef(0);
   const [loadError, setLoadError] = useState(false);
 
   const [user, setUser] = useState(null);
@@ -174,6 +198,14 @@ const ImageGallery = () => {
   };
 
   const fetchImages = useCallback(async (pageNum = 1, append = false) => {
+    const requestKey = `${filter}:${pageNum}`;
+    if (inFlightPagesRef.current.has(requestKey)) {
+      return;
+    }
+
+    inFlightPagesRef.current.add(requestKey);
+    const requestId = activeRequestRef.current;
+
     try {
       setIsLoading(true);
       setLoadError(false);
@@ -194,30 +226,45 @@ const ImageGallery = () => {
       if (!response.ok) throw new Error("Server responded with error");
 
       const data = await response.json();
+      if (requestId !== activeRequestRef.current) {
+        return;
+      }
+
       console.log('data', data)
       if (data.images.length === 0) {
         setHasMore(false);
       } else {
         setHasMore(data.images.length === limit);
-        setImages(prev => (append ? [...prev, ...data.images] : data.images));
+        setImages(prev => (
+          append ? mergeUniqueById(prev, data.images) : mergeUniqueById([], data.images)
+        ));
         setPage(pageNum);
       }
     } catch (error) {
-      setError(error.message);
-      setLoadError(true);
-      showNotification('Failed to load images', 'error');
+      if (requestId === activeRequestRef.current) {
+        setError(error.message);
+        setLoadError(true);
+        showNotification('Failed to load images', 'error');
+      }
     } finally {
-      setIsLoading(false);
+      inFlightPagesRef.current.delete(requestKey);
+      if (requestId === activeRequestRef.current) {
+        setIsLoading(false);
+      }
     }
-  }, [filter, user, limit]);
+  }, [filter, limit]);
 
   useEffect(() => {
+    activeRequestRef.current += 1;
+    inFlightPagesRef.current.clear();
     setPage(1);
     setHasMore(true);
     fetchImages(1, false);
-  }, [filter, user]);
+  }, [filter, user, fetchImages]);
 
   const handleFilterChange = selectedFilter => {
+    activeRequestRef.current += 1;
+    inFlightPagesRef.current.clear();
     setFilter(selectedFilter);
     setImages([]);
     setPage(1);
@@ -415,6 +462,7 @@ const ImageGallery = () => {
             className={styles.galleryImage}
             onClick={() => handleImageSelect(image)}
             type="image"
+            fallbackSrc={placeholder3d}
           />
           <div className={styles.modelBadge}>3D Model</div>
         </div>

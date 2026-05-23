@@ -53,7 +53,9 @@ const passport = require("passport");
 require("./passport-config"); // Load the Passport config
 
 // Middleware
-const IMAGES_DIR = path.join(__dirname, 'images');
+const IMAGES_DIR = process.env.MODEL_OUTPUT_DIR
+  ? path.resolve(process.env.MODEL_OUTPUT_DIR)
+  : path.join(__dirname, 'images');
 if (!fs.existsSync(IMAGES_DIR)) {
   fs.mkdirSync(IMAGES_DIR, { recursive: true });
 }
@@ -62,6 +64,7 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(cors({ origin: '*' }));
 app.use('/images', express.static(IMAGES_DIR, {
+  fallthrough: false,
   setHeaders: (res) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');

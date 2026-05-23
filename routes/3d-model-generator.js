@@ -287,6 +287,29 @@ function getPreviewImage(output) {
   return null;
 }
 
+function parseDataUrl(dataUrl) {
+  if (typeof dataUrl !== 'string') return null;
+  const match = dataUrl.match(/^data:([^;]+);base64,(.+)$/);
+  if (!match) return null;
+  return {
+    mimeType: match[1],
+    buffer: Buffer.from(match[2], 'base64')
+  };
+}
+
+function extensionForMimeType(mimeType) {
+  switch (mimeType) {
+    case 'image/jpeg':
+      return 'jpg';
+    case 'image/png':
+      return 'png';
+    case 'image/webp':
+      return 'webp';
+    default:
+      return 'bin';
+  }
+}
+
 async function streamS3BodyToResponse(body, res) {
   if (!body) {
     throw new Error('R2 object response body is empty.');
@@ -419,6 +442,7 @@ router.get('/3d-model-status/:job_id', async (req, res) => {
     let modelUrl = resolveReturnedModelLocation(output, fileName);
     let glbSizeBytes = output?.glb_size_bytes || null;
     let modelBuffer = null;
+    let previewImageUrl = null;
 
     if (!glbBase64 && !output?.glb_url && !output?.glb_object_key) {
       return res.status(500).json({
@@ -474,6 +498,22 @@ router.get('/3d-model-status/:job_id', async (req, res) => {
       modelUrl = `/images/${fileName}`;
     }
 
+    if (previewImage) {
+      const parsedPreview = parseDataUrl(previewImage);
+      if (parsedPreview) {
+        const previewFileName = `image-${Date.now()}.${extensionForMimeType(parsedPreview.mimeType)}`;
+        const previewOutputDir = getModelOutputDir();
+        ensureDirExists(previewOutputDir);
+        const previewSavePath = path.join(previewOutputDir, previewFileName);
+        if (!fs.existsSync(previewSavePath)) {
+          fs.writeFileSync(previewSavePath, parsedPreview.buffer);
+        }
+        previewImageUrl = `/images/${previewFileName}`;
+      } else {
+        previewImageUrl = previewImage;
+      }
+    }
+
     let savedModel = null;
     if (userId) {
       try {
@@ -481,7 +521,7 @@ router.get('/3d-model-status/:job_id', async (req, res) => {
           userId,
           type: '3d_model',
           modelUrl,
-          imageUrl: previewImage,
+          imageUrl: previewImageUrl,
           description: JSON.stringify({
             resolution: output?.resolution,
             seed: output?.seed,
@@ -507,7 +547,7 @@ router.get('/3d-model-status/:job_id', async (req, res) => {
       glb_filename: fileName,
       glb_size_bytes: glbSizeBytes,
       glb_base64: glbBase64 || null,
-      preview_image: previewImage,
+      preview_image: previewImageUrl || previewImage,
       resolution: output?.resolution,
       seed: output?.seed,
       texture_size: output?.texture_size,
