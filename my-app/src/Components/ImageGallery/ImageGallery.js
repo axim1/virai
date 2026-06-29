@@ -14,6 +14,48 @@ import placeholder3d from '../../assets/vector_icons/3D object generation-01 1.s
 
 const apiUrl = process.env.REACT_APP_API_URL;
 const API_BASE = process.env.REACT_APP_API_URL;
+const GALLERY_PAGE_COOLDOWN_MS = 600;
+const GALLERY_MEDIA_CONCURRENCY = 4;
+
+const galleryMediaQueue = {
+  active: 0,
+  queue: [],
+  request(start) {
+    const item = {
+      cancelled: false,
+      released: false,
+      started: false,
+      start,
+    };
+
+    this.queue.push(item);
+    this.runNext();
+
+    return () => {
+      item.cancelled = true;
+      if (item.started && !item.released) {
+        item.released = true;
+        this.active = Math.max(0, this.active - 1);
+        this.runNext();
+      }
+    };
+  },
+  runNext() {
+    while (this.active < GALLERY_MEDIA_CONCURRENCY && this.queue.length > 0) {
+      const item = this.queue.shift();
+      if (!item || item.cancelled) continue;
+
+      this.active += 1;
+      item.started = true;
+      item.start(() => {
+        if (item.released) return;
+        item.released = true;
+        this.active = Math.max(0, this.active - 1);
+        this.runNext();
+      });
+    }
+  },
+};
 
 const mergeUniqueById = (existing, incoming) => {
   const merged = new Map();
@@ -29,13 +71,20 @@ const mergeUniqueById = (existing, incoming) => {
 const LazyImage = ({ src, alt, className, onClick, type, style, fallbackSrc }) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isInView, setIsInView] = useState(false);
+  const [canLoadMedia, setCanLoadMedia] = useState(false);
   const [hasError, setHasError] = useState(false);
   const [currentSrc, setCurrentSrc] = useState(src);
   const imgRef = useRef();
+  const releaseMediaSlotRef = useRef(null);
 
   useEffect(() => {
     const nextSrc = src || fallbackSrc || null;
+    if (releaseMediaSlotRef.current) {
+      releaseMediaSlotRef.current();
+      releaseMediaSlotRef.current = null;
+    }
     setCurrentSrc(nextSrc);
+    setCanLoadMedia(false);
     setHasError(!nextSrc);
     setIsLoaded(!nextSrc);
   }, [src, fallbackSrc]);
@@ -50,7 +99,7 @@ const LazyImage = ({ src, alt, className, onClick, type, style, fallbackSrc }) =
       },
       {
         threshold: 0.1,
-        rootMargin: '50px'
+        rootMargin: '180px'
       }
     );
 
@@ -65,11 +114,42 @@ const LazyImage = ({ src, alt, className, onClick, type, style, fallbackSrc }) =
     };
   }, []);
 
+  useEffect(() => {
+    if (!isInView || !currentSrc || hasError || type === 'video') return;
+
+    releaseMediaSlotRef.current = galleryMediaQueue.request(release => {
+      releaseMediaSlotRef.current = release;
+      setCanLoadMedia(true);
+    });
+
+    return () => {
+      if (releaseMediaSlotRef.current) {
+        releaseMediaSlotRef.current();
+        releaseMediaSlotRef.current = null;
+      }
+    };
+  }, [isInView, currentSrc, hasError, type]);
+
+  useEffect(() => () => {
+    if (releaseMediaSlotRef.current) {
+      releaseMediaSlotRef.current();
+    }
+  }, []);
+
+  const releaseMediaSlot = () => {
+    if (releaseMediaSlotRef.current) {
+      releaseMediaSlotRef.current();
+      releaseMediaSlotRef.current = null;
+    }
+  };
+
   const handleLoad = () => {
     setIsLoaded(true);
+    releaseMediaSlot();
   };
 
   const handleError = () => {
+    releaseMediaSlot();
     if (fallbackSrc && currentSrc !== fallbackSrc) {
       setCurrentSrc(fallbackSrc);
       return;
@@ -80,24 +160,22 @@ const LazyImage = ({ src, alt, className, onClick, type, style, fallbackSrc }) =
 
   return (
     <div ref={imgRef} className={styles.lazyImageContainer} style={style}>
-      {!isLoaded && (
+      {!isLoaded && type !== 'video' && (
         <div className={styles.imagePlaceholder}>
           <div className={styles.placeholderShimmer}></div>
         </div>
       )}
       {isInView && !hasError && type === 'video' ? (
-        <video
-          src={currentSrc}
-          className={`${className} ${isLoaded ? styles.imageLoaded : styles.imageLoading}`}
-          controls={false}
-          muted
-          loop
+        <button
+          type="button"
+          className={`${styles.videoPreview} ${className}`}
           onClick={onClick}
-          onLoadedData={handleLoad}
-          onError={handleError}
-          style={{ cursor: 'pointer' }}
-        />
-      ) : isInView && !hasError ? (
+          aria-label={alt}
+        >
+          <span className={styles.videoPlayIcon}>▶</span>
+          <span className={styles.videoPreviewText}>Video</span>
+        </button>
+      ) : isInView && canLoadMedia && !hasError ? (
         <img
           src={currentSrc}
           alt={alt}
@@ -123,6 +201,9 @@ const ImageGallery = () => {
   const mobileFilterRef = useRef(null);
   const inFlightPagesRef = useRef(new Set());
   const activeRequestRef = useRef(0);
+  const abortControllerRef = useRef(null);
+  const lastPageRequestAtRef = useRef(0);
+  const pageRef = useRef(1);
   const [loadError, setLoadError] = useState(false);
 
   const [user, setUser] = useState(null);
@@ -200,28 +281,39 @@ const ImageGallery = () => {
 
   const fetchImages = useCallback(async (pageNum = 1, append = false, requestId = activeRequestRef.current) => {
     const requestKey = `${filter}:${pageNum}`;
-    if (inFlightPagesRef.current.has(requestKey)) {
+    if (inFlightPagesRef.current.size > 0 || inFlightPagesRef.current.has(requestKey)) {
       return;
     }
 
     inFlightPagesRef.current.add(requestKey);
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+    lastPageRequestAtRef.current = Date.now();
 
     try {
       setIsLoading(true);
       setLoadError(false);
 
-      let url = `${apiUrl}api/images?filter=${filter}&page=${pageNum}&limit=${limit}`;
+      const params = new URLSearchParams({
+        filter,
+        page: String(pageNum),
+        limit: String(limit),
+      });
       if (filter === 'Owned by Me') {
         const storedUser = JSON.parse(localStorage.getItem('user'));
 
         if (storedUser && storedUser._id) {
-          url += `&userId=${storedUser._id}`;
+          params.set('userId', storedUser._id);
         } else {
           console.warn('⚠️ User ID missing');
         }
       }
 
-      const response = await fetch(url);
+      const url = `${apiUrl}api/images?${params.toString()}`;
+      const response = await fetch(url, { signal: controller.signal });
       if (!response.ok) throw new Error("Server responded with error");
 
       const data = await response.json();
@@ -229,16 +321,22 @@ const ImageGallery = () => {
         return;
       }
 
-      if (data.images.length === 0) {
+      const nextImages = Array.isArray(data.images) ? data.images : [];
+
+      if (nextImages.length === 0) {
         setHasMore(false);
       } else {
-        setHasMore(data.images.length === limit);
+        setHasMore(typeof data.hasMore === 'boolean' ? data.hasMore : nextImages.length === limit);
         setImages(prev => (
-          append ? mergeUniqueById(prev, data.images) : mergeUniqueById([], data.images)
+          append ? mergeUniqueById(prev, nextImages) : mergeUniqueById([], nextImages)
         ));
         setPage(pageNum);
+        pageRef.current = pageNum;
       }
     } catch (error) {
+      if (error.name === 'AbortError') {
+        return;
+      }
       if (requestId === activeRequestRef.current) {
         setError(error.message);
         setLoadError(true);
@@ -246,6 +344,9 @@ const ImageGallery = () => {
       }
     } finally {
       inFlightPagesRef.current.delete(requestKey);
+      if (abortControllerRef.current === controller) {
+        abortControllerRef.current = null;
+      }
       if (requestId === activeRequestRef.current) {
         setIsLoading(false);
       }
@@ -256,17 +357,34 @@ const ImageGallery = () => {
     const requestId = activeRequestRef.current + 1;
     activeRequestRef.current = requestId;
     inFlightPagesRef.current.clear();
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
     setPage(1);
+    pageRef.current = 1;
     setHasMore(true);
     fetchImages(1, false, requestId);
+
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+        abortControllerRef.current = null;
+      }
+    };
   }, [filter, fetchImages]);
 
   const handleFilterChange = selectedFilter => {
     activeRequestRef.current += 1;
     inFlightPagesRef.current.clear();
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
     setFilter(selectedFilter);
     setImages([]);
     setPage(1);
+    pageRef.current = 1;
     setHasMore(true);
     if (isMobile) {
       setIsFilterMenuOpen(false);
@@ -279,10 +397,12 @@ const ImageGallery = () => {
     const observer = new IntersectionObserver(
       entries => {
         if (entries[0].isIntersecting) {
-          fetchImages(page + 1, true);
+          const elapsedSinceLastPage = Date.now() - lastPageRequestAtRef.current;
+          if (elapsedSinceLastPage < GALLERY_PAGE_COOLDOWN_MS) return;
+          fetchImages(pageRef.current + 1, true);
         }
       },
-      { threshold: 1 }
+      { threshold: 0.25, rootMargin: '320px 0px' }
     );
 
     const current = loaderRef.current;
@@ -291,7 +411,7 @@ const ImageGallery = () => {
     return () => {
       if (current) observer.unobserve(current);
     };
-  }, [isLoading, hasMore, page, fetchImages, loadError]);
+  }, [isLoading, hasMore, fetchImages, loadError]);
 
   const handleDownload = async (imageUrl, filename) => {
     try {
@@ -583,7 +703,13 @@ const ImageGallery = () => {
           <div key={`image-${image._id || index}`} className={styles.imageItem}>
             {renderContent(image)}
             <div className={styles.userInfo}>
-              <img src={getProfilePicUrl(image.owner?.profilePic || '')} className={styles.logo} alt="User Profile" />
+              <img
+                src={getProfilePicUrl(image.owner?.profilePic || '')}
+                className={styles.logo}
+                alt="User Profile"
+                loading="lazy"
+                decoding="async"
+              />
               <span className={styles.userName}>{image.owner?.name || 'Anonymous'}</span>
             </div>
             

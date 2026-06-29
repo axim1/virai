@@ -150,6 +150,7 @@ const GeneratedImageSchema = new mongoose.Schema({
 GeneratedImageSchema.index({ createdAt: -1 });
 GeneratedImageSchema.index({ likes: -1 });
 GeneratedImageSchema.index({ views: -1 });
+GeneratedImageSchema.index({ shares: -1 });
 GeneratedImageSchema.index({ likes: -1, views: -1 });
 GeneratedImageSchema.index({ userId: 1, createdAt: -1 });
 GeneratedImageSchema.index({ userId: 1, jobId: 1 });

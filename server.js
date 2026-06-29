@@ -80,7 +80,8 @@ app.use((req, res, next) => {
 });
 app.use('/images', express.static(IMAGES_DIR, {
   fallthrough: true,
-  maxAge: '7d',
+  maxAge: '30d',
+  immutable: true,
   setHeaders: (res) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
@@ -822,23 +823,39 @@ app.get("/api/user/:userId", async (req, res) => {
 // });
 
 
+const GALLERY_DEFAULT_LIMIT = 8;
+const GALLERY_MAX_LIMIT = 8;
+
+const clampGalleryPage = value => {
+  const page = Number.parseInt(value, 10);
+  return Number.isFinite(page) && page > 0 ? page : 1;
+};
+
+const clampGalleryLimit = value => {
+  const limit = Number.parseInt(value, 10);
+  if (!Number.isFinite(limit) || limit <= 0) return GALLERY_DEFAULT_LIMIT;
+  return Math.min(limit, GALLERY_MAX_LIMIT);
+};
+
 const imageRequestQueue = new Queue(async (task, cb) => {
   try {
-    const { filter, page = 1, limit = 8, userId } = task;
+    const {
+      filter,
+      page = 1,
+      limit = GALLERY_DEFAULT_LIMIT,
+      userId
+    } = task;
 
     const query = {};
     let sort = {};
 
-    // if (filter === "Owned by Me" && userId) {
-    //   query.userId = userId;
-    // }
-if (filter === "Owned by Me" && userId) {
-  if (mongoose.isValidObjectId(userId)) {
-    query.userId = new mongoose.Types.ObjectId(userId);
-  } else {
-    return cb(new Error('Invalid userId'));
-  }
-}
+    if (filter === "Owned by Me" && userId) {
+      if (mongoose.isValidObjectId(userId)) {
+        query.userId = new mongoose.Types.ObjectId(userId);
+      } else {
+        return cb(new Error('Invalid userId'));
+      }
+    }
 
     switch (filter) {
       case "Newest":
@@ -853,23 +870,24 @@ if (filter === "Owned by Me" && userId) {
       case "Most Viewed":
         sort = { views: -1 };
         break;
+      case "Shared":
+        sort = { shares: -1 };
+        break;
       case "Trending":
         sort = { likes: -1, views: -1 };
         break;
       default:
-        if (filter) {
-          query.description = { $regex: filter, $options: 'i' };
-        }
+        sort = { createdAt: -1 };
     }
 
     const queryStartedAt = Date.now();
-const images = await GeneratedImage.find(query)
-  .sort(sort)
-  .skip((page - 1) * limit)
-  .limit(Number(limit))
-  .select('_id type imageUrl likes views fires shares createdAt prompt negativePrompt width height steps guidanceScale seed scheduler clipSkip style model modelUrl userId')
-  .populate('userId', 'fname lname profilePic')
-  .lean();
+    const images = await GeneratedImage.find(query)
+      .sort(sort)
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .select('_id type imageUrl likes views fires shares createdAt prompt negativePrompt width height steps guidanceScale seed scheduler clipSkip style model modelUrl userId')
+      .populate('userId', 'fname lname profilePic')
+      .lean();
     const queryDurationMs = Date.now() - queryStartedAt;
 
 
@@ -900,14 +918,14 @@ const images = await GeneratedImage.find(query)
         fires: img.fires || 0,
         shares: img.shares || 0,
         owner: img.userId
-  ? {
-      name: `${img.userId.fname} ${img.userId.lname}`,
-      profilePic: img.userId.profilePic || null,
-    }
-  : {
-      name: 'Anonymous',
-      profilePic: null,
-    },
+          ? {
+              name: `${img.userId.fname} ${img.userId.lname}`,
+              profilePic: img.userId.profilePic || null,
+            }
+          : {
+              name: 'Anonymous',
+              profilePic: null,
+            },
 
         createdAt: img.createdAt,
 
@@ -936,17 +954,44 @@ const images = await GeneratedImage.find(query)
       });
     }
 
-    cb(null, { images: imageUrls });
+    cb(null, {
+      images: imageUrls,
+      page,
+      limit,
+      hasMore: imageUrls.length === limit
+    });
   } catch (error) {
     console.error("❌ Queue error:", error);
     cb(error);
   }
-}, { concurrent: 5 });
+}, { concurrent: 2 });
 
 
 app.get('/api/images', async (req, res) => {
   try {
-    const { filter, page = 1, limit = 8, userId } = req.query;
+    const requestedFilter = typeof req.query.filter === 'string' ? req.query.filter : 'Newest';
+    const filter = [
+      'Newest',
+      'Oldest',
+      'Most Liked',
+      'Shared',
+      'Trending',
+      'Most Viewed',
+      'Owned by Me'
+    ].includes(requestedFilter) ? requestedFilter : 'Newest';
+    const page = clampGalleryPage(req.query.page);
+    const limit = clampGalleryLimit(req.query.limit);
+    const userId = typeof req.query.userId === 'string' ? req.query.userId : null;
+
+    if (filter === 'Owned by Me') {
+      res.setHeader('Cache-Control', 'private, no-store');
+      if (!userId || !mongoose.isValidObjectId(userId)) {
+        return res.status(400).json({ error: 'Invalid userId' });
+      }
+    } else {
+      res.setHeader('Cache-Control', 'public, max-age=15, stale-while-revalidate=60');
+    }
+
     // Add request to queue
     imageRequestQueue.push({ filter, page, limit, userId }, (err, result) => {
       if (err) {
