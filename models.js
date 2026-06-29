@@ -147,6 +147,13 @@ const GeneratedImageSchema = new mongoose.Schema({
   modelUrl: { type: String, default: null }
 });
 
+GeneratedImageSchema.index({ createdAt: -1 });
+GeneratedImageSchema.index({ likes: -1 });
+GeneratedImageSchema.index({ views: -1 });
+GeneratedImageSchema.index({ likes: -1, views: -1 });
+GeneratedImageSchema.index({ userId: 1, createdAt: -1 });
+GeneratedImageSchema.index({ userId: 1, jobId: 1 });
+
 const GeneratedImage = mongoose.model('GeneratedImage', GeneratedImageSchema);
 // module.exports = { GeneratedImage };
 

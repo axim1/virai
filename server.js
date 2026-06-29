@@ -63,8 +63,24 @@ if (!fs.existsSync(IMAGES_DIR)) {
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(cors({ origin: '*' }));
+app.use((req, res, next) => {
+  const startedAt = Date.now();
+  res.on('finish', () => {
+    const durationMs = Date.now() - startedAt;
+    if (durationMs >= 1000) {
+      console.warn('[SLOW_REQUEST]', {
+        method: req.method,
+        path: req.originalUrl,
+        status: res.statusCode,
+        durationMs
+      });
+    }
+  });
+  next();
+});
 app.use('/images', express.static(IMAGES_DIR, {
   fallthrough: false,
+  maxAge: '7d',
   setHeaders: (res) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
@@ -72,14 +88,10 @@ app.use('/images', express.static(IMAGES_DIR, {
 }));
 const { isStringObject } = require("util/types");
 // Serve static files
-app.use('/api/models', (req, res, next) => {
-  console.log('📦 [MODEL-SERVE] Request for model:', {
-    path: req.path,
-    method: req.method,
-    url: req.url
-  });
-  next();
-}, express.static('public/models'));
+app.use('/api/models', express.static('public/models', {
+  maxAge: '7d',
+  immutable: true
+}));
 
 app.use(session({
   secret: "your-session-secret",
@@ -668,10 +680,8 @@ app.get("/topimages/:userId", async (req, res) => {
 // });
 app.get("/api/user/:userId", async (req, res) => {
   const userId = req.params.userId;
-  console.log("tjos ", userId)
   try {
-    const user = await User.findById(userId).populate("subscription");
-    console.log("user:::", user)
+    const user = await User.findById(userId).populate("subscription").lean();
     if (!user) {
       console.log("User not found. UserId:", userId);
       return res.status(404).send({ message: "User not found" });
@@ -807,7 +817,6 @@ app.get("/api/user/:userId", async (req, res) => {
 const imageRequestQueue = new Queue(async (task, cb) => {
   try {
     const { filter, page = 1, limit = 8, userId } = task;
-    console.log("✅ Backend: /api/images was hit");
 
     const query = {};
     let sort = {};
@@ -818,7 +827,6 @@ const imageRequestQueue = new Queue(async (task, cb) => {
 if (filter === "Owned by Me" && userId) {
   if (mongoose.isValidObjectId(userId)) {
     query.userId = new mongoose.Types.ObjectId(userId);
-    console.log('owner but me');
   } else {
     return cb(new Error('Invalid userId'));
   }
@@ -850,7 +858,8 @@ const images = await GeneratedImage.find(query)
   .sort(sort)
   .skip((page - 1) * limit)
   .limit(Number(limit))
-  .populate('userId', 'fname lname profilePic'); // Only populate needed fields
+  .populate('userId', 'fname lname profilePic')
+  .lean();
 
 
     const backendUrl = process.env.BACKEND_URL || "http://localhost:8000";
@@ -905,15 +914,12 @@ const images = await GeneratedImage.find(query)
     console.error("❌ Queue error:", error);
     cb(error);
   }
-});
+}, { concurrent: 5 });
 
 
 app.get('/api/images', async (req, res) => {
   try {
-    console.log('✅ Backend: /api/images was hit');
-
     const { filter, page = 1, limit = 8, userId } = req.query;
-    console.log("filter", filter, userId)
     // Add request to queue
     imageRequestQueue.push({ filter, page, limit, userId }, (err, result) => {
       if (err) {
@@ -1030,10 +1036,40 @@ app.post("/api/images/:id/view", async (req, res) => {
 });
 
 
-app.use(express.static(path.join(__dirname, 'my-app/build')));
+const BUILD_DIR = path.join(__dirname, 'my-app/build');
+
+app.get(/^\/static\/.*\.map$/, (req, res) => {
+  res.status(404).send('Not found');
+});
+
+app.use('/static', express.static(path.join(BUILD_DIR, 'static'), {
+  fallthrough: false,
+  maxAge: '1y',
+  immutable: true
+}));
+
+app.use('/models', express.static(path.join(BUILD_DIR, 'models'), {
+  fallthrough: false,
+  maxAge: '7d'
+}));
+
+app.use(express.static(BUILD_DIR, {
+  index: false,
+  maxAge: '1h',
+  setHeaders: (res, filePath) => {
+    if (filePath.endsWith('.html')) {
+      res.setHeader('Cache-Control', 'no-cache');
+    }
+  }
+}));
+
+app.get(/^\/.*\.[^/]+$/, (req, res) => {
+  res.status(404).send('Not found');
+});
 
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'my-app/build', 'index.html'));
+  res.setHeader('Cache-Control', 'no-cache');
+  res.sendFile(path.join(BUILD_DIR, 'index.html'));
 });
 
 app.listen(8000, () => {
