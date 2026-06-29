@@ -862,13 +862,15 @@ if (filter === "Owned by Me" && userId) {
         }
     }
 
+    const queryStartedAt = Date.now();
 const images = await GeneratedImage.find(query)
   .sort(sort)
   .skip((page - 1) * limit)
   .limit(Number(limit))
-  .select('-image')
+  .select('_id type imageUrl likes views fires shares createdAt prompt negativePrompt width height steps guidanceScale seed scheduler clipSkip style model modelUrl userId')
   .populate('userId', 'fname lname profilePic')
   .lean();
+    const queryDurationMs = Date.now() - queryStartedAt;
 
 
     const backendUrl = process.env.BACKEND_URL || "http://localhost:8000";
@@ -923,6 +925,16 @@ const images = await GeneratedImage.find(query)
         modelUrl: normalizeMediaUrl(img.modelUrl),
       };
     });
+
+    if (queryDurationMs >= 500) {
+      console.warn('[GALLERY_QUERY]', {
+        filter,
+        page,
+        limit,
+        count: images.length,
+        queryDurationMs
+      });
+    }
 
     cb(null, { images: imageUrls });
   } catch (error) {

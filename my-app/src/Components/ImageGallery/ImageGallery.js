@@ -183,7 +183,7 @@ const ImageGallery = () => {
       setUser(null);
       setLoggedIn(false);
     }
-  }, [loggedIn]);
+  }, []);
 
   const filters = ['Newest', 'Oldest', 'Most Liked', 'Shared', 'Trending', 'Most Viewed', 'Owned by Me'];
 
@@ -259,7 +259,7 @@ const ImageGallery = () => {
     setPage(1);
     setHasMore(true);
     fetchImages(1, false, requestId);
-  }, [filter, user, fetchImages]);
+  }, [filter, fetchImages]);
 
   const handleFilterChange = selectedFilter => {
     activeRequestRef.current += 1;
