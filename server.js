@@ -79,13 +79,16 @@ app.use((req, res, next) => {
   next();
 });
 app.use('/images', express.static(IMAGES_DIR, {
-  fallthrough: false,
+  fallthrough: true,
   maxAge: '7d',
   setHeaders: (res) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
   }
 }));
+app.use('/images', (req, res) => {
+  res.status(404).send('Not found');
+});
 const { isStringObject } = require("util/types");
 // Serve static files
 app.use('/api/models', express.static('public/models', {
@@ -614,26 +617,30 @@ app.post('/prompt-enhancer', upload.none(), async (req, res) => {
 
 app.get("/topimages/:userId", async (req, res) => {
   const userId = req.params.userId;
-  console.log(userId);
   try {
-    const user = await User.findById(userId).populate({
-      path: 'generatedImages',
-      options: { limit: 8 } // Limiting the number of images fetched
-    });
+    if (!mongoose.isValidObjectId(userId)) {
+      return res.status(400).send({ message: "Invalid userId" });
+    }
 
-    if (!user) {
+    const userExists = await User.exists({ _id: userId });
+    if (!userExists) {
       console.log("User not found. UserId:", userId);
       res.status(404).send({ message: "User not found" });
       return;
     }
 
     const baseUrl = (process.env.BACKEND_URL || '').replace(/\/+$/, '');
-    const imageUrls = user.generatedImages
-      .map((item) => {
-        if (item?.image && Buffer.isBuffer(item.image)) {
-          return `data:image/jpeg;base64,${item.image.toString('base64')}`;
-        }
+    const generatedImages = await GeneratedImage.find({
+      userId: new mongoose.Types.ObjectId(userId),
+      imageUrl: { $type: 'string', $ne: '' }
+    })
+      .sort({ createdAt: -1 })
+      .limit(8)
+      .select('imageUrl')
+      .lean();
 
+    const imageUrls = generatedImages
+      .map((item) => {
         if (typeof item?.imageUrl === 'string' && item.imageUrl.trim()) {
           if (/^https?:\/\//i.test(item.imageUrl)) return item.imageUrl;
           if (item.imageUrl.startsWith('/')) return baseUrl ? `${baseUrl}${item.imageUrl}` : item.imageUrl;
@@ -858,6 +865,7 @@ const images = await GeneratedImage.find(query)
   .sort(sort)
   .skip((page - 1) * limit)
   .limit(Number(limit))
+  .select('-image')
   .populate('userId', 'fname lname profilePic')
   .lean();
 
@@ -953,7 +961,7 @@ app.post("/api/images/:id/like", async (req, res) => {
       id, 
       { $inc: { likes: 1 } }, 
       { new: true }
-    );
+    ).select('-image');
     
     if (!image) {
       return res.status(404).json({ message: "Image not found" });
@@ -976,7 +984,7 @@ app.post("/api/images/:id/fire", async (req, res) => {
       id, 
       { $inc: { fires: 1 } }, 
       { new: true }
-    );
+    ).select('-image');
     
     if (!image) {
       return res.status(404).json({ message: "Image not found" });
@@ -999,7 +1007,7 @@ app.post("/api/images/:id/share", async (req, res) => {
       id, 
       { $inc: { shares: 1 } }, 
       { new: true }
-    );
+    ).select('-image');
     
     if (!image) {
       return res.status(404).json({ message: "Image not found" });
@@ -1022,7 +1030,7 @@ app.post("/api/images/:id/view", async (req, res) => {
       id, 
       { $inc: { views: 1 } }, 
       { new: true }
-    );
+    ).select('-image');
     
     if (!image) {
       return res.status(404).json({ message: "Image not found" });
