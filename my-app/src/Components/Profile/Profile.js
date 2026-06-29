@@ -271,7 +271,7 @@ const Profile = () => {
   const getProfilePicUrl = (picPath) => {
     if (!picPath) return "https://via.placeholder.com/100x100.png?text=User";
     const filename = picPath.split("\\").pop().split("/").pop(); // Handle both slashes
-    return `${API_BASE}api/uploads/profilepic/${filename}?t=${Date.now()}`;
+    return `${API_BASE}api/uploads/profilepic/${filename}`;
   };
 
   const formatDate = (dateString) => {

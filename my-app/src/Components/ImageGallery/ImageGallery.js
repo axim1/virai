@@ -34,10 +34,11 @@ const LazyImage = ({ src, alt, className, onClick, type, style, fallbackSrc }) =
   const imgRef = useRef();
 
   useEffect(() => {
-    setCurrentSrc(src);
-    setHasError(false);
-    setIsLoaded(false);
-  }, [src]);
+    const nextSrc = src || fallbackSrc || null;
+    setCurrentSrc(nextSrc);
+    setHasError(!nextSrc);
+    setIsLoaded(!nextSrc);
+  }, [src, fallbackSrc]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -197,14 +198,13 @@ const ImageGallery = () => {
     }, 3000);
   };
 
-  const fetchImages = useCallback(async (pageNum = 1, append = false) => {
+  const fetchImages = useCallback(async (pageNum = 1, append = false, requestId = activeRequestRef.current) => {
     const requestKey = `${filter}:${pageNum}`;
     if (inFlightPagesRef.current.has(requestKey)) {
       return;
     }
 
     inFlightPagesRef.current.add(requestKey);
-    const requestId = activeRequestRef.current;
 
     try {
       setIsLoading(true);
@@ -216,7 +216,6 @@ const ImageGallery = () => {
 
         if (storedUser && storedUser._id) {
           url += `&userId=${storedUser._id}`;
-          console.log('✅ URL:', url);
         } else {
           console.warn('⚠️ User ID missing');
         }
@@ -230,7 +229,6 @@ const ImageGallery = () => {
         return;
       }
 
-      console.log('data', data)
       if (data.images.length === 0) {
         setHasMore(false);
       } else {
@@ -255,11 +253,12 @@ const ImageGallery = () => {
   }, [filter, limit]);
 
   useEffect(() => {
-    activeRequestRef.current += 1;
+    const requestId = activeRequestRef.current + 1;
+    activeRequestRef.current = requestId;
     inFlightPagesRef.current.clear();
     setPage(1);
     setHasMore(true);
-    fetchImages(1, false);
+    fetchImages(1, false, requestId);
   }, [filter, user, fetchImages]);
 
   const handleFilterChange = selectedFilter => {
@@ -490,7 +489,7 @@ const ImageGallery = () => {
   const getProfilePicUrl = (picPath) => {
     if (!picPath) return "https://via.placeholder.com/100x100.png?text=User";
     const filename = picPath.split("\\").pop().split("/").pop();
-    return `${API_BASE}api/uploads/profilepic/${filename}?t=${Date.now()}`;
+    return `${API_BASE}api/uploads/profilepic/${filename}`;
   };
 
   return (

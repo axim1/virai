@@ -504,6 +504,7 @@ app.get("/api/uploads/profilepic/:filename", (req, res) => {
     }
 
     res.setHeader("Content-Type", mime || "application/octet-stream");
+    res.setHeader("Cache-Control", "public, max-age=86400");
     fs.createReadStream(filePath).on("error", () => res.sendStatus(404)).pipe(res);
   });
 });
@@ -875,6 +876,12 @@ const images = await GeneratedImage.find(query)
       if (!value) return null;
       if (value.startsWith('data:') || value.startsWith('http://') || value.startsWith('https://')) {
         return value;
+      }
+      if (value.startsWith('/images/')) {
+        const imageFilePath = path.join(IMAGES_DIR, path.basename(value));
+        if (!fs.existsSync(imageFilePath)) {
+          return null;
+        }
       }
       return `${backendUrl}${value}`;
     };
