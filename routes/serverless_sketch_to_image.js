@@ -11,6 +11,65 @@ const upload = multer({ dest: 'uploads/' });
 const RUNPOD_ENDPOINT = "https://api.runpod.ai/v2/e9h6mg32jrf3ol/run";
 const RUNPOD_API_KEY = "Bearer rpa_OPBINZKI3UYA9HX0YGSQ3ZMNPR1KMFT0PR0HSC7Qvtvij7";
 const sanitizeJobId = (jobId = '') => jobId.replace(/[^a-zA-Z0-9-_]/g, '');
+const completedSketchJobPromises = new Map();
+
+function getImageOutputDir() {
+  return process.env.MODEL_OUTPUT_DIR || path.join(__dirname, '../images');
+}
+
+function getPublicImageUrl(fileName) {
+  const baseUrl = (process.env.BACKEND_URL || '').replace(/\/+$/, '');
+  const imagePath = `/images/${fileName}`;
+  return baseUrl ? `${baseUrl}${imagePath}` : imagePath;
+}
+
+async function persistCompletedSketchImages(jobId, output, query) {
+  const existingImages = await GeneratedImage.find({ jobId })
+    .sort({ createdAt: 1 })
+    .select('imageUrl')
+    .lean();
+
+  if (existingImages.length > 0) {
+    return existingImages.map(image => image.imageUrl).filter(Boolean);
+  }
+
+  const outputDir = getImageOutputDir();
+  fs.mkdirSync(outputDir, { recursive: true });
+  const safeJobId = sanitizeJobId(jobId) || Date.now().toString();
+  const imageUrls = [];
+
+  for (const [index, img] of output.images.entries()) {
+    const buffer = Buffer.from(img, 'base64');
+    const fileName = `image-${safeJobId}-${index + 1}.png`;
+    const savePath = path.join(outputDir, fileName);
+    if (!fs.existsSync(savePath)) {
+      fs.writeFileSync(savePath, buffer);
+    }
+
+    const imageUrl = getPublicImageUrl(fileName);
+    imageUrls.push(imageUrl);
+
+    await GeneratedImage.create({
+      userId: query.userId,
+      jobId,
+      imageUrl,
+      prompt: query.prompt || '',
+      negativePrompt: query.negative_prompt || '',
+      width: parseInt(query.width) || 512,
+      height: parseInt(query.height) || 512,
+      steps: parseInt(query.steps) || 25,
+      guidanceScale: parseFloat(query.guidance_scale) || 7.5,
+      seed: parseInt(query.seed) || Math.floor(Math.random() * 1000000000),
+      scheduler: query.scheduler || 'normal',
+      clipSkip: parseInt(query.clip_skip) || 0,
+      style: query.style || 'default',
+      model: query.model_xl === 'true' ? 'XL' : 'default',
+      type: 'image'
+    });
+  }
+
+  return imageUrls;
+}
 
 // Convert file to base64
 function toBase64(filePath) {
@@ -140,50 +199,20 @@ router.get('/sketch-to-image-status/:job_id', async (req, res) => {
         jobId: job_id,
         imageCount: output.images.length
       });
-      const formattedImages = output.images.map(img => `data:image/png;base64,${img}`);
-      let skippedPersist = false;
-      // Save to DB if userId is provided
-      if (req.query.userId) {
-        const existing = await GeneratedImage.exists({ jobId: job_id });
-        if (existing) {
-          skippedPersist = true;
-          console.log('♻️  [SKETCH-TO-IMAGE-STATUS] Job already persisted, skipping duplicate save:', {
-            jobId: job_id
-          });
-        } else {
-          const safeJobId = sanitizeJobId(job_id) || Date.now().toString();
-          for (const [index, img] of output.images.entries()) {
-            const buffer = Buffer.from(img, 'base64');
-            const fileName = `image-${safeJobId}-${index}.png`;
-            const savePath = path.join('/var/www/clients/client0/web1/web/images', fileName);
-            if (!fs.existsSync(savePath)) {
-              fs.writeFileSync(savePath, buffer);
-            }
-            console.log('image url : ', fileName);
-            await GeneratedImage.create({
-              userId: req.query.userId,
-              jobId: job_id,
-              imageUrl: `/images/${fileName}`,
-              prompt: req.query.prompt || '',
-              negativePrompt: req.query.negative_prompt || '',
-              width: parseInt(req.query.width) || 512,
-              height: parseInt(req.query.height) || 512,
-              steps: parseInt(req.query.steps) || 25,
-              guidanceScale: parseFloat(req.query.guidance_scale) || 7.5,
-              seed: parseInt(req.query.seed) || Math.floor(Math.random() * 1000000000),
-              scheduler: req.query.scheduler || 'normal',
-              clipSkip: parseInt(req.query.clip_skip) || 0,
-              style: req.query.style || 'default',
-              model: req.query.model_xl === 'true' ? 'XL' : 'default',
-              type: 'image'
-            });
-          }
-        }
+
+      if (!req.query.userId) {
+        const imageUrls = output.images.map(img => `data:image/png;base64,${img}`);
+        return res.status(200).json({ imageUrls });
       }
-      return res.status(200).json({
-        imageUrls: formattedImages,
-        persisted: !skippedPersist
-      });
+
+      if (!completedSketchJobPromises.has(job_id)) {
+        const persistencePromise = persistCompletedSketchImages(job_id, output, req.query)
+          .finally(() => completedSketchJobPromises.delete(job_id));
+        completedSketchJobPromises.set(job_id, persistencePromise);
+      }
+
+      const imageUrls = await completedSketchJobPromises.get(job_id);
+      return res.status(200).json({ imageUrls });
     }
 
     console.warn('⚠️ [SKETCH-TO-IMAGE-STATUS] Job completed but no images found:', {

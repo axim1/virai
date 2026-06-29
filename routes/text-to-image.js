@@ -8,6 +8,65 @@ const fs = require('fs'); // if not already imported
 const RUNPOD_ENDPOINT = "https://api.runpod.ai/v2/q5rsf2wvu67m43/run";
 const RUNPOD_STATUS_BASE = "https://api.runpod.ai/v2/q5rsf2wvu67m43/status";
 const RUNPOD_API_KEY = "Bearer rpa_OPBINZKI3UYA9HX0YGSQ3ZMNPR1KMFT0PR0HSC7Qvtvij7";
+const completedTextJobPromises = new Map();
+
+function getImageOutputDir() {
+  return process.env.MODEL_OUTPUT_DIR || path.join(__dirname, '../images');
+}
+
+function getPublicImageUrl(fileName) {
+  const baseUrl = (process.env.BACKEND_URL || '').replace(/\/+$/, '');
+  const imagePath = `/images/${fileName}`;
+  return baseUrl ? `${baseUrl}${imagePath}` : imagePath;
+}
+
+async function persistCompletedTextImages(jobId, output, query) {
+  const existingImages = await GeneratedImage.find({ jobId })
+    .sort({ createdAt: 1 })
+    .select('imageUrl')
+    .lean();
+
+  if (existingImages.length > 0) {
+    return existingImages.map(image => image.imageUrl).filter(Boolean);
+  }
+
+  const outputDir = getImageOutputDir();
+  fs.mkdirSync(outputDir, { recursive: true });
+
+  const imageUrls = [];
+  for (let index = 0; index < output.images.length; index += 1) {
+    const img = output.images[index];
+    const buffer = Buffer.from(img, 'base64');
+    const fileName = `image-${jobId.replace(/[^a-zA-Z0-9_-]/g, '_')}-${index + 1}.png`;
+    const savePath = path.join(outputDir, fileName);
+
+    if (!fs.existsSync(savePath)) {
+      fs.writeFileSync(savePath, buffer);
+    }
+
+    const imageUrl = getPublicImageUrl(fileName);
+    imageUrls.push(imageUrl);
+
+    await GeneratedImage.create({
+      userId: query.userId,
+      jobId,
+      imageUrl,
+      prompt: query.prompt,
+      negativePrompt: query.negative_prompt,
+      width: parseInt(query.width),
+      height: parseInt(query.height),
+      steps: parseInt(query.steps),
+      guidanceScale: parseFloat(query.guidance_scale),
+      scheduler: query.scheduler,
+      clipSkip: parseInt(query.clip_skip),
+      style: query.style,
+      model: String(query.model_xl).toLowerCase() === 'true' ? 'XL' : 'default',
+      type: 'image'
+    });
+  }
+
+  return imageUrls;
+}
 
 // Submit text-to-image job
 router.post('/text-to-image-serverless', async (req, res) => {
@@ -124,53 +183,24 @@ router.get('/text-to-image-status/:job_id', async (req, res) => {
     }
 
     if (status === 'COMPLETED' && output?.images?.length > 0) {
-      console.log('✅ [TEXT-TO-IMAGE-STATUS] Job completed successfully:', { 
-        job_id, 
-        imageCount: output.images.length ,
-        prompt:req.query.prompt
-
+      console.log('✅ [TEXT-TO-IMAGE-STATUS] Job completed successfully:', {
+        job_id,
+        imageCount: output.images.length,
+        prompt: req.query.prompt
       });
-      const imageUrls = output.images.map(img => `data:image/png;base64,${img}`);
-      // Save to DB if userId is provided
-      // if (req.query.userId) {
-      //   for (const img of output.images) {
-      //     const buffer = Buffer.from(img, 'base64');
-      //     await GeneratedImage.create({ userId: req.query.userId, image: buffer });
-      //   }
-      // }
 
+      if (!req.query.userId) {
+        const imageUrls = output.images.map(img => `data:image/png;base64,${img}`);
+        return res.status(200).json({ imageUrls });
+      }
 
+      if (!completedTextJobPromises.has(job_id)) {
+        const persistencePromise = persistCompletedTextImages(job_id, output, req.query)
+          .finally(() => completedTextJobPromises.delete(job_id));
+        completedTextJobPromises.set(job_id, persistencePromise);
+      }
 
-      if (req.query.userId) {
-  for (const img of output.images) {
-    const buffer = Buffer.from(img, 'base64');
-
-    const fileName = `image-${Date.now()}.png`;
-    const savePath = path.join('/var/www/clients/client0/web1/web/images', fileName);
-    fs.writeFileSync(savePath, buffer);
-    console.log('image url : ', fileName)
-    await GeneratedImage.create({
-      userId: req.query.userId,
-      // image: buffer,
-      // imageUrl: `data:image/png;base64,${img}`,
-      imageUrl: `/images/${fileName}`,
-
-      prompt: req.query.prompt,
-      negativePrompt: req.query.negative_prompt,
-      width: parseInt(req.query.width),
-      height: parseInt(req.query.height),
-      steps: parseInt(req.query.steps),
-      guidanceScale: parseFloat(req.query.guidance_scale),
-      // seed: parseInt(req.query.seed),
-      scheduler: req.query.scheduler,
-      clipSkip: parseInt(req.query.clip_skip),
-      style: req.query.style,
-      model: req.query.model_xl ? 'XL' : 'default',
-      type: 'image' // or enhance dynamically if needed
-    });
-  }
-}
-
+      const imageUrls = await completedTextJobPromises.get(job_id);
       return res.status(200).json({ imageUrls });
     }
 

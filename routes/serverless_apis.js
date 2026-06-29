@@ -9,6 +9,69 @@ const upload = multer({ dest: 'uploads/' });
 
 const RUNPOD_ENDPOINT = "https://api.runpod.ai/v2/gz0b6c1odcb3d5/run";
 const RUNPOD_API_KEY = "Bearer rpa_0GRW20NDH6XJMXLLG5YBD3VN0YO0R5SLG49QBD7A1c5fsl";
+const completedEnhancementJobPromises = new Map();
+
+function getImageOutputDir() {
+  return process.env.MODEL_OUTPUT_DIR || path.join(__dirname, '../images');
+}
+
+function sanitizeJobId(jobId = '') {
+  return jobId.replace(/[^a-zA-Z0-9-_]/g, '');
+}
+
+function getPublicImageUrl(fileName) {
+  const baseUrl = (process.env.BACKEND_URL || '').replace(/\/+$/, '');
+  const imagePath = `/images/${fileName}`;
+  return baseUrl ? `${baseUrl}${imagePath}` : imagePath;
+}
+
+async function persistCompletedEnhancementImages(jobId, output, query) {
+  const existingImages = await GeneratedImage.find({ jobId })
+    .sort({ createdAt: 1 })
+    .select('imageUrl')
+    .lean();
+
+  if (existingImages.length > 0) {
+    return existingImages.map(image => image.imageUrl).filter(Boolean);
+  }
+
+  const outputDir = getImageOutputDir();
+  fs.mkdirSync(outputDir, { recursive: true });
+  const safeJobId = sanitizeJobId(jobId) || Date.now().toString();
+  const imageUrls = [];
+
+  for (const [index, img] of output.images.entries()) {
+    const buffer = Buffer.from(img, 'base64');
+    const fileName = `image-${safeJobId}-${index + 1}.png`;
+    const savePath = path.join(outputDir, fileName);
+    if (!fs.existsSync(savePath)) {
+      fs.writeFileSync(savePath, buffer);
+    }
+
+    const imageUrl = getPublicImageUrl(fileName);
+    imageUrls.push(imageUrl);
+
+    await GeneratedImage.create({
+      userId: query.userId,
+      jobId,
+      imageUrl,
+      prompt: query.prompt || '',
+      negativePrompt: query.negative_prompt || '',
+      width: parseInt(query.width) || 512,
+      height: parseInt(query.height) || 512,
+      steps: parseInt(query.steps) || 25,
+      guidanceScale: parseFloat(query.guidance_scale) || 7.5,
+      seed: parseInt(query.seed) || Math.floor(Math.random() * 1000000000),
+      scheduler: query.scheduler || 'normal',
+      clipSkip: parseInt(query.clip_skip) || 0,
+      style: query.style || 'default',
+      model: query.model_xl === 'true' ? 'XL' : 'default',
+      type: 'enhanced_image'
+    });
+  }
+
+  return imageUrls;
+}
 
 function toBase64(filePath) {
   const ext = path.extname(filePath).toLowerCase();
@@ -105,34 +168,18 @@ router.get('/image-enhancement-status/:job_id', async (req, res) => {
     }
 
     if (status === 'COMPLETED' && output?.images?.length > 0) {
-      const imageUrls = output.images.map(img => `data:image/png;base64,${img}`);
-
-      if (req.query.userId) {
-        for (const img of output.images) {
-          const buffer = Buffer.from(img, 'base64');
-              const fileName = `image-${Date.now()}.png`;
-              const savePath = path.join('/var/www/clients/client0/web1/web/images', fileName);
-              fs.writeFileSync(savePath, buffer);
-              console.log('image url : ', fileName)
-          await GeneratedImage.create({                         userId: req.query.userId,
-            // image: buffer,
-      imageUrl: `/images/${fileName}`,
-            prompt: req.query.prompt || '',
-            negativePrompt: req.query.negative_prompt || '',
-            width: parseInt(req.query.width) || 512,
-            height: parseInt(req.query.height) || 512,
-            steps: parseInt(req.query.steps) || 25,
-            guidanceScale: parseFloat(req.query.guidance_scale) || 7.5,
-            seed: parseInt(req.query.seed) || Math.floor(Math.random() * 1000000000),
-            scheduler: req.query.scheduler || 'normal',
-            clipSkip: parseInt(req.query.clip_skip) || 0,
-            style: req.query.style || 'default',
-            model: req.query.model_xl === 'true' ? 'XL' : 'default',
-            type: 'image' });
-          console.log(`💾 Image stored for user: ${req.query.userId}`);
-        }
+      if (!req.query.userId) {
+        const imageUrls = output.images.map(img => `data:image/png;base64,${img}`);
+        return res.status(200).json({ imageUrls });
       }
 
+      if (!completedEnhancementJobPromises.has(job_id)) {
+        const persistencePromise = persistCompletedEnhancementImages(job_id, output, req.query)
+          .finally(() => completedEnhancementJobPromises.delete(job_id));
+        completedEnhancementJobPromises.set(job_id, persistencePromise);
+      }
+
+      const imageUrls = await completedEnhancementJobPromises.get(job_id);
       console.log(`✅ Job completed. ${imageUrls.length} image(s) returned.`);
       return res.status(200).json({ imageUrls });
     }

@@ -9,6 +9,7 @@ const router = express.Router();
 const { GeneratedImage } = require('../models');
 
 const upload = multer({ dest: 'uploads/' });
+const completed3DJobPromises = new Map();
 const RUNPOD_STATUS_TIMEOUT_MS = Number(process.env.RUNPOD_3D_STATUS_TIMEOUT_MS || 180000);
 const RUNPOD_HTTPS_AGENT = new https.Agent({ keepAlive: true, family: 4 });
 const TRELLIS_DEFAULT_INPUTS = {
@@ -412,6 +413,8 @@ router.get('/3d-model-status/:job_id', async (req, res) => {
   const { job_id } = req.params;
   const { userId } = req.query;
   const statusRequestStartedAt = Date.now();
+  let resolveCompleted3DJob = null;
+  let rejectCompleted3DJob = null;
 
   console.log('🔍 [3D-MODEL-STATUS] Checking status for job:', { jobId: job_id, userId });
 
@@ -453,11 +456,38 @@ router.get('/3d-model-status/:job_id', async (req, res) => {
       ? await GeneratedImage.findOne({ userId, jobId: job_id }).sort({ createdAt: -1 })
       : null;
 
+    if (existingModel?.modelUrl) {
+      return res.status(200).json({
+        status,
+        message: '3D model generation completed.',
+        modelId: existingModel._id,
+        modelUrl: existingModel.modelUrl,
+        glb_filename: path.basename(existingModel.modelUrl),
+        glb_size_bytes: null,
+        glb_base64: null,
+        preview_image: existingModel.imageUrl || null
+      });
+    }
+
     if (!glbBase64 && !output?.glb_url && !output?.glb_object_key) {
       return res.status(500).json({
         error: 'Job completed but no GLB output was returned.',
         rawOutput: output
       });
+    }
+
+    if (userId) {
+      if (completed3DJobPromises.has(job_id)) {
+        const payload = await completed3DJobPromises.get(job_id);
+        return res.status(200).json(payload);
+      }
+
+      const inFlightCompletion = new Promise((resolve, reject) => {
+        resolveCompleted3DJob = resolve;
+        rejectCompleted3DJob = reject;
+      }).finally(() => completed3DJobPromises.delete(job_id));
+      completed3DJobPromises.set(job_id, inFlightCompletion);
+      inFlightCompletion.catch(() => {});
     }
 
     if (glbBase64) {
@@ -565,14 +595,14 @@ router.get('/3d-model-status/:job_id', async (req, res) => {
       }
     }
 
-    return res.status(200).json({
+    const responsePayload = {
       status,
       message: '3D model generation completed.',
       modelId: savedModel?._id || null,
       modelUrl,
       glb_filename: fileName,
       glb_size_bytes: glbSizeBytes,
-      glb_base64: glbBase64 || null,
+      glb_base64: userId ? null : glbBase64 || null,
       preview_image: previewImageUrl || previewImage,
       resolution: output?.resolution,
       seed: output?.seed,
@@ -580,8 +610,18 @@ router.get('/3d-model-status/:job_id', async (req, res) => {
       cold_start: output?.cold_start,
       generation_seconds: output?.generation_seconds,
       model_load_seconds: output?.model_load_seconds
-    });
+    };
+
+    if (resolveCompleted3DJob) {
+      resolveCompleted3DJob(responsePayload);
+    }
+
+    return res.status(200).json(responsePayload);
   } catch (error) {
+    if (rejectCompleted3DJob) {
+      rejectCompleted3DJob(error);
+    }
+
     if (isTransientRunpodNetworkError(error)) {
       console.warn('⚠️ [3D-MODEL-STATUS] Transient RunPod network error, keeping polling alive:', {
         jobId: job_id,

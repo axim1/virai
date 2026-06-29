@@ -146,14 +146,21 @@ function ImageGenerator({ onGenerateImage }) {
       // Step 2: Poll job status
       const pollForResult = async () => {
         return new Promise((resolve, reject) => {
+          let isPolling = false;
+          let isDone = false;
+
           const interval = setInterval(async () => {
+            if (isPolling || isDone) return;
+
             if (Date.now() > endTime) {
+              isDone = true;
               clearInterval(interval);
               reject(new Error('GLB generation timed out'));
               return;
             }
 
             try {
+              isPolling = true;
               const statusRes = await axios.get(`${apiUrl}api/serverless/3d-model-status/${jobId}`, {
                 params: { userId } // Use the userId from above
               });
@@ -161,6 +168,7 @@ function ImageGenerator({ onGenerateImage }) {
               if (statusRes.status === 202) return;
 
               if (statusRes.status === 200 && (statusRes.data.glb_base64 || statusRes.data.modelUrl)) {
+                isDone = true;
                 clearInterval(interval);
                 resolve({
                   glbBase64: statusRes.data.glb_base64 || null,
@@ -169,8 +177,11 @@ function ImageGenerator({ onGenerateImage }) {
               }
             } catch (err) {
               if (err.response?.status === 202) return;
+              isDone = true;
               clearInterval(interval);
               reject(err);
+            } finally {
+              isPolling = false;
             }
           }, 3000); // poll every 3s
         });
@@ -284,13 +295,20 @@ function ImageGenerator({ onGenerateImage }) {
 
       const pollResult = async () => {
         return new Promise((resolve, reject) => {
+          let isPolling = false;
+          let isDone = false;
+
           const interval = setInterval(async () => {
+            if (isPolling || isDone) return;
+
             if (Date.now() > endTime) {
+              isDone = true;
               clearInterval(interval);
               return reject(new Error('Timeout while waiting for text-to-image result'));
             }
 
             try {
+              isPolling = true;
               const pollRes = await axios.get(`${apiUrl}api/serverless/text-to-image-status/${jobId}`, {
                 params: {
                   userId,
@@ -311,13 +329,17 @@ function ImageGenerator({ onGenerateImage }) {
               if (pollRes.status === 202) return;
 
               if (pollRes.status === 200 && pollRes.data.imageUrls) {
+                isDone = true;
                 clearInterval(interval);
                 resolve(pollRes.data.imageUrls);
               }
             } catch (err) {
               if (err.response && err.response.status === 202) return;
+              isDone = true;
               clearInterval(interval);
               reject(err);
+            } finally {
+              isPolling = false;
             }
           }, 3000);
         });
@@ -503,10 +525,15 @@ function ImageGenerator({ onGenerateImage }) {
 
       const pollForResult = () => {
         return new Promise((resolve, reject) => {
+          let isPolling = false;
+          let isDone = false;
+
           const intervalId = setInterval(async () => {
+            if (isPolling || isDone) return;
             console.log(`📡 Polling status for job ${jobId}...`);
 
             if (Date.now() >= endTime) {
+              isDone = true;
               clearInterval(intervalId);
               console.error('⏱️ Timeout: No result after 100 seconds.');
               reject(new Error('Timeout while polling image enhancement'));
@@ -514,6 +541,7 @@ function ImageGenerator({ onGenerateImage }) {
             }
 
             try {
+              isPolling = true;
               const response = await axios.get(`${apiUrl}api/sl/image-enhancement-status/${jobId}`, {
                 params: {
                   userId,
@@ -533,15 +561,19 @@ function ImageGenerator({ onGenerateImage }) {
 
               if (response.status === 202) return; // Still processing
               if (response.status === 200 && response.data?.imageUrls?.length > 0) {
+                isDone = true;
                 clearInterval(intervalId);
                 console.log('✅ Enhancement completed. Images returned.');
                 resolve(response.data.imageUrls);
               }
             } catch (error) {
               if (error.response?.status === 202) return; // Still in progress
+              isDone = true;
               clearInterval(intervalId);
               console.error('❌ Error polling enhancement status:', error);
               reject(error);
+            } finally {
+              isPolling = false;
             }
           }, 3000);
         });
@@ -549,16 +581,18 @@ function ImageGenerator({ onGenerateImage }) {
 
       const imageUrls = await pollForResult();
 
-      const base64 = imageUrls[0].replace(/^data:image\/\w+;base64,/, '');
-      const mime = imageUrls[0].match(/^data:(image\/\w+);base64/)[1];
-      const byteChars = atob(base64);
-      const byteNums = Array.from(byteChars).map(char => char.charCodeAt(0));
-      const blob = new Blob([new Uint8Array(byteNums)], { type: mime });
-
-      const objectUrl = URL.createObjectURL(blob);
       const img = new Image();
       img.onload = () => setUploadedImage(img);
-      img.src = objectUrl;
+      if (imageUrls[0].startsWith('data:')) {
+        const base64 = imageUrls[0].replace(/^data:image\/\w+;base64,/, '');
+        const mime = imageUrls[0].match(/^data:(image\/\w+);base64/)[1];
+        const byteChars = atob(base64);
+        const byteNums = Array.from(byteChars).map(char => char.charCodeAt(0));
+        const blob = new Blob([new Uint8Array(byteNums)], { type: mime });
+        img.src = URL.createObjectURL(blob);
+      } else {
+        img.src = resolveBackendMediaUrl(imageUrls[0]);
+      }
 
     } catch (error) {
       console.error('💥 Error during image enhancement:', error);
@@ -574,9 +608,14 @@ function ImageGenerator({ onGenerateImage }) {
       const videoUuid = res.data.uuid;
 
       const endTime = Date.now() + 1940000;
+      let isPolling = false;
+      let isDone = false;
 
       const pollInterval = setInterval(async () => {
+        if (isPolling || isDone) return;
+
         if (Date.now() > endTime) {
+          isDone = true;
           clearInterval(pollInterval);
           clearTimeout(retrieveTimeoutRef.current);
           setIsRetrieving(false);
@@ -585,19 +624,33 @@ function ImageGenerator({ onGenerateImage }) {
           return;
         }
 
-        const statusRes = await axios.get(`${apiUrl}runway/check-video/${videoUuid}`);
+        try {
+          isPolling = true;
+          const statusRes = await axios.get(`${apiUrl}runway/check-video/${videoUuid}`);
 
-        if (statusRes.status === 202) return;
+          if (statusRes.status === 202) return;
 
-        if (statusRes.status === 200) {
+          if (statusRes.status === 200) {
+            isDone = true;
+            clearInterval(pollInterval);
+            const downloadUrl = statusRes.data.downloadUrl;
+            const mimeType = statusRes.data.mimeType || 'video/mp4';
+            setGeneratedVideoUrl(downloadUrl);
+            setGeneratedVideoMimeType(mimeType);
+            clearTimeout(retrieveTimeoutRef.current);
+            setIsRetrieving(false);
+            setIsLoading(false);
+          }
+        } catch (error) {
+          if (error.response?.status === 202) return;
+          isDone = true;
           clearInterval(pollInterval);
-          const downloadUrl = statusRes.data.downloadUrl;
-          const mimeType = statusRes.data.mimeType || 'video/mp4';
-          setGeneratedVideoUrl(downloadUrl);
-          setGeneratedVideoMimeType(mimeType);
+          console.error('Error checking video status:', error?.response?.data || error.message || error);
           clearTimeout(retrieveTimeoutRef.current);
           setIsRetrieving(false);
           setIsLoading(false);
+        } finally {
+          isPolling = false;
         }
       }, 3000);
     } catch (error) {
@@ -615,9 +668,14 @@ function ImageGenerator({ onGenerateImage }) {
       const res = await axios.post(`${apiUrl}object-creation`, formData);
       const imageUuid = res.data.uuid;
       const endTime = Date.now() + 240000; // 4 minutes
+      let isPolling = false;
+      let isDone = false;
 
       const pollInterval = setInterval(async () => {
+        if (isPolling || isDone) return;
+
         if (Date.now() > endTime) {
+          isDone = true;
           clearInterval(pollInterval);
           clearTimeout(retrieveTimeoutRef.current);
           setIsRetrieving(false);
@@ -626,18 +684,32 @@ function ImageGenerator({ onGenerateImage }) {
           return;
         }
 
-        const statusRes = await axios.get(`${apiUrl}check-object/${imageUuid}`);
-        if (statusRes.status === 202) return; // Still generating
+        try {
+          isPolling = true;
+          const statusRes = await axios.get(`${apiUrl}check-object/${imageUuid}`);
+          if (statusRes.status === 202) return; // Still generating
 
-        if (statusRes.status === 200) {
+          if (statusRes.status === 200) {
+            isDone = true;
+            clearInterval(pollInterval);
+            const { glb_data } = statusRes.data;
+            const blob = base64ToBlob(glb_data, 'model/gltf-binary');
+            const url = URL.createObjectURL(blob);
+            setGeneratedModelUrl(url);
+            clearTimeout(retrieveTimeoutRef.current);
+            setIsRetrieving(false);
+            setIsLoading(false);
+          }
+        } catch (error) {
+          if (error.response?.status === 202) return;
+          isDone = true;
           clearInterval(pollInterval);
-          const { glb_data } = statusRes.data;
-          const blob = base64ToBlob(glb_data, 'model/gltf-binary');
-          const url = URL.createObjectURL(blob);
-          setGeneratedModelUrl(url);
+          console.error('Error checking object status:', error?.response?.data || error.message || error);
           clearTimeout(retrieveTimeoutRef.current);
           setIsRetrieving(false);
           setIsLoading(false);
+        } finally {
+          isPolling = false;
         }
       }, 3000);
     } catch (error) {
