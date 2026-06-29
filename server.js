@@ -1058,13 +1058,13 @@ app.get(/^\/static\/.*\.map$/, (req, res) => {
 });
 
 app.use('/static', express.static(path.join(BUILD_DIR, 'static'), {
-  fallthrough: false,
+  fallthrough: true,
   maxAge: '1y',
   immutable: true
 }));
 
 app.use('/models', express.static(path.join(BUILD_DIR, 'models'), {
-  fallthrough: false,
+  fallthrough: true,
   maxAge: '7d'
 }));
 
